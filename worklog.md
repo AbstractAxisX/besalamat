@@ -297,3 +297,19 @@ Stage Summary:
 - فایل‌ها (۸): app/blog/page.tsx، components/blog/blog-index.tsx، app/blog/[slug]/page.tsx، app/about/page.tsx، app/contact/page.tsx، components/contact/contact-form.tsx، app/faq/page.tsx، app/not-found.tsx — بدون any، اعداد فارسی، transition 200-300ms، touch ≥44 (دکمه‌ها h-11/h-12؛ چیپ‌ها مطابق بریف h-9)
 - وضعیت: lint ✅ exit 0 | tsc ✅ (فقط examples/skills ازپیش‌موجود) | dev.log ✅ بدون خطا | curl ✅ 200/404 درست | تعاملی ✅ فرم/فیلتر/آکاردئون
 - برای فازهای بعد: /api/contact (فاز ۵) جایی که TODO نشانه‌گذاری شد؛ sanitize مقاله (فاز ۶)؛ دادهٔ FAQ از جدول (فاز ۶)؛ لینک «مشاهده روی نقشه» به /contact اشاره می‌کند (نقشهٔ آنجا)
+
+---
+Task ID: 1-2-orchestrator-close
+Agent: orchestrator (main)
+Task: بستن فاز ۱ و ۲ — کامپوز هوم، راستی‌آزمایی مرورگر کامل، .env.example، کامیت گیت
+
+Work Log:
+- کامپوز src/app/page.tsx: تمام ۸ بخش هوم از PREVIEW_HOME_SECTIONS (مرتب با sortOrder، احترام به isActive) + metadata برند
+- راستی‌آزمایی مرورگر (agent-browser) موفق: هوم هر دو تم (VLM: سالم، کارت‌ها تیره + بوم تصویر روشن = استاندارد)، تاگل دارک persist، مسیر طلایی (محصول → تنوع TG300 با تغییر قیمت زنده ۱٬۶۸۰٬۰۰۰→۲٬۱۵۰٬۰۰۰ → افزودن به سبد → سبد ۲ قلمی با persist)، ورود OTP واقعی (موبایل با ارقام فارسی → devCode ۵۰۷۹۸ → تأیید → /account)، خروج (AlertDialog + پاک شدن کوکی)، منوی موبایل تمام‌صفحه، ناوبری پایین fixed (box: 390×65 @bottom، VLM برش تأیید + بج سبد)، /admin → 307 به login (گارد middleware)، همهٔ صفحات 200، 404 سالم، dev.log صفر خطا، lint exit 0
+- .env.example کامل (همهٔ envهای واقعی کد: OTP/SMS سه‌گانه + کلیدها/ترب sandbox+live/SMTP/آپلود/دیتابیس PG-MySQL) + .gitignore برای .verify
+- کامیت گیت 92db3f4 با پیام فارسی
+
+Stage Summary:
+- فاز ۱ (دیزاین‌سیستم + اسکلت تمام صفحات) و فاز ۲ (Prisma+seed+OTP+درایورها+ایمیل+صف+آپلود) تکمیل و اثبات‌شده
+- آماده برای فاز ۳: هوم داینامیک از DB + کاتالوگ سروری + صفحهٔ محصول کامل (زوم YARL) + جستجوی هوشمند — preview-data.ts با کوئری‌های واقعی جایگزین می‌شود
+- نکتهٔ مهم برای فاز ۳: searchText نرمال‌شده در DB است (normalizeSearchText در seed.ts)؛ کوئری کاربر هم باید نرمال شود

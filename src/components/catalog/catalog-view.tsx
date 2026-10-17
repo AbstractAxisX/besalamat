@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * نمای کاتالوگ — فیلتر، سورت، صفحه‌بندی و نمای دوتایی (شبکه/فهرست)
+ * نمای کاتالوگ — تولبار شناور، چیپ‌های فیلتر فعال، سایدبار چسبان
  * ─────────────────────────────
  * کل منطق سمت کلاینت روی دادهٔ props (بدون fetch)؛ هر تغییر state در URL
  * همگام می‌شود (router.replace بدون اسکرول) تا لینک‌ها قابل اشتراک باشند.
@@ -17,8 +17,9 @@ import {
   ChevronRight,
   LayoutGrid,
   List,
-  Search,
+  SearchX,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 
 import { FilterPanel } from "@/components/catalog/filter-panel";
@@ -47,7 +48,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { discountPercent, formatTomanPlain, toEnDigits, toFa } from "@/lib/format";
+import {
+  discountPercent,
+  formatTomanPlain,
+  toEnDigits,
+  toFa,
+} from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { BrandSummary, CategoryNode, ProductSummary } from "@/types/shop";
 
@@ -82,6 +88,10 @@ export interface CatalogInitialFilters {
 }
 
 const PAGE_SIZE = 8;
+
+/** ارتفاع هدر دسکتاپ (۳ سطر) برای چسباندن تولبار/سایدبار درست زیر آن */
+const DESKTOP_HEADER_H = 160;
+const TOOLBAR_H = 76;
 
 const SORT_OPTIONS: { key: CatalogSortKey; label: string }[] = [
   { key: "newest", label: "جدیدترین" },
@@ -156,13 +166,18 @@ interface CatalogViewProps {
   showHeading?: boolean;
 }
 
+interface ActiveChip {
+  key: string;
+  label: string;
+  clear: () => void;
+}
+
 export function CatalogView({
   products,
   categories,
   brands,
   categoryByProduct,
   initialFilters,
-  showHeading = true,
 }: CatalogViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -276,7 +291,6 @@ export function CatalogView({
 
   const goToPage = (next: number) => {
     setPage(Math.min(Math.max(1, next), totalPages));
-    /* رفتار اسکرول را CSS تعیین می‌کند (smooth و در reduced-motion لحظه‌ای) */
     window.scrollTo({ top: 0 });
   };
 
@@ -306,16 +320,66 @@ export function CatalogView({
   const activeCategoryTitle = filters.category
     ? findCategoryTitle(categories, filters.category)
     : null;
-  const headingText = activeCategoryTitle ?? "فروشگاه";
 
-  const hasActiveFilters =
-    filters.category != null ||
-    filters.brands.length > 0 ||
-    filters.min != null ||
-    filters.max != null ||
-    filters.inStock ||
-    filters.discount ||
-    (filters.q != null && filters.q.trim() !== "");
+  const activeChips = useMemo<ActiveChip[]>(() => {
+    const chips: ActiveChip[] = [];
+    if (filters.category != null) {
+      chips.push({
+        key: "category",
+        label: activeCategoryTitle ?? filters.category,
+        clear: () => updateFilters({ category: null }),
+      });
+    }
+    for (const slug of filters.brands) {
+      chips.push({
+        key: `brand-${slug}`,
+        label: brandTitleBySlug.get(slug) ?? slug,
+        clear: () =>
+          updateFilters({
+            brands: filters.brands.filter((item) => item !== slug),
+          }),
+      });
+    }
+    if (filters.min != null) {
+      chips.push({
+        key: "min",
+        label: `از ${formatTomanPlain(filters.min)}`,
+        clear: () => updateFilters({ min: null }),
+      });
+    }
+    if (filters.max != null) {
+      chips.push({
+        key: "max",
+        label: `تا ${formatTomanPlain(filters.max)}`,
+        clear: () => updateFilters({ max: null }),
+      });
+    }
+    if (filters.inStock) {
+      chips.push({
+        key: "inStock",
+        label: "فقط موجود",
+        clear: () => updateFilters({ inStock: false }),
+      });
+    }
+    if (filters.discount) {
+      chips.push({
+        key: "discount",
+        label: "فقط تخفیف‌دار",
+        clear: () => updateFilters({ discount: false }),
+      });
+    }
+    const query = filters.q?.trim();
+    if (query) {
+      chips.push({
+        key: "q",
+        label: `جستجو: «${query}»`,
+        clear: () => updateFilters({ q: null }),
+      });
+    }
+    return chips;
+  }, [filters, activeCategoryTitle, brandTitleBySlug]);
+
+  const hasActiveFilters = activeChips.length > 0;
 
   const filterPanel = (
     <FilterPanel
@@ -329,40 +393,34 @@ export function CatalogView({
 
   return (
     <div>
-      {/* هدر + نوار ابزار */}
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-        <div>
-          {showHeading ? (
-            <h1 className="text-xl font-black text-foreground md:text-2xl">
-              {headingText}
-            </h1>
-          ) : null}
-          <p
-            className={cn(
-              "text-sm text-muted-foreground",
-              showHeading && "mt-1",
-            )}
-          >
-            {toFa(totalCount)} کالا
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+      {/* ── تولبار — شناورِ شیشه‌ای در دسکتاپ ── */}
+      <div
+        className="rounded-2xl border border-border/70 bg-card px-4 py-3 shadow-card lg:sticky lg:z-30 lg:bg-background/85 lg:backdrop-blur-md"
+        style={{ top: `${DESKTOP_HEADER_H - 1}px` }}
+      >
+        <div className="flex flex-wrap items-center gap-3">
           {/* فیلتر موبایل — دراور پایین‌کش */}
           <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
             <DrawerTrigger asChild>
               <Button
                 type="button"
                 variant="outline"
-                className="h-10 gap-2 rounded-xl lg:hidden"
+                className="h-11 gap-2 rounded-full border-border/70 lg:hidden"
               >
                 <SlidersHorizontal className="size-4" aria-hidden="true" />
                 فیلترها
+                {hasActiveFilters ? (
+                  <span className="flex size-5 items-center justify-center rounded-full bg-gold text-[10px] font-black text-gold-foreground">
+                    {toFa(activeChips.length)}
+                  </span>
+                ) : null}
               </Button>
             </DrawerTrigger>
             <DrawerContent className="rounded-t-3xl!">
               <DrawerHeader className="text-start">
-                <DrawerTitle className="text-base font-bold">فیلترها</DrawerTitle>
+                <DrawerTitle className="text-base font-bold">
+                  فیلترها
+                </DrawerTitle>
                 <DrawerDescription className="sr-only">
                   فیلتر محصولات بر اساس دسته‌بندی، برند، قیمت و موجودی
                 </DrawerDescription>
@@ -371,111 +429,169 @@ export function CatalogView({
                 {filterPanel}
               </div>
               <DrawerFooter className="border-t border-border/60">
+                {hasActiveFilters ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-9 text-destructive hover:text-destructive"
+                    onClick={resetFilters}
+                  >
+                    حذف همهٔ فیلترها
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
-                  className="btn-metallic h-12 rounded-xl text-base font-bold"
+                  className="h-12 rounded-xl text-base font-bold"
                   onClick={() => setFiltersOpen(false)}
                 >
-                  مشاهدهٔ نتایج
+                  مشاهدهٔ {toFa(totalCount)} کالا
                 </Button>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
 
-          {/* سورت */}
-          <Select
-            value={sort}
-            onValueChange={(value) => {
-              const option = SORT_OPTIONS.find((item) => item.key === value);
-              if (option) {
-                setSort(option.key);
-                setPage(1);
-              }
-            }}
-          >
-            <SelectTrigger
-              className="h-10 w-40 rounded-xl"
-              aria-label="مرتب‌سازی محصولات"
-            >
-              <SelectValue placeholder="مرتب‌سازی" />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.key} value={option.key}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* شمار نتیجه */}
+          <p className="hidden text-sm text-muted-foreground lg:block">
+            {toFa(totalCount)} کالا
+          </p>
 
-          {/* نمای شبکه/فهرست */}
-          <div
-            className="flex items-center gap-0.5 rounded-xl border border-border bg-card p-1"
-            role="group"
-            aria-label="نوع نمایش محصولات"
-          >
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "size-9 rounded-lg",
-                view === "grid"
-                  ? "bg-accent text-primary"
-                  : "text-muted-foreground",
-              )}
-              onClick={() => setView("grid")}
-              aria-label="نمای شبکه‌ای"
-              aria-pressed={view === "grid"}
+          <div className="ms-auto flex items-center gap-2">
+            {/* سورت */}
+            <Select
+              value={sort}
+              onValueChange={(value) => {
+                const option = SORT_OPTIONS.find((item) => item.key === value);
+                if (option) {
+                  setSort(option.key);
+                  setPage(1);
+                }
+              }}
             >
-              <LayoutGrid className="size-4" aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "size-9 rounded-lg",
-                view === "list"
-                  ? "bg-accent text-primary"
-                  : "text-muted-foreground",
-              )}
-              onClick={() => setView("list")}
-              aria-label="نمای فهرستی"
-              aria-pressed={view === "list"}
+              <SelectTrigger
+                className="h-11 w-[10.5rem] rounded-full border-border/70"
+                aria-label="مرتب‌سازی محصولات"
+              >
+                <SelectValue placeholder="مرتب‌سازی" />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((option) => (
+                  <SelectItem key={option.key} value={option.key}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* نمای شبکه/فهرست */}
+            <div
+              className="flex items-center gap-0.5 rounded-full border border-border/70 bg-card p-1"
+              role="group"
+              aria-label="نوع نمایش محصولات"
             >
-              <List className="size-4" aria-hidden="true" />
-            </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "size-9 rounded-full",
+                  view === "grid"
+                    ? "bg-accent text-primary"
+                    : "text-muted-foreground",
+                )}
+                onClick={() => setView("grid")}
+                aria-label="نمای شبکه‌ای"
+                aria-pressed={view === "grid"}
+              >
+                <LayoutGrid className="size-4" aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "size-9 rounded-full",
+                  view === "list"
+                    ? "bg-accent text-primary"
+                    : "text-muted-foreground",
+                )}
+                onClick={() => setView("list")}
+                aria-label="نمای فهرستی"
+                aria-pressed={view === "list"}
+              >
+                <List className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* بدنه: سایدبار فیلتر + محتوا */}
+      {/* ── چیپ‌های فیلتر فعال ── */}
+      {hasActiveFilters ? (
+        <div
+          className="mt-4 flex flex-wrap items-center gap-2"
+          aria-label="فیلترهای فعال"
+        >
+          {activeChips.map((chip) => (
+            <button
+              key={chip.key}
+              type="button"
+              onClick={chip.clear}
+              className="group inline-flex h-8 items-center gap-1.5 rounded-full border border-gold/40 bg-gold-soft/25 px-3 text-xs font-medium text-foreground transition-colors hover:bg-gold-soft/50 dark:bg-gold-soft/15 dark:hover:bg-gold-soft/25"
+            >
+              {chip.label}
+              <X
+                className="size-3.5 text-muted-foreground transition-colors group-hover:text-destructive"
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mr-1 text-xs font-medium text-destructive transition-colors hover:text-destructive/80"
+          >
+            حذف همه
+          </button>
+        </div>
+      ) : null}
+
+      {/* ── بدنه: سایدبار فیلتر + محتوا ── */}
       <div className="mt-6 flex gap-8">
         <aside
-          className="sticky top-24 hidden w-64 shrink-0 self-start lg:block"
+          className="hidden w-64 shrink-0 lg:block"
           aria-label="فیلترهای محصولات"
         >
-          {filterPanel}
+          <div
+            className="sticky overflow-y-auto pb-4 pe-1"
+            style={{
+              top: `${DESKTOP_HEADER_H + TOOLBAR_H}px`,
+              maxHeight: `calc(100vh - ${DESKTOP_HEADER_H + TOOLBAR_H + 24}px)`,
+            }}
+          >
+            {filterPanel}
+          </div>
         </aside>
 
         <div className="min-w-0 flex-1">
           {totalCount === 0 ? (
-            <div className="card-luxe flex flex-col items-center gap-3 px-4 py-16 text-center">
-              <Search
-                className="size-6 text-muted-foreground opacity-40"
-                aria-hidden="true"
-              />
-              <p className="text-sm text-muted-foreground">
-                {hasActiveFilters
-                  ? "محصولی مطابق فیلترهای شما یافت نشد"
-                  : "محصولی یافت نشد"}
-              </p>
+            <div className="card-luxe flex flex-col items-center gap-4 px-4 py-20 text-center">
+              <span className="flex size-16 items-center justify-center rounded-full bg-accent text-primary">
+                <SearchX className="size-7" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">
+                  {hasActiveFilters
+                    ? "محصولی مطابق فیلترهای شما یافت نشد"
+                    : "محصولی یافت نشد"}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید
+                </p>
+              </div>
               {hasActiveFilters ? (
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="h-9 text-destructive hover:text-destructive"
+                  className="h-10 rounded-full px-6"
                   onClick={resetFilters}
                 >
                   حذف فیلترها
@@ -493,7 +609,7 @@ export function CatalogView({
           )}
 
           {totalPages > 1 ? (
-            <Pagination className="mt-8">
+            <Pagination className="mt-10">
               <PaginationContent>
                 {/* در RTL دکمهٔ «قبلی» سمت راست قرار می‌گیرد */}
                 <PaginationItem>
@@ -568,10 +684,10 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
   const discount = discountPercent(product.price, product.comparePrice);
 
   return (
-    <div className="card-luxe card-lift flex items-stretch gap-4 p-4">
+    <div className="group card-luxe flex items-stretch gap-4 p-4 transition-all duration-300 hover:border-gold/40 hover:shadow-lift">
       <Link
         href={`/products/${product.slug}`}
-        className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-white outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:size-28"
+        className="img-canvas relative size-24 shrink-0 overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:size-28"
       >
         <Image
           src={product.image}
@@ -579,7 +695,7 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
           fill
           sizes="112px"
           className={cn(
-            "object-contain",
+            "object-contain p-1.5 transition-transform duration-500 group-hover:scale-[1.06]",
             !product.inStock && "opacity-40 grayscale",
           )}
         />
@@ -587,24 +703,26 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {product.brandTitle ? (
-          <p className="text-xs text-muted-foreground">{product.brandTitle}</p>
+          <p className="text-[11px] font-medium text-muted-foreground">
+            {product.brandTitle}
+          </p>
         ) : null}
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h3 className="line-clamp-1 min-w-0 basis-full text-sm font-medium leading-6 text-foreground sm:basis-auto sm:flex-1">
+          <h3 className="line-clamp-1 min-w-0 basis-full text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-primary sm:basis-auto sm:flex-1">
             {product.title}
           </h3>
           {discount != null && product.inStock ? (
-            <span className="rounded-full bg-gold px-2.5 py-0.5 text-xs font-bold text-gold-foreground">
+            <span className="rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-black text-gold-foreground">
               ٪{toFa(discount)}
             </span>
           ) : null}
           {product.isNew && product.inStock ? (
-            <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
+            <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">
               جدید
             </span>
           ) : null}
           {!product.inStock ? (
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-bold text-secondary-foreground">
+            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-bold text-secondary-foreground">
               ناموجود
             </span>
           ) : null}
@@ -614,11 +732,11 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
           {product.inStock ? (
             <div className="min-w-0">
               {product.comparePrice != null ? (
-                <p className="text-xs text-muted-foreground line-through decoration-destructive/60">
+                <p className="text-xs text-muted-foreground line-through decoration-destructive/50">
                   {formatTomanPlain(product.comparePrice)}
                 </p>
               ) : null}
-              <p className="text-base font-extrabold text-primary md:text-lg">
+              <p className="text-base font-black text-primary md:text-lg">
                 {formatTomanPlain(product.price)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   تومان
@@ -628,8 +746,11 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
           ) : (
             <p className="text-xs text-warning">به‌زودی موجود می‌شود</p>
           )}
-          <Button asChild variant="ghost" className="h-10 shrink-0 rounded-xl">
-            <Link href={`/products/${product.slug}`}>مشاهده</Link>
+          <Button
+            asChild
+            className="h-10 shrink-0 rounded-full px-6 text-xs font-bold"
+          >
+            <Link href={`/products/${product.slug}`}>مشاهدهٔ محصول</Link>
           </Button>
         </div>
       </div>

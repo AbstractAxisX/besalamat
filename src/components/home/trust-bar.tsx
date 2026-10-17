@@ -1,7 +1,7 @@
 /**
- * نوار اعتماد — چهار مزیت فروشگاه، چسبیده به زیر هیرو
+ * نوار اعتماد — چهار مزیت، چسبیده به زیر هیرو
  * ─────────────────────────────
- * Server Component؛ موبایل ۲ ستون، دسکتاپ ۴ ستون — ساده و بی‌جداکننده.
+ * Server Component؛ ردیف ظریف با جداکننده‌های عمودی مویین در دسکتاپ.
  */
 
 import {
@@ -20,39 +20,45 @@ interface TrustItem {
 
 const TRUST_ITEMS: TrustItem[] = [
   {
-    icon: Truck,
-    title: "ارسال سریع و مطمئن",
-    description: "به سراسر کشور",
-  },
-  {
     icon: ShieldCheck,
     title: "ضمانت اصالت کالا",
-    description: "کالای اورجینال با فاکتور",
+    description: "کالای اورجینال با فاکتور رسمی",
+  },
+  {
+    icon: Truck,
+    title: "ارسال سریع",
+    description: "به سراسر کشور، همان‌روز در تهران",
   },
   {
     icon: Headset,
-    title: "پشتیبانی تخصصی",
-    description: "همراهِ انتخاب شما",
+    title: "مشاورهٔ تخصصی",
+    description: "کارشناس واقعی، قبل از خرید",
   },
   {
     icon: LockKeyhole,
     title: "پرداخت امن",
-    description: "درگاه پرداخت معتبر",
+    description: "درگاه رسمی و رمزنگاری‌شده",
   },
 ];
 
 export function TrustBar() {
   return (
-    <section className="border-b border-border/60 bg-card" aria-label="مزیت‌های فروشگاه">
-      <div className="shell grid grid-cols-2 gap-6 py-8 lg:grid-cols-4">
+    <section
+      className="border-b border-border/70 bg-background"
+      aria-label="مزیت‌های فروشگاه"
+    >
+      <div className="shell grid grid-cols-2 gap-x-4 gap-y-6 py-7 lg:grid-cols-4 lg:divide-x lg:divide-x-reverse lg:divide-border/70">
         {TRUST_ITEMS.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="flex items-center gap-3">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gold-soft/40 text-gold-strong dark:bg-gold-soft/15 dark:text-gold">
+          <div
+            key={title}
+            className="flex items-center gap-3 lg:justify-center"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-gold/25 bg-gold-soft/20 text-gold-strong dark:bg-gold-soft/10 dark:text-gold">
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-foreground">{title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-[13px] font-bold text-foreground">{title}</p>
+              <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">
                 {description}
               </p>
             </div>

@@ -156,8 +156,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       {related.length > 0 ? (
-        <section className="mt-12 md:mt-16">
-          <SectionHeading title="محصولات مرتبط" />
+        <section className="mt-14 md:mt-20">
+          <SectionHeading
+            eyebrow="پیشنهاد ما"
+            title="محصولات مرتبط"
+            href={
+              product.categorySlug
+                ? `/products?category=${product.categorySlug}`
+                : "/products"
+            }
+            hrefLabel="مشاهدهٔ دسته"
+          />
           <ProductGrid products={related} />
         </section>
       ) : null}

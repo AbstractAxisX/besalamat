@@ -4,44 +4,29 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  CircleHelp,
-  Home,
-  Info,
-  Newspaper,
+  ChevronDown,
   Phone,
   Search,
-  Store,
   UserRound,
   X,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Logo } from "@/components/shared/brand-assets";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { brand } from "@/config/brand";
+import { formatPhoneFa, toFa } from "@/lib/format";
 import { PREVIEW_CATEGORIES } from "@/lib/preview-data";
 
-interface MainLinkItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-const MAIN_LINKS: MainLinkItem[] = [
-  { href: "/", label: "صفحهٔ اصلی", icon: Home },
-  { href: "/products", label: "فروشگاه", icon: Store },
-  { href: "/blog", label: "وبلاگ", icon: Newspaper },
-  { href: "/about", label: "دربارهٔ ما", icon: Info },
-  { href: "/contact", label: "تماس", icon: Phone },
-  { href: "/faq", label: "پرسش‌های متداول", icon: CircleHelp },
-];
+const MAIN_LINKS = [
+  { href: "/", label: "صفحهٔ اصلی" },
+  { href: "/products", label: "همهٔ محصولات" },
+  { href: "/blog", label: "مجلهٔ سلامت" },
+  { href: "/about", label: "دربارهٔ ما" },
+  { href: "/contact", label: "تماس با ما" },
+  { href: "/faq", label: "پرسش‌های متداول" },
+] as const;
 
 export function MobileMenu({
   open,
@@ -79,7 +64,7 @@ export function MobileMenu({
           transition={{ duration: 0.28, ease: "easeOut" }}
         >
           {/* هدر منو */}
-          <div className="flex items-center justify-between border-b border-border/60 p-4">
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <Link
               href="/"
               onClick={onClose}
@@ -87,16 +72,19 @@ export function MobileMenu({
             >
               <Logo />
             </Link>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-9"
-              onClick={onClose}
-              aria-label="بستن منو"
-            >
-              <X className="size-5" aria-hidden="true" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-11"
+                onClick={onClose}
+                aria-label="بستن منو"
+              >
+                <X className="size-5" aria-hidden="true" />
+              </Button>
+            </div>
           </div>
 
           {/* جستجو */}
@@ -104,10 +92,10 @@ export function MobileMenu({
             action="/search"
             method="get"
             role="search"
-            className="relative m-4 mb-2"
+            className="relative px-4 pt-4"
           >
             <Search
-              className="pointer-events-none absolute start-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute start-7 top-1/2 size-4.5 translate-y-[3px] text-muted-foreground"
               aria-hidden="true"
             />
             <Input
@@ -115,14 +103,15 @@ export function MobileMenu({
               name="q"
               placeholder="جستجوی محصول، دسته یا برند…"
               aria-label="جستجو در فروشگاه"
-              className="h-11 rounded-full border-input/70 bg-card ps-11 shadow-none"
+              className="h-12 rounded-full border-transparent bg-muted/70 ps-11 shadow-none"
             />
           </form>
 
           {/* بدنهٔ اسکرول‌شونده */}
           <div className="flex-1 overflow-y-auto px-4 pb-6">
-            <nav className="py-2" aria-label="ناوبری موبایل">
-              <ul className="space-y-1">
+            {/* لینک‌های اصلی */}
+            <nav className="py-4" aria-label="ناوبری موبایل">
+              <ul className="grid grid-cols-2 gap-2">
                 {MAIN_LINKS.map((item, index) => (
                   <li key={item.href}>
                     <motion.div
@@ -137,12 +126,8 @@ export function MobileMenu({
                       <Link
                         href={item.href}
                         onClick={onClose}
-                        className="flex h-11 items-center gap-3 rounded-xl px-3 text-foreground outline-none transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        className="flex h-12 items-center rounded-xl bg-muted/50 px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       >
-                        <item.icon
-                          className="size-5 text-muted-foreground"
-                          aria-hidden="true"
-                        />
                         {item.label}
                       </Link>
                     </motion.div>
@@ -151,50 +136,83 @@ export function MobileMenu({
               </ul>
             </nav>
 
-            <div className="mt-3 border-t border-border/60 pt-3">
-              <p className="px-3 pb-1 pt-2 text-xs font-medium text-muted-foreground">
-                دسته‌بندی کالاها
-              </p>
-              <Accordion type="single" collapsible>
-                {PREVIEW_CATEGORIES.map((category) => (
-                  <AccordionItem key={category.id} value={category.slug}>
-                    <AccordionTrigger className="py-3 text-start text-sm font-medium text-foreground hover:no-underline hover:text-gold">
-                      {category.title}
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-3">
+            <span className="gold-hairline my-2 block" aria-hidden="true" />
+
+            {/* دسته‌ها — ایندکس شماره‌دار */}
+            <p className="px-1 pb-2 pt-4 text-xs font-bold text-gold">
+              دسته‌بندی کالاها
+            </p>
+            <ul>
+              {PREVIEW_CATEGORIES.map((category, index) => (
+                <li
+                  key={category.id}
+                  className="border-b border-border/50 last:border-b-0"
+                >
+                  <details className="group">
+                    <summary className="flex cursor-pointer list-none items-center gap-3 py-4 outline-none [&::-webkit-details-marker]:hidden">
+                      <span className="w-6 text-xs font-black text-gold/70">
+                        {toFa(String(index + 1).padStart(2, "0"))}
+                      </span>
+                      <Link
+                        href={`/products?category=${category.slug}`}
+                        onClick={onClose}
+                        className="flex-1 text-[15px] font-bold text-foreground transition-colors hover:text-primary"
+                      >
+                        {category.title}
+                      </Link>
+                      <ChevronDown
+                        className="size-4 shrink-0 text-muted-foreground transition-transform duration-300 group-open:rotate-180"
+                        aria-hidden="true"
+                      />
+                    </summary>
+                    <div className="flex flex-wrap gap-2 pb-4 ps-9">
                       {category.children.map((child) => (
                         <Link
                           key={child.id}
                           href={`/products?category=${child.slug}`}
                           onClick={onClose}
-                          className="block py-2 ps-4 text-sm text-muted-foreground transition-colors hover:text-gold"
+                          className="rounded-full bg-muted/60 px-3.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
                         >
                           {child.title}
                         </Link>
                       ))}
-                      <Link
-                        href={`/products?category=${category.slug}`}
-                        onClick={onClose}
-                        className="block py-2 ps-4 text-sm font-medium text-foreground transition-colors hover:text-gold"
-                      >
-                        همهٔ {category.title}
-                      </Link>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
+                    </div>
+                  </details>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* نوار پایین */}
-          <div className="flex items-center justify-between gap-3 border-t border-border/60 p-4">
-            <ThemeToggle />
-            <Button asChild variant="outline" className="h-11 flex-1 rounded-xl">
-              <Link href="/login" onClick={onClose}>
-                <UserRound className="size-5" aria-hidden="true" />
-                ورود / حساب من
-              </Link>
-            </Button>
+          <div className="border-t border-border/60 p-4">
+            <div className="flex items-center gap-3">
+              <Button
+                asChild
+                className="h-12 flex-1 rounded-xl text-sm font-bold"
+              >
+                <Link href="/login" onClick={onClose}>
+                  <UserRound className="size-5" aria-hidden="true" />
+                  ورود / حساب من
+                </Link>
+              </Button>
+              <a
+                href={`tel:${brand.contact.phone}`}
+                className="flex size-12 items-center justify-center rounded-xl border border-border/80 text-primary transition-colors hover:bg-accent"
+                aria-label="تماس با فروشگاه"
+              >
+                <Phone className="size-5" aria-hidden="true" />
+              </a>
+            </div>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">
+              پشتیبانی:{" "}
+              <a
+                href={`tel:${brand.contact.phone}`}
+                dir="ltr"
+                className="font-medium text-primary"
+              >
+                {formatPhoneFa(brand.contact.phone)}
+              </a>
+            </p>
           </div>
         </motion.div>
       )}

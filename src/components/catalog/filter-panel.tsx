@@ -12,8 +12,6 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 import type { CatalogFilterState } from "@/components/catalog/catalog-view";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -27,6 +25,15 @@ interface FilterPanelProps {
   filters: CatalogFilterState;
   onChange: (filters: CatalogFilterState) => void;
   onReset: () => void;
+}
+
+/** سرفصل بخش */
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <h3 className="text-xs font-black tracking-wide text-foreground">
+      {children}
+    </h3>
+  );
 }
 
 /** ورودی قیمت — اعداد فارسی/لاتین را می‌پذیرد و با blur/Enter اعمال می‌شود */
@@ -70,7 +77,7 @@ function PriceInput({
               event.currentTarget.blur();
             }
           }}
-          className="pe-11"
+          className="h-10 pe-11 text-xs"
         />
         <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
           تومان
@@ -100,9 +107,9 @@ function CategoryItem({
       className={cn(
         "flex w-full items-center justify-between gap-2 rounded-lg py-2 text-start transition-colors",
         small
-          ? "text-sm text-muted-foreground hover:text-gold"
-          : "font-medium text-foreground hover:text-gold",
-        active && "font-semibold text-gold hover:text-gold",
+          ? "text-xs text-muted-foreground hover:text-primary"
+          : "text-[13px] font-bold text-foreground hover:text-primary",
+        active && "font-bold text-gold-strong hover:text-gold-strong dark:text-gold dark:hover:text-gold",
       )}
     >
       {label}
@@ -127,12 +134,37 @@ export function FilterPanel({
     onChange({ ...filters, brands: next });
   };
 
+  const hasActive =
+    filters.category != null ||
+    filters.brands.length > 0 ||
+    filters.min != null ||
+    filters.max != null ||
+    filters.inStock ||
+    filters.discount ||
+    (filters.q != null && filters.q.trim() !== "");
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* سرِ پنل */}
+      <div className="flex items-center justify-between">
+        <SectionTitle>فیلترها</SectionTitle>
+        {hasActive ? (
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-[11px] font-medium text-destructive transition-colors hover:text-destructive/80"
+          >
+            حذف همه
+          </button>
+        ) : null}
+      </div>
+
+      <Separator className="!bg-border/60" />
+
       {/* دسته‌بندی — درخت دوسطحی */}
       <section aria-label="دسته‌بندی">
-        <h3 className="mb-3 text-sm font-bold">دسته‌بندی</h3>
-        <ul>
+        <SectionTitle>دسته‌بندی</SectionTitle>
+        <ul className="mt-3">
           <li>
             <CategoryItem
               label="همهٔ دسته‌ها"
@@ -166,12 +198,12 @@ export function FilterPanel({
         </ul>
       </section>
 
-      <Separator />
+      <Separator className="!bg-border/60" />
 
       {/* محدودهٔ قیمت */}
       <section aria-label="محدودهٔ قیمت">
-        <h3 className="mb-3 text-sm font-bold">محدودهٔ قیمت</h3>
-        <div className="grid grid-cols-2 gap-2">
+        <SectionTitle>محدودهٔ قیمت</SectionTitle>
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <PriceInput
             key={`min-${filters.min ?? "empty"}`}
             label="از"
@@ -187,12 +219,13 @@ export function FilterPanel({
         </div>
       </section>
 
-      <Separator />
+      <Separator className="!bg-border/60" />
 
       {/* سوییچ‌ها */}
       <section aria-label="وضعیت کالا" className="space-y-3">
-        <label className="flex cursor-pointer items-center justify-between gap-3">
-          <span className="text-sm">فقط کالاهای موجود</span>
+        <SectionTitle>وضعیت کالا</SectionTitle>
+        <label className="mt-3 flex cursor-pointer items-center justify-between gap-3">
+          <span className="text-[13px]">فقط کالاهای موجود</span>
           <Switch
             checked={filters.inStock}
             onCheckedChange={(checked) =>
@@ -202,7 +235,7 @@ export function FilterPanel({
           />
         </label>
         <label className="flex cursor-pointer items-center justify-between gap-3">
-          <span className="text-sm">فقط تخفیف‌دار</span>
+          <span className="text-[13px]">فقط تخفیف‌دار</span>
           <Switch
             checked={filters.discount}
             onCheckedChange={(checked) =>
@@ -213,38 +246,45 @@ export function FilterPanel({
         </label>
       </section>
 
-      <Separator />
+      <Separator className="!bg-border/60" />
 
       {/* برند */}
       <section aria-label="برند">
-        <h3 className="mb-3 text-sm font-bold">برند</h3>
-        <div className="max-h-48 space-y-1 overflow-y-auto pe-1">
+        <SectionTitle>برند</SectionTitle>
+        <div className="mt-3 max-h-56 space-y-0.5 overflow-y-auto pe-1">
           {brands.map((brand) => (
             <label
               key={brand.id}
-              className="flex cursor-pointer items-center gap-2.5 rounded-lg py-2 text-sm transition-colors hover:text-gold"
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg py-2 text-[13px] transition-colors hover:text-primary"
             >
-              <Checkbox
+              <input
+                type="checkbox"
+                className="peer sr-only"
                 checked={filters.brands.includes(brand.slug)}
-                onCheckedChange={(checked) =>
-                  toggleBrand(brand.slug, checked === true)
+                onChange={(event) =>
+                  toggleBrand(brand.slug, event.target.checked)
                 }
                 aria-label={brand.title}
               />
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "flex size-4.5 shrink-0 items-center justify-center rounded-md border transition-colors",
+                  "peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-1",
+                  filters.brands.includes(brand.slug)
+                    ? "border-gold bg-gold text-gold-foreground"
+                    : "border-input bg-card",
+                )}
+              >
+                {filters.brands.includes(brand.slug) ? (
+                  <Check className="size-3" />
+                ) : null}
+              </span>
               {brand.title}
             </label>
           ))}
         </div>
       </section>
-
-      <Button
-        type="button"
-        variant="ghost"
-        className="mt-4 h-9 w-full text-destructive hover:text-destructive"
-        onClick={onReset}
-      >
-        حذف فیلترها
-      </Button>
     </div>
   );
 }

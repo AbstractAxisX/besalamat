@@ -20,26 +20,29 @@
 :root {
   --radius: 0.75rem;
 
-  /* ── بنیان روشن: عاجی ── */
-  --background: #f7f6f1;
-  --foreground: #17251f;
+  /* ── بنیان روشن: سفید-سبز ── */
+  --background: #ffffff;
+  --foreground: #14201a;
   --card: #ffffff;
-  --card-foreground: #17251f;
+  --card-foreground: #14201a;
   --popover: #ffffff;
-  --popover-foreground: #17251f;
+  --popover-foreground: #14201a;
   --primary: #0c3b2e;
-  --primary-foreground: #f5f1e6;
-  --secondary: #edebe1;
-  --secondary-foreground: #24382f;
-  --muted: #efede3;
-  --muted-foreground: #5d6c63;
-  --accent: #f1ecde;
+  --primary-foreground: #f2f7f3;
+  --secondary: #ecf2ee;
+  --secondary-foreground: #22362d;
+  --muted: #f1f5f2;
+  --muted-foreground: #61716a;
+  --accent: #e9f1ec;
   --accent-foreground: #0c3b2e;
   --destructive: #c0392b;
   --destructive-foreground: #fdf6ef;
-  --border: #e3e0d3;
-  --input: #d9d5c6;
+  --border: #e3eae5;
+  --input: #d6e0da;
   --ring: #c9a24b;
+
+  /* سطح متناوب بخش‌ها — سبزفامِ بسیار ملایم روی سفید */
+  --surface-alt: #f3f7f4;
   --chart-1: #0c3b2e;
   --chart-2: #c9a24b;
   --chart-3: #2e7d32;
@@ -71,13 +74,13 @@
   );
 
   /* سایدبار ادمین */
-  --sidebar: #f2f0e8;
-  --sidebar-foreground: #17251f;
+  --sidebar: #f3f7f4;
+  --sidebar-foreground: #14201a;
   --sidebar-primary: #0c3b2e;
-  --sidebar-primary-foreground: #f5f1e6;
-  --sidebar-accent: #ece8da;
+  --sidebar-primary-foreground: #f2f7f3;
+  --sidebar-accent: #e9f1ec;
   --sidebar-accent-foreground: #0c3b2e;
-  --sidebar-border: #e0dccc;
+  --sidebar-border: #e3eae5;
   --sidebar-ring: #c9a24b;
 }
 
@@ -129,6 +132,9 @@
     rgba(217, 180, 95, 0.04),
     rgba(217, 180, 95, 0.07)
   );
+
+  /* سطح متناوب بخش‌ها در تیره */
+  --surface-alt: #101d17;
 
   --sidebar: #10201a;
   --sidebar-foreground: #e9efea;
@@ -187,6 +193,7 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-on-metallic: var(--on-metallic);
   --color-on-metallic-muted: var(--on-metallic-muted);
+  --color-surface-alt: var(--surface-alt);
 
   --font-sans: "Vazirmatn", "Segoe UI", Tahoma, ui-sans-serif, system-ui,
     sans-serif;
@@ -295,6 +302,11 @@
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
+  /* سطح متناوب بخش‌ها (باند سبزفام) */
+  .bg-surface-alt {
+    background-color: var(--surface-alt);
+  }
+
   /* سطح متالیک سبز کاجی (هیرو، فوتر، بنر) */
   .bg-metallic {
     background-image: var(--metallic);
@@ -338,9 +350,17 @@
   /* کارت لوکس */
   .card-luxe {
     background-color: var(--card);
-    border: 1px solid color-mix(in oklab, var(--border) 85%, transparent);
+    border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
     border-radius: 1rem;
     box-shadow: var(--shadow-card);
+  }
+
+  /* بوم تصویر محصول — سفیدِ متمایز از کارت در تم‌های متناوب */
+  .img-canvas {
+    background-color: #fafcfa;
+  }
+  .dark .img-canvas {
+    background-color: #182a22;
   }
 
   /* هاورِ نرم و باوقار */

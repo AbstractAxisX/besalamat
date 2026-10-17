@@ -119,59 +119,83 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     }
   }
 
-  return (
-    <div className="shell py-8 md:py-12">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">خانه</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronLeft aria-hidden="true" />
-          </BreadcrumbSeparator>
-          {activeParent ? (
-            <>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/products">فروشگاه</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronLeft aria-hidden="true" />
-              </BreadcrumbSeparator>
-            </>
-          ) : (
-            <BreadcrumbItem>
-              <BreadcrumbPage>فروشگاه</BreadcrumbPage>
-            </BreadcrumbItem>
-          )}
-          {activeChild ? (
-            <>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={`/products?category=${activeParent?.slug ?? ""}`}>
-                    {activeParent?.title}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronLeft aria-hidden="true" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbPage>{activeChild.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </>
-          ) : activeParent ? (
-            <BreadcrumbItem>
-              <BreadcrumbPage>{activeParent.title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          ) : null}
-        </BreadcrumbList>
-      </Breadcrumb>
+  const activeParentTitle = activeParent?.title ?? null;
+  const heading = activeChild?.title ?? activeParentTitle ?? "فروشگاه";
+  const headingDescription = activeParent
+    ? `خرید آنلاین ${heading} با ضمانت اصالت کالا و ارسال سریع`
+    : "انتخاب از میان لوازم و تجهیزات پزشکی اصل؛ فیلتر دسته‌بندی، برند، قیمت و موجودی در یک نگاه.";
 
-      <div className="mt-6 md:mt-8">
+  return (
+    <div>
+      {/* باند هدر — سبزفام full-bleed */}
+      <div className="border-b border-border/60 bg-surface-alt">
+        <div className="shell py-6 md:py-8">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">خانه</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator>
+                <ChevronLeft aria-hidden="true" />
+              </BreadcrumbSeparator>
+              {activeParent ? (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link href="/products">فروشگاه</Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator>
+                    <ChevronLeft aria-hidden="true" />
+                  </BreadcrumbSeparator>
+                </>
+              ) : (
+                <BreadcrumbItem>
+                  <BreadcrumbPage>فروشگاه</BreadcrumbPage>
+                </BreadcrumbItem>
+              )}
+              {activeChild ? (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={`/products?category=${activeParent?.slug ?? ""}`}
+                      >
+                        {activeParent?.title}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator>
+                    <ChevronLeft aria-hidden="true" />
+                  </BreadcrumbSeparator>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{activeChild.title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              ) : activeParent ? (
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{activeParent.title}</BreadcrumbPage>
+                </BreadcrumbItem>
+              ) : null}
+            </BreadcrumbList>
+          </Breadcrumb>
+
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+            <div>
+              <h1 className="text-2xl font-black text-foreground md:text-3xl">
+                {heading}
+              </h1>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                {headingDescription}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="shell py-6 md:py-8">
         <CatalogView
           products={PREVIEW_PRODUCTS}
           categories={PREVIEW_CATEGORIES}

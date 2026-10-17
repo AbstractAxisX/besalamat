@@ -39,6 +39,13 @@ export interface BrandContactConfig {
   mapEmbedUrl: string;
 }
 
+export interface BrandShippingConfig {
+  /** هزینهٔ ارسال ثابت (تومان) — فاز ۴ از Setting خوانده می‌شود */
+  flatRate: number;
+  /** آستانهٔ ارسال رایگان (تومان) */
+  freeThreshold: number;
+}
+
 export interface BrandConfig {
   /** نام فروشگاه */
   name: string;
@@ -54,6 +61,7 @@ export interface BrandConfig {
 
   contact: BrandContactConfig;
   socials: SocialConfig[];
+  shipping: BrandShippingConfig;
 
   currencyLabel: string;
 
@@ -99,6 +107,11 @@ export const brand: BrandConfig = {
     { key: "eitaa", label: "ایتا", defaultHref: "" },
     { key: "rubika", label: "روبیکا", defaultHref: "" },
   ],
+
+  shipping: {
+    flatRate: 45_000,
+    freeThreshold: 2_000_000,
+  },
 
   currencyLabel: "تومان",
 

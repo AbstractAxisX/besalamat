@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * اسلایدر هیرو — سطح متالیک تمام‌عرض با پترن طلایی و واترمارک برند
+ * هیروی ادیتوریال — «طاق فارسی» روی بوم سفید-سبز
  * ─────────────────────────────
- * embla (RTL + loop) با اتوپلی ۶ ثانیه؛ در hover مکث و پس از تعامل ادامه.
- * متن هر اسلاید فقط در حالتِ انتخاب رندر می‌شود و تعویض آن با framer
- * (فقط opacity/transform) نرم است؛ تصویر همیشه در جای خودش می‌ماند.
- * عنوان اسلاید نخست h1 است (سرفصل صفحهٔ هوم) و بقیه h2.
+ * امضای بصری: قاب طاقی‌شکل (rounded-t-full) با هالهٔ طلایی هندسی؛
+ * ستون متن با چیدمان فروش‌محور (تیتر درشت، دو CTA، سه چیپ اعتماد).
+ * embla (RTL + loop) با اتوپلی ۶ ثانیه؛ متنِ اسلاید فقط در حالتِ انتخاب.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -15,14 +14,28 @@ import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  LockKeyhole,
+  Phone,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 
-import { Pattern, Watermark } from "@/components/shared/brand-assets";
 import { toFa } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { brand } from "@/config/brand";
 import type { HomeSlideDTO } from "@/types/shop";
 
 const AUTOPLAY_DELAY_MS = 6_000;
+
+const TRUST_CHIPS = [
+  { icon: ShieldCheck, label: "ضمانت اصالت کالا" },
+  { icon: Truck, label: "ارسال سریع به سراسر کشور" },
+  { icon: LockKeyhole, label: "پرداخت امن" },
+] as const;
 
 interface HeroSliderProps {
   slides: HomeSlideDTO[];
@@ -66,20 +79,24 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   if (slides.length === 0) return null;
 
   const showControls = slides.length > 1;
-  const goTo = (index: number) => emblaApi?.scrollTo(index);
 
   return (
     <section
-      className="relative overflow-hidden bg-metallic"
+      className="bg-surface-alt relative overflow-hidden"
       role="region"
       aria-roledescription="carousel"
       aria-label="اسلایدر هیرو"
     >
-      <Pattern className="text-gold opacity-[0.05]" />
-      {/* واترمارک بزرگ برند — سمت چپِ قاب، پشت ستون تصویر */}
-      <Watermark className="end-[-3rem] top-1/2 size-[26rem] -translate-y-1/2 text-on-metallic opacity-[0.05] md:end-[-4rem] md:size-[34rem]" />
+      {/* هالهٔ سبز بسیار ملایم — عمق بدون شلوغی */}
+      <div
+        className="pointer-events-none absolute -top-40 start-[-8rem] size-[36rem] rounded-full bg-primary/[0.05] blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -bottom-52 end-[-10rem] size-[34rem] rounded-full bg-gold/[0.06] blur-3xl"
+        aria-hidden="true"
+      />
 
-      {/* درِ اسلایدها */}
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {slides.map((slide, index) => {
@@ -93,50 +110,128 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                 aria-roledescription="slide"
                 aria-label={`اسلاید ${toFa(index + 1)} از ${toFa(slides.length)}`}
               >
-                <div className="shell grid min-h-[440px] grid-cols-1 items-center gap-8 pb-16 pt-10 md:min-h-[540px] md:grid-cols-2 md:pb-12 md:pt-12">
-                  {/* ستون متن — راست در RTL */}
-                  <div className="relative">
+                <div className="shell grid items-center gap-10 pb-14 pt-10 md:min-h-[560px] md:grid-cols-[1.05fr_0.95fr] md:gap-14 md:pb-20 md:pt-14">
+                  {/* ── ستون متن — راست در RTL ── */}
+                  <div className="relative order-1">
                     <AnimatePresence mode="wait">
                       {isSelected ? (
                         <motion.div
                           key={slide.id}
-                          initial={{ opacity: 0, y: 12 }}
+                          initial={{ opacity: 0, y: 14 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.35, ease: "easeOut" }}
                         >
-                          <Heading className="text-3xl leading-[1.25] font-black text-on-metallic md:text-5xl">
+                          {/* سردر */}
+                          <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-soft/25 px-3.5 py-1.5 text-[11px] font-bold text-gold-strong dark:text-gold">
+                            <span
+                              className="size-1.5 rounded-full bg-gold"
+                              aria-hidden="true"
+                            />
+                            سلامت خانواده، سرمایهٔ اصلی شماست
+                          </span>
+
+                          <Heading className="mt-5 text-[1.75rem] leading-[1.35] font-black text-foreground md:text-[2.6rem] md:leading-[1.3]">
                             {slide.title}
                           </Heading>
+
+                          <span
+                            className="gold-hairline mt-5 block w-24"
+                            aria-hidden="true"
+                          />
+
                           {slide.subtitle ? (
-                            <p className="mt-4 text-base leading-8 text-on-metallic-muted md:text-lg">
+                            <p className="mt-5 max-w-xl text-sm leading-8 text-muted-foreground md:text-base md:leading-9">
                               {slide.subtitle}
                             </p>
                           ) : null}
-                          <Link
-                            href={slide.ctaHref ?? "/products"}
-                            className="btn-metallic mt-8 inline-flex h-12 items-center gap-2 rounded-full px-8 font-bold outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
-                          >
-                            {slide.ctaLabel ?? "مشاهده محصولات"}
-                            <ArrowLeft className="size-4" aria-hidden="true" />
-                          </Link>
+
+                          {/* CTAها */}
+                          <div className="mt-8 flex flex-wrap items-center gap-4">
+                            <Link
+                              href={slide.ctaHref ?? "/products"}
+                              className="inline-flex h-12 items-center gap-2 rounded-full px-8 text-sm font-bold outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                              style={{ backgroundColor: "var(--primary)" }}
+                            >
+                              <span className="text-primary-foreground">
+                                {slide.ctaLabel ?? "مشاهدهٔ محصولات"}
+                              </span>
+                              <ArrowLeft
+                                className="size-4 text-primary-foreground"
+                                aria-hidden="true"
+                              />
+                            </Link>
+                            <a
+                              href={`tel:${brand.contact.phone}`}
+                              className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-card px-6 text-sm font-medium text-foreground transition-colors duration-300 hover:border-gold/50 hover:text-gold-strong"
+                            >
+                              <Phone className="size-4" aria-hidden="true" />
+                              مشاورهٔ رایگان قبل از خرید
+                            </a>
+                          </div>
+
+                          {/* چیپ‌های اعتماد */}
+                          <ul className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
+                            {TRUST_CHIPS.map(({ icon: Icon, label }) => (
+                              <li
+                                key={label}
+                                className="flex items-center gap-2 text-xs text-muted-foreground"
+                              >
+                                <Icon
+                                  className="size-4 text-success"
+                                  aria-hidden="true"
+                                />
+                                {label}
+                              </li>
+                            ))}
+                          </ul>
                         </motion.div>
                       ) : null}
                     </AnimatePresence>
                   </div>
 
-                  {/* ستون تصویر — چپ در RTL */}
-                  <div className="relative mx-auto aspect-square max-h-[420px] w-full max-w-[420px] rounded-3xl bg-white/5 p-4 ring-1 ring-gold/25">
-                    <div className="relative h-full w-full">
+                  {/* ── ستون تصویر — طاق فارسی ── */}
+                  <div className="relative order-2 mx-auto w-full max-w-[440px] md:max-w-[480px]">
+                    {/* هالهٔ طلایی هندسی — قابِ جابه‌جاشده پشت طاق */}
+                    <div
+                      className="absolute -inset-3 rounded-b-[2.5rem] rounded-t-[999px] border border-gold/45 md:-inset-4"
+                      aria-hidden="true"
+                    />
+                    <div
+                      className="absolute -inset-3 translate-y-3 rounded-b-[2.5rem] rounded-t-[999px] bg-primary/[0.04] md:-inset-4"
+                      aria-hidden="true"
+                    />
+
+                    <div className="bg-metallic relative aspect-[4/5] overflow-hidden rounded-b-[2rem] rounded-t-[999px] p-8 md:p-10">
                       <Image
                         src={slide.imageUrl}
                         alt={slide.title}
                         fill
                         priority={index === 0}
-                        sizes="(max-width: 768px) 100vw, 420px"
-                        className="object-contain drop-shadow-2xl"
+                        sizes="(max-width: 768px) 90vw, 480px"
+                        className="object-contain drop-shadow-2xl transition-transform duration-500"
                       />
                     </div>
+
+                    {/* کارت شناور ارسال — داخل قاب طاق */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25, duration: 0.4 }}
+                      className="absolute bottom-5 start-5 z-10 flex items-center gap-3 rounded-2xl border border-border/70 bg-card px-4 py-3 shadow-lift"
+                    >
+                      <span className="flex size-10 items-center justify-center rounded-full bg-gold-soft/40 text-gold-strong dark:bg-gold-soft/15 dark:text-gold">
+                        <Truck className="size-5" aria-hidden="true" />
+                      </span>
+                      <span>
+                        <span className="block text-xs font-bold text-foreground">
+                          ارسال همان روز در تهران
+                        </span>
+                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                          برای سفارش‌های تا ساعت ۱۳
+                        </span>
+                      </span>
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -147,45 +242,44 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
       {showControls ? (
         <>
-          {/* قبلی — سمت راست در RTL */}
+          {/* فلش‌ها — سفید با حاشیه، محو در موبایل */}
           <button
             type="button"
             onClick={() => emblaApi?.scrollPrev()}
             aria-label="اسلاید قبلی"
-            className="absolute start-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-on-metallic backdrop-blur transition-colors outline-none hover:bg-gold/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+            className="absolute end-5 top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-card text-foreground shadow-card transition-all duration-300 hover:border-gold/60 hover:text-gold-strong focus-visible:ring-2 focus-visible:ring-ring md:flex"
           >
-            <ChevronRight className="size-5" aria-hidden="true" />
+            <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
-          {/* بعدی — سمت چپ در RTL */}
           <button
             type="button"
             onClick={() => emblaApi?.scrollNext()}
             aria-label="اسلاید بعدی"
-            className="absolute end-4 top-1/2 z-10 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-on-metallic backdrop-blur transition-colors outline-none hover:bg-gold/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+            className="absolute start-5 top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-card text-foreground shadow-card transition-all duration-300 hover:border-gold/60 hover:text-gold-strong focus-visible:ring-2 focus-visible:ring-ring md:flex"
           >
-            <ChevronLeft className="size-5" aria-hidden="true" />
+            <ChevronRight className="size-5" aria-hidden="true" />
           </button>
 
-          {/* نقاط پیشرفت */}
-          <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1">
+          {/* میله‌های پیشرفت — موبایل: مرکز؛ دسکتاپ: زیر ستون متن */}
+          <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 md:left-auto md:right-1/4 md:translate-x-1/2">
             {slides.map((slide, index) => {
               const isActive = index === selected;
               return (
                 <button
                   key={slide.id}
                   type="button"
-                  onClick={() => goTo(index)}
+                  onClick={() => emblaApi?.scrollTo(index)}
                   aria-label={`نمایش اسلاید ${toFa(index + 1)}`}
                   aria-current={isActive}
-                  className="flex h-11 w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-pine"
+                  className="flex h-11 items-center justify-center rounded-full px-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "block h-1.5 rounded-full transition-all",
+                      "block h-1.5 rounded-full transition-all duration-300",
                       isActive
-                        ? "w-8 bg-gold"
-                        : "w-1.5 bg-white/30 hover:bg-white/60",
+                        ? "w-10 bg-gold"
+                        : "w-4 bg-border hover:bg-gold/50",
                     )}
                   />
                 </button>

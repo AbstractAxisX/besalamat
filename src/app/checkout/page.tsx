@@ -48,7 +48,7 @@ function useMounted(): boolean {
 
 /* ── هزینهٔ ارسال (تومان) ── */
 // فاز ۴: از تنظیمات (Setting: shipping.cost) خوانده می‌شود
-const SHIPPING_COST = 45000;
+const SHIPPING_COST = brand.shipping.flatRate;
 
 type ShippingMethod = "post" | "pickup";
 

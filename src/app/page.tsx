@@ -6,15 +6,17 @@ import {
   PREVIEW_BRANDS,
   PREVIEW_CATEGORIES,
   PREVIEW_HOME_SECTIONS,
+  PREVIEW_PRODUCTS,
   PREVIEW_SLIDES,
-  PRODUCT_TABS,
   getPreviewProductsByTab,
 } from "@/lib/preview-data";
 import type { HomeSectionKey } from "@/types/shop";
 import { HeroSlider } from "@/components/home/hero-slider";
 import { TrustBar } from "@/components/home/trust-bar";
-import { CategoryCards } from "@/components/home/category-cards";
-import { ProductTabs } from "@/components/home/product-tabs";
+import { CategoryIndex } from "@/components/home/category-index";
+import { DealBanner } from "@/components/home/deal-banner";
+import { BestsellerRail } from "@/components/home/bestseller-rail";
+import { ExpertPicks } from "@/components/home/expert-picks";
 import { HomeBanners } from "@/components/home/home-banners";
 import { BrandsStrip } from "@/components/home/brands-strip";
 import { ArticlesTeaser } from "@/components/home/articles-teaser";
@@ -32,10 +34,10 @@ export const metadata: Metadata = {
   },
 };
 
-/** دادهٔ تب‌های محصول — یک‌بار برای همهٔ تب‌ها */
-const productsByTab = Object.fromEntries(
-  PRODUCT_TABS.map((tab) => [tab.key, getPreviewProductsByTab(tab.key)]),
-);
+/** دادهٔ مشتق — یک‌بار در سطح ماژول */
+const DEAL_PRODUCT = getPreviewProductsByTab("discount")[0] ?? null;
+const BESTSELLERS = getPreviewProductsByTab("bestseller");
+const EXPERT_PICKS = PREVIEW_PRODUCTS.filter((product) => product.isFeatured);
 
 /**
  * فاز ۱: دادهٔ ایستا از preview-data.
@@ -58,21 +60,33 @@ export default function HomePage() {
         return <TrustBar key={key} />;
       case "categories":
         return (
-          <CategoryCards
+          <CategoryIndex
             key={key}
             categories={PREVIEW_CATEGORIES}
             title={section.title ?? "دسته‌بندی محصولات"}
             subtitle={section.subtitle}
           />
         );
-      case "productTabs":
+      case "deal":
+        return DEAL_PRODUCT ? (
+          <DealBanner key={key} product={DEAL_PRODUCT} />
+        ) : null;
+      case "bestsellers":
         return (
-          <ProductTabs
+          <BestsellerRail
             key={key}
-            title={section.title ?? "انتخاب هوشمندانه"}
+            title={section.title ?? "پرفروش‌های این هفته"}
             subtitle={section.subtitle}
-            tabs={PRODUCT_TABS}
-            productsByTab={productsByTab}
+            products={BESTSELLERS}
+          />
+        );
+      case "expertPicks":
+        return (
+          <ExpertPicks
+            key={key}
+            title={section.title ?? "منتخب کارشناس سلامت"}
+            subtitle={section.subtitle}
+            products={EXPERT_PICKS}
           />
         );
       case "banners":

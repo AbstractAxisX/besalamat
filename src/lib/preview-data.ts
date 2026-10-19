@@ -6,13 +6,15 @@
  */
 
 import type {
+  AdGridDTO,
+  AdLayoutSpecDTO,
   ArticleDetail,
   ArticleSummary,
   BrandSummary,
   CategoryNode,
-  HomeBannerDTO,
   HomeSectionDTO,
   HomeSlideDTO,
+  NeedCardDTO,
   ProductDetail,
   ProductSpecDTO,
   ProductSummary,
@@ -594,6 +596,7 @@ function toProductSummary(row: PreviewProductRow, index: number): ProductSummary
     brandTitle: row.brandTitle,
     isNew: row.isNew,
     isFeatured: row.isFeatured,
+    categorySlug: row.categorySlug,
   } satisfies ProductSummary;
 }
 
@@ -635,86 +638,207 @@ export const PREVIEW_PRODUCT_DETAILS: Record<string, ProductDetail> = Object.fro
 export const PREVIEW_SLIDES: HomeSlideDTO[] = [
   {
     id: "slide-1",
-    title: "سلامتی خانواده، با خیال راحت",
-    subtitle: "تجهیزات پزشکی اورجینال با ضمانت اصالت کالا",
+    title: "تجهیزات پزشکی اصل، با خیال راحت",
+    subtitle: "بیش از ۸۰ برند معتبر جهانی — اومرون، بویرون، مدیسانا و…",
     imageUrl: "/placeholders/slide-1.svg",
-    ctaLabel: "مشاهده محصولات",
+    ctaLabel: "دیدن محصولات",
     ctaHref: "/products",
   },
   {
     id: "slide-2",
-    title: "برندهای معتبر جهانی",
-    subtitle: "اومرون، بویرون، مدیسانا و…",
+    title: "برای هر خانه، یک دستگاه سلامت",
+    subtitle: "از فشارسنج و قندسنج تا بخور و ترازوی هوشمند",
     imageUrl: "/placeholders/slide-2.svg",
-    ctaLabel: "مشاهدهٔ فروشگاه",
+    ctaLabel: "خرید بر اساس نیاز",
     ctaHref: "/products",
   },
   {
     id: "slide-3",
-    title: "مشاورهٔ تخصصی رایگان",
-    subtitle: "کارشناسان ما در انتخاب همراه شما هستند",
+    title: "قبل از خرید، با کارشناس مشورت کنید",
+    subtitle: "مشاورهٔ تخصصی رایگان — انتخاب درست، هزینهٔ کمتر",
     imageUrl: "/placeholders/slide-3.svg",
-    ctaLabel: "تماس با ما",
+    ctaLabel: "تماس با کارشناس",
     ctaHref: "/contact",
   },
 ];
 
-/* ══════════════════════════ بنرهای میانی (۲) ══════════════════════════ */
+/* ══════════════════════════ خرید بر اساس نیاز (۶) ══════════════════════════ */
 
-export const PREVIEW_BANNERS: HomeBannerDTO[] = [
+export const PREVIEW_NEEDS: NeedCardDTO[] = [
   {
-    id: "banner-1",
-    title: "اقلام مصرفی بهداشتی",
-    imageUrl: "/placeholders/banner-1.svg",
-    href: "/products?category=masks",
-    slot: 1,
+    id: "need-bp",
+    title: "کنترل فشار خون",
+    description: "فشارسنج‌های بازویی و مچی با دقت بالینیک",
+    iconKey: "blood-pressure",
+    href: "/products?category=blood-pressure",
+    isActive: true,
+    sortOrder: 1,
   },
   {
-    id: "banner-2",
-    title: "حمایت و ارتوپدی",
-    imageUrl: "/placeholders/banner-2.svg",
+    id: "need-glucose",
+    title: "مدیریت دیابت",
+    description: "قندسنج، نوار و لانست برای پایش روزانه",
+    iconKey: "glucose",
+    href: "/products?category=glucose",
+    isActive: true,
+    sortOrder: 2,
+  },
+  {
+    id: "need-resp",
+    title: "سلامت تنفس",
+    description: "بخور، پالس‌اکسیمتر و ماسک اکسیژن",
+    iconKey: "respiratory",
+    href: "/products?category=respiratory",
+    isActive: true,
+    sortOrder: 3,
+  },
+  {
+    id: "need-bed",
+    title: "مراقبت از بیمار",
+    description: "تخت برقی، تشک ضدزخم و لوازم بستری",
+    iconKey: "beds",
+    href: "/products?category=beds",
+    isActive: true,
+    sortOrder: 4,
+  },
+  {
+    id: "need-ortho",
+    title: "توان‌بخشی و ارتوپدی",
+    description: "کمربند طبی، زانوبند و طوق گردنی",
+    iconKey: "orthopedic",
     href: "/products?category=orthopedic",
-    slot: 2,
+    isActive: true,
+    sortOrder: 5,
+  },
+  {
+    id: "need-mask",
+    title: "بهداشت و مصرفی",
+    description: "ماسک، دستکش و اقلام ضدعفونی",
+    iconKey: "masks",
+    href: "/products?category=masks",
+    isActive: true,
+    sortOrder: 6,
   },
 ];
+
+/* ══════════════════════════ گرید تبلیغات عکسی ══════════════════════════
+ *
+ * ادمین: چیدمان (layout) را انتخاب می‌کند، برای هر اسلات تصویر آپلود می‌کند،
+ * مقصد کلیک را تعیین می‌کند و هر کاشی را جداگانه فعال/غیرفعال می‌کند.
+ * AD_LAYOUT_SPECS ابعاد دقیق هر اسلات را به طراح نشان می‌دهد (پیکسل @۲x).
+ */
+
+export const AD_LAYOUT_SPECS: Record<AdLayoutSpecDTO["key"], AdLayoutSpecDTO> = {
+  bento: {
+    key: "bento",
+    title: "بنتو — مربع بزرگ + مستطیل + دو مربع",
+    slots: [
+      { name: "مربع بزرگ (چپ)", ratio: "۱:۱", sizeHint: "۱۴۴۰×۱۴۴۰ پیکسل" },
+      { name: "مستطیل عریض (بالا-راست)", ratio: "۲:۱", sizeHint: "۱۴۴۰×۷۲۰ پیکسل" },
+      { name: "مربع کوچک (پایین-راست ۱)", ratio: "۱:۱", sizeHint: "۷۲۰×۷۲۰ پیکسل" },
+      { name: "مربع کوچک (پایین-راست ۲)", ratio: "۱:۱", sizeHint: "۷۲۰×۷۲۰ پیکسل" },
+    ],
+  },
+  duo: {
+    key: "duo",
+    title: "جفت — دو مستطیل عریض",
+    slots: [
+      { name: "مستطیل ۱", ratio: "۱۲:۵", sizeHint: "۱۶۸۰×۷۰۰ پیکسل" },
+      { name: "مستطیل ۲", ratio: "۱۲:۵", sizeHint: "۱۶۸۰×۷۰۰ پیکسل" },
+    ],
+  },
+  trio: {
+    key: "trio",
+    title: "سه‌تایی — سه مربع",
+    slots: [
+      { name: "مربع ۱", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+      { name: "مربع ۲", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+      { name: "مربع ۳", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+    ],
+  },
+};
+
+export const PREVIEW_ADS: AdGridDTO = {
+  layout: "bento",
+  tiles: [
+    {
+      id: "ad-1",
+      slotIndex: 0,
+      imageUrl: "/placeholders/ad-big-1.svg",
+      title: "فشارسنج‌های دیجیتال",
+      subtitle: "دقت بالینیک، دو سال گارانتی",
+      href: "/products?category=blood-pressure",
+      isActive: true,
+      sortOrder: 1,
+    },
+    {
+      id: "ad-2",
+      slotIndex: 1,
+      imageUrl: "/placeholders/ad-wide-1.svg",
+      title: "اقلام مصرفی اورجینال",
+      subtitle: "نوار قند، لانست و ماسک",
+      href: "/products?category=masks",
+      isActive: true,
+      sortOrder: 2,
+    },
+    {
+      id: "ad-3",
+      slotIndex: 2,
+      imageUrl: "/placeholders/ad-square-1.svg",
+      title: "بخور و نبولایزر",
+      subtitle: null,
+      href: "/products?category=nebulizer",
+      isActive: true,
+      sortOrder: 3,
+    },
+    {
+      id: "ad-4",
+      slotIndex: 3,
+      imageUrl: "/placeholders/ad-square-2.svg",
+      title: "تشک ضدزخم",
+      subtitle: null,
+      href: "/products?category=anti-bedsore-mattress",
+      isActive: true,
+      sortOrder: 4,
+    },
+  ],
+};
 
 /* ══════════════════════════ بخش‌های صفحهٔ خانه (۸) ══════════════════════════ */
 
 export const PREVIEW_HOME_SECTIONS: HomeSectionDTO[] = [
   { key: "hero", title: null, subtitle: null, sortOrder: 0, isActive: true },
-  { key: "trust", title: null, subtitle: null, sortOrder: 1, isActive: true },
   {
-    key: "categories",
+    key: "needs",
     title: "خرید بر اساس نیاز",
-    subtitle: "از پایش روزمرهٔ سلامت تا مراقبت بلندمدت؛ همه‌چیز زیر یک سقف",
-    sortOrder: 2,
+    subtitle: "به جای جست‌وجوی دسته‌ها، بگویید دغدغه‌تان چیست",
+    sortOrder: 1,
     isActive: true,
   },
-  { key: "deal", title: "پیشنهاد ویژهٔ امروز", subtitle: null, sortOrder: 3, isActive: true },
+  { key: "ads", title: null, subtitle: null, sortOrder: 2, isActive: true },
   {
-    key: "bestsellers",
-    title: "پرفروش‌های این هفته",
-    subtitle: "انتخاب هزاران خانوادهٔ ایرانی؛ رتبه‌بندی بر اساس فروش واقعی",
-    sortOrder: 4,
+    key: "productRail",
+    title: "محبوب‌ترین‌ها",
+    subtitle: "انتخاب واقعی مشتریان، به‌روزرسانی هفتگی",
+    sortOrder: 3,
     isActive: true,
   },
   {
     key: "expertPicks",
     title: "منتخب کارشناس سلامت",
-    subtitle: "تیم کارشناسی ما این چهار قلم را با وسواس انتخاب کرده است",
-    sortOrder: 5,
+    subtitle: "تیم کارشناسی ما این قلم‌ها را با وسواس انتخاب کرده است",
+    sortOrder: 4,
     isActive: true,
   },
-  { key: "banners", title: null, subtitle: null, sortOrder: 6, isActive: true },
-  { key: "brands", title: "برندهای همراه ما", subtitle: null, sortOrder: 7, isActive: true },
+  { key: "brands", title: "برندهای همراه ما", subtitle: null, sortOrder: 5, isActive: true },
   {
     key: "articles",
     title: "مجلهٔ سلامت",
     subtitle: "خواندنی‌های کاربردی برای سلامتی خانواده",
-    sortOrder: 8,
+    sortOrder: 6,
     isActive: true,
   },
-  { key: "aboutStore", title: "دربارهٔ بسلامت", subtitle: null, sortOrder: 9, isActive: true },
+  { key: "aboutStore", title: "دربارهٔ بسلامت", subtitle: null, sortOrder: 7, isActive: true },
 ];
 
 /* ══════════════════════════ مجلهٔ سلامت (۲ دسته + ۳ مقاله) ══════════════════════════ */

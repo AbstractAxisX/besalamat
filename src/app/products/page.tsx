@@ -1,13 +1,12 @@
 /**
  * صفحهٔ فروشگاه (کاتالوگ) — Server Component
  * ─────────────────────────────
- * searchParams (Next 16: Promise) → initialFilters برای CatalogView.
- * بریدکرامب: خانه / فروشگاه [/ دستهٔ والد / دستهٔ فرزند]
+ * تجزیهٔ امن searchParams (Next 16: Promise) → initialFilters برای CatalogView.
+ * باند هدر، تولبار، سایدبار درختی و صفحه‌بندی همه داخل CatalogView (کلاینت)
+ * رندر می‌شوند تا با URL همگام بمانند — این صفحه فقط داده می‌رساند.
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 
 import {
   CatalogView,
@@ -16,26 +15,17 @@ import {
   type CatalogViewMode,
 } from "@/components/catalog/catalog-view";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
   PREVIEW_BRANDS,
   PREVIEW_CATEGORIES,
   PREVIEW_PRODUCT_DETAILS,
   PREVIEW_PRODUCTS,
 } from "@/lib/preview-data";
 import { toEnDigits } from "@/lib/format";
-import type { CategoryNode } from "@/types/shop";
 
 export const metadata: Metadata = {
-  title: "فروشگاه | انتخاب محصولات",
+  title: "فروشگاه تجهیزات پزشکی",
   description:
-    "انتخاب از میان لوازم و تجهیزات پزشکی اصل؛ فیلتر دسته‌بندی، برند، قیمت و موجودی در یک نگاه.",
+    "خرید آنلاین لوازم و تجهیزات پزشکی از بسلامت؛ فیلتر دسته‌بندی، برند، محدودهٔ قیمت و موجودی همراه مرتب‌سازی و صفحه‌بندی.",
 };
 
 type RawParams = Record<string, string | string[] | undefined>;
@@ -69,7 +59,7 @@ function toFlag(value: string | string[] | undefined): boolean {
   return raw === "1" || raw === "true";
 }
 
-/** نقشهٔ slug محصول → دستهٔ فرزند (برای فیلتر دسته‌بندی در CatalogView) */
+/** نقشهٔ slug محصول → دستهٔ فرزند (سازگاری با قرارداد props کاتالوگ) */
 function buildCategoryByProduct(): Record<string, string | null> {
   const map: Record<string, string | null> = {};
   for (const product of Object.values(PREVIEW_PRODUCT_DETAILS)) {
@@ -100,110 +90,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     discount: toFlag(params.discount),
   };
 
-  /* دستهٔ فعال برای بریدکرامب (والد یا فرزند) */
-  const activeSlug = initialFilters.category ?? null;
-  let activeParent: CategoryNode | null = null;
-  let activeChild: CategoryNode | null = null;
-  if (activeSlug) {
-    for (const parent of PREVIEW_CATEGORIES) {
-      if (parent.slug === activeSlug) {
-        activeParent = parent;
-        break;
-      }
-      const child = parent.children.find((item) => item.slug === activeSlug);
-      if (child) {
-        activeParent = parent;
-        activeChild = child;
-        break;
-      }
-    }
-  }
-
-  const activeParentTitle = activeParent?.title ?? null;
-  const heading = activeChild?.title ?? activeParentTitle ?? "فروشگاه";
-  const headingDescription = activeParent
-    ? `خرید آنلاین ${heading} با ضمانت اصالت کالا و ارسال سریع`
-    : "انتخاب از میان لوازم و تجهیزات پزشکی اصل؛ فیلتر دسته‌بندی، برند، قیمت و موجودی در یک نگاه.";
-
   return (
-    <div>
-      {/* باند هدر — سبزفام full-bleed */}
-      <div className="border-b border-border/60 bg-surface-alt">
-        <div className="shell py-6 md:py-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">خانه</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronLeft aria-hidden="true" />
-              </BreadcrumbSeparator>
-              {activeParent ? (
-                <>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link href="/products">فروشگاه</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator>
-                    <ChevronLeft aria-hidden="true" />
-                  </BreadcrumbSeparator>
-                </>
-              ) : (
-                <BreadcrumbItem>
-                  <BreadcrumbPage>فروشگاه</BreadcrumbPage>
-                </BreadcrumbItem>
-              )}
-              {activeChild ? (
-                <>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link
-                        href={`/products?category=${activeParent?.slug ?? ""}`}
-                      >
-                        {activeParent?.title}
-                      </Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator>
-                    <ChevronLeft aria-hidden="true" />
-                  </BreadcrumbSeparator>
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>{activeChild.title}</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </>
-              ) : activeParent ? (
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{activeParent.title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              ) : null}
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-            <div>
-              <h1 className="text-2xl font-black text-foreground md:text-3xl">
-                {heading}
-              </h1>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                {headingDescription}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="shell py-6 md:py-8">
-        <CatalogView
-          products={PREVIEW_PRODUCTS}
-          categories={PREVIEW_CATEGORIES}
-          brands={PREVIEW_BRANDS}
-          categoryByProduct={buildCategoryByProduct()}
-          initialFilters={initialFilters}
-        />
-      </div>
-    </div>
+    <CatalogView
+      products={PREVIEW_PRODUCTS}
+      categories={PREVIEW_CATEGORIES}
+      brands={PREVIEW_BRANDS}
+      categoryByProduct={buildCategoryByProduct()}
+      initialFilters={initialFilters}
+    />
   );
 }

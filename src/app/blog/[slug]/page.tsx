@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { toFa } from "@/lib/format";
 import { faDate } from "@/lib/jalali";
 import { PREVIEW_ARTICLE_DETAILS } from "@/lib/preview-data";
+import { JsonLd } from "@/components/shared/json-ld";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/jsonld";
+import { brand } from "@/config/brand";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -57,8 +60,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     .split(/\s+/)
     .filter(Boolean).length;
   const readingMinutes = Math.max(1, Math.ceil(wordCount / 200));
+  const articleUrl = `${brand.domain}/blog/${article.slug}`;
 
   return (
+    <>
+      <JsonLd data={articleJsonLd(article, articleUrl)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "خانه", url: brand.domain },
+          { name: "مجلهٔ سلامت", url: `${brand.domain}/blog` },
+          { name: article.title, url: articleUrl },
+        ])}
+      />
     <div className="shell pb-8 md:pb-12">
       <article className="mx-auto max-w-3xl">
         {/* مسیر صفحه */}
@@ -138,5 +151,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </div>
       </article>
     </div>
+    </>
   );
 }

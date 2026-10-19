@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════
-   «بسلامت» — Design System لوکس (White-label)
-   حس: کلاسیک-مدرن، سبز کاجی متالیک + عاجی + لمسه‌های طلایی
+   «بسلامت» — Design System 2026 (White-label)
+   هویت: سبز عمیق + سفید — تمیز، مطمئن، امروزی
    تغییر برند فروشگاه بعدی = فقط همین فایل + src/config/brand.ts
    ═══════════════════════════════════════════════════════════════ */
 
@@ -18,132 +18,137 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 
   /* ── بنیان روشن: سفید-سبز ── */
-  --background: #ffffff;
-  --foreground: #14201a;
+  --background: #f6faf7;
+  --foreground: #12251c;
   --card: #ffffff;
-  --card-foreground: #14201a;
+  --card-foreground: #12251c;
   --popover: #ffffff;
-  --popover-foreground: #14201a;
-  --primary: #0c3b2e;
-  --primary-foreground: #f2f7f3;
-  --secondary: #ecf2ee;
-  --secondary-foreground: #22362d;
-  --muted: #f1f5f2;
-  --muted-foreground: #61716a;
-  --accent: #e9f1ec;
-  --accent-foreground: #0c3b2e;
-  --destructive: #c0392b;
-  --destructive-foreground: #fdf6ef;
-  --border: #e3eae5;
-  --input: #d6e0da;
-  --ring: #c9a24b;
+  --popover-foreground: #12251c;
+  --primary: #0b4634;
+  --primary-foreground: #f2faf5;
+  --secondary: #ebf4ef;
+  --secondary-foreground: #1c3a2d;
+  --muted: #f0f6f2;
+  --muted-foreground: #5b7266;
+  --accent: #e2f1e9;
+  --accent-foreground: #0b4634;
+  --destructive: #c2402f;
+  --destructive-foreground: #fdf5f2;
+  --border: #e0eae4;
+  --input: #c9dbd0;
+  --ring: #26a06b;
 
-  /* سطح متناوب بخش‌ها — سبزفامِ بسیار ملایم روی سفید */
-  --surface-alt: #f3f7f4;
-  --chart-1: #0c3b2e;
-  --chart-2: #c9a24b;
-  --chart-3: #2e7d32;
-  --chart-4: #b7791f;
-  --chart-5: #6c8e7b;
+  /* سطح متناوب بخش‌ها */
+  --surface-alt: #eef5f0;
+  --chart-1: #0b4634;
+  --chart-2: #26a06b;
+  --chart-3: #12805c;
+  --chart-4: #6cbb92;
+  --chart-5: #9dd4b6;
 
-  /* ── برند: طلایی و سبز کاجی ── */
-  --gold: #c9a24b;
-  --gold-strong: #a9862f;
-  --gold-soft: #ebddb5;
-  --gold-foreground: #143726;
-  --pine: #0c3b2e;
-  --pine-deep: #14532d;
-  --success: #2e7d32;
-  --success-foreground: #f2f8f0;
-  --warning: #b7791f;
-  --warning-foreground: #fdf8ee;
+  /* ── برند: خانوادهٔ سبز ── */
+  /* توکن‌های legacy طلایی → به سبز نگاشت شدند (سازگاری کلاس‌های قدیمی) */
+  --gold: #1e9e6a;
+  --gold-strong: #12805c;
+  --gold-soft: #d9f0e4;
+  --gold-foreground: #f2faf5;
+  --pine: #0b4634;
+  --pine-deep: #073427;
+  --fresh: #1e9e6a;
+  --fresh-strong: #12805c;
+  --fresh-soft: #d9f0e4;
+  --success: #178a51;
+  --success-foreground: #f0faf4;
+  --warning: #b07818;
+  --warning-foreground: #fdf8ec;
 
-  /* متن روی سطوح متالیک تیره (هیرو، فوتر) */
-  --on-metallic: #f2efe2;
-  --on-metallic-muted: #c3ccc0;
+  /* متن روی سطوح سبز عمیق (هیرو، فوتر) */
+  --on-metallic: #eef8f2;
+  --on-metallic-muted: #a9c9b8;
 
-  /* گرادیان متالیک سبز کاجی */
-  --metallic: linear-gradient(135deg, #0c3b2e 0%, #11452f 46%, #14532d 100%);
+  /* گرادیان سبز عمیق — امروزی و عمق‌دار */
+  --metallic: linear-gradient(150deg, #0a3527 0%, #0b4634 44%, #0f5c43 100%);
   --metallic-soft: linear-gradient(
-    135deg,
-    rgba(12, 59, 46, 0.05),
-    rgba(20, 83, 45, 0.09)
+    150deg,
+    rgba(11, 70, 52, 0.05),
+    rgba(15, 92, 67, 0.09)
   );
 
   /* سایدبار ادمین */
-  --sidebar: #f3f7f4;
-  --sidebar-foreground: #14201a;
-  --sidebar-primary: #0c3b2e;
-  --sidebar-primary-foreground: #f2f7f3;
-  --sidebar-accent: #e9f1ec;
-  --sidebar-accent-foreground: #0c3b2e;
-  --sidebar-border: #e3eae5;
-  --sidebar-ring: #c9a24b;
+  --sidebar: #f0f6f2;
+  --sidebar-foreground: #12251c;
+  --sidebar-primary: #0b4634;
+  --sidebar-primary-foreground: #f2faf5;
+  --sidebar-accent: #e2f1e9;
+  --sidebar-accent-foreground: #0b4634;
+  --sidebar-border: #e0eae4;
+  --sidebar-ring: #26a06b;
 }
 
 .dark {
-  /* ── بنیان تیره: سبز کهربایی عمیق ── */
-  --background: #0d1b16;
-  --foreground: #e9efea;
-  --card: #12241d;
-  --card-foreground: #e9efea;
-  --popover: #10201a;
-  --popover-foreground: #e9efea;
-  --primary: #1c5c47;
-  --primary-foreground: #f0efe6;
-  --secondary: #1a3029;
-  --secondary-foreground: #d8e4dc;
-  --muted: #172b23;
-  --muted-foreground: #93a69b;
-  --accent: #203a2e;
-  --accent-foreground: #e9efea;
-  --destructive: #d65a4a;
+  /* ── بنیان تیره: سبز عمیق شبانه ── */
+  --background: #0a1511;
+  --foreground: #e7efe9;
+  --card: #10221a;
+  --card-foreground: #e7efe9;
+  --popover: #0f1f18;
+  --popover-foreground: #e7efe9;
+  --primary: #17996a;
+  --primary-foreground: #effcf4;
+  --secondary: #1a3328;
+  --secondary-foreground: #d3e6da;
+  --muted: #172c22;
+  --muted-foreground: #93ac9d;
+  --accent: #1c3a2c;
+  --accent-foreground: #e7efe9;
+  --destructive: #e06552;
   --destructive-foreground: #fdf1ec;
   --border: #1f3a2e;
   --input: #2a4a3b;
-  --ring: #d9b45f;
-  --chart-1: #6fbf9b;
-  --chart-2: #e0be6c;
-  --chart-3: #7cc98a;
-  --chart-4: #e0b25e;
-  --chart-5: #9db8aa;
+  --ring: #2eb57e;
+  --chart-1: #17996a;
+  --chart-2: #6cbb92;
+  --chart-3: #2eb57e;
+  --chart-4: #9dd4b6;
+  --chart-5: #b7d9c5;
 
-  /* برند در تیره: طلایی درخشان‌تر */
-  --gold: #d9b45f;
-  --gold-strong: #e5c678;
-  --gold-soft: #3a3119;
-  --gold-foreground: #10190f;
-  --pine: #164a39;
-  --pine-deep: #1c5c47;
-  --success: #58b26b;
-  --success-foreground: #0c1a10;
+  --gold: #2eb57e;
+  --gold-strong: #6cbb92;
+  --gold-soft: #143428;
+  --gold-foreground: #0a1511;
+  --pine: #116047;
+  --pine-deep: #0c4a37;
+  --fresh: #2eb57e;
+  --fresh-strong: #6cbb92;
+  --fresh-soft: #143428;
+  --success: #3dba82;
+  --success-foreground: #0a1511;
   --warning: #d9a441;
   --warning-foreground: #1c1405;
 
-  --on-metallic: #eef3ec;
-  --on-metallic-muted: #aebfb2;
+  --on-metallic: #eaf5ee;
+  --on-metallic-muted: #a3c2b1;
 
-  --metallic: linear-gradient(135deg, #0f3a2c 0%, #134633 46%, #185a3f 100%);
+  --metallic: linear-gradient(150deg, #0c2e22 0%, #0f3d2d 46%, #135040 100%);
   --metallic-soft: linear-gradient(
-    135deg,
-    rgba(217, 180, 95, 0.04),
-    rgba(217, 180, 95, 0.07)
+    150deg,
+    rgba(46, 181, 126, 0.05),
+    rgba(46, 181, 126, 0.08)
   );
 
-  /* سطح متناوب بخش‌ها در تیره */
-  --surface-alt: #101d17;
+  --surface-alt: #0d1c15;
 
-  --sidebar: #10201a;
-  --sidebar-foreground: #e9efea;
-  --sidebar-primary: #1c5c47;
-  --sidebar-primary-foreground: #f0efe6;
-  --sidebar-accent: #1a3029;
-  --sidebar-accent-foreground: #e9efea;
+  --sidebar: #0f1f18;
+  --sidebar-foreground: #e7efe9;
+  --sidebar-primary: #17996a;
+  --sidebar-primary-foreground: #effcf4;
+  --sidebar-accent: #1a3328;
+  --sidebar-accent-foreground: #e7efe9;
   --sidebar-border: #1f3a2e;
-  --sidebar-ring: #d9b45f;
+  --sidebar-ring: #2eb57e;
 }
 
 @theme inline {
@@ -187,6 +192,9 @@
   --color-gold-foreground: var(--gold-foreground);
   --color-pine: var(--pine);
   --color-pine-deep: var(--pine-deep);
+  --color-fresh: var(--fresh);
+  --color-fresh-strong: var(--fresh-strong);
+  --color-fresh-soft: var(--fresh-soft);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
@@ -202,17 +210,23 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
 
-  /* سایه‌های نرم لوکس */
-  --shadow-card: 0 1px 2px rgba(15, 26, 21, 0.05),
-    0 10px 28px -14px rgba(15, 26, 21, 0.14);
-  --shadow-lift: 0 2px 6px rgba(15, 26, 21, 0.06),
-    0 18px 44px -18px rgba(12, 59, 46, 0.24);
-  --shadow-pop: 0 4px 10px rgba(15, 26, 21, 0.07),
-    0 24px 56px -20px rgba(12, 59, 46, 0.28);
+  /* سایه‌های نرم و لایه‌ای */
+  --shadow-card: 0 1px 2px rgba(9, 32, 22, 0.04),
+    0 12px 32px -16px rgba(9, 32, 22, 0.1);
+  --shadow-lift: 0 2px 6px rgba(9, 32, 22, 0.05),
+    0 20px 48px -20px rgba(11, 70, 52, 0.18);
+  --shadow-pop: 0 4px 12px rgba(9, 32, 22, 0.06),
+    0 32px 64px -24px rgba(11, 70, 52, 0.24);
+  --shadow-soft: 0 1px 2px rgba(9, 32, 22, 0.03),
+    0 6px 20px -10px rgba(9, 32, 22, 0.08);
 
   --animate-marquee: marquee 42s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 10s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 3.2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
 
   @keyframes marquee {
     from {
@@ -220,6 +234,34 @@
     }
     to {
       transform: translateX(50%);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.06);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
     }
   }
 }
@@ -244,7 +286,7 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--gold) 30%, transparent);
+    background-color: color-mix(in oklab, var(--fresh) 28%, transparent);
     color: var(--foreground);
   }
 
@@ -253,7 +295,7 @@
     scrollbar-width: thin;
     scrollbar-color: color-mix(
         in oklab,
-        var(--muted-foreground) 32%,
+        var(--muted-foreground) 30%,
         transparent
       )
       transparent;
@@ -266,11 +308,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 28%, transparent);
+    background: color-mix(in oklab, var(--muted-foreground) 26%, transparent);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--gold) 50%, transparent);
+    background: color-mix(in oklab, var(--primary) 45%, transparent);
   }
 
   /* حذف فلش‌های ورودی عدد */
@@ -297,17 +339,17 @@
 }
 
 @layer utilities {
-  /* ظرف اصلی صفحه */
+  /* ظرف اصلی صفحه — عریض برای دسکتاپ */
   .shell {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
   }
 
-  /* سطح متناوب بخش‌ها (باند سبزفام) */
+  /* سطح متناوب بخش‌ها (باند سبزفام ملایم) */
   .bg-surface-alt {
     background-color: var(--surface-alt);
   }
 
-  /* سطح متالیک سبز کاجی (هیرو، فوتر، بنر) */
+  /* سطح سبز عمیق گرادیانی (هیرو، فوتر، هدر فروشگاه) */
   .bg-metallic {
     background-image: var(--metallic);
   }
@@ -315,23 +357,31 @@
     background-image: var(--metallic-soft);
   }
 
-  /* خط جداکننده طلایی نازک (سمت‌ها محو) */
+  /* هاله‌های نرم — عمق بدون طرح شلوغ */
+  .glow {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    pointer-events: none;
+  }
+
+  /* خط جداکنندهٔ سبز نازک (سمت‌ها محو) */
   .gold-hairline {
     height: 1px;
     background-image: linear-gradient(
       to left,
       transparent,
-      color-mix(in oklab, var(--gold) 75%, transparent),
+      color-mix(in oklab, var(--fresh) 55%, transparent),
       transparent
     );
   }
 
-  /* دکمه اصلی متالیک با لبهٔ طلایی ظریف */
+  /* دکمهٔ اصلی سبز عمیق با درخشش داخلی ظریف */
   .btn-metallic {
     background-image: var(--metallic);
     color: var(--on-metallic);
-    border: 1px solid color-mix(in oklab, var(--gold) 38%, transparent);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), var(--shadow-card);
+    border: 1px solid color-mix(in oklab, var(--fresh) 30%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--shadow-card);
     transition:
       box-shadow 250ms ease,
       border-color 250ms ease,
@@ -339,50 +389,48 @@
       transform 150ms ease;
   }
   .btn-metallic:hover {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), var(--shadow-lift);
-    border-color: color-mix(in oklab, var(--gold) 70%, transparent);
-    filter: brightness(1.07);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), var(--shadow-lift);
+    border-color: color-mix(in oklab, var(--fresh) 60%, transparent);
+    filter: brightness(1.08);
   }
   .btn-metallic:active {
     transform: translateY(1px);
   }
 
-  /* کارت لوکس */
+  /* کارت تمیز */
   .card-luxe {
     background-color: var(--card);
     border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
     border-radius: 1rem;
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-soft);
   }
 
-  /* بوم تصویر محصول — سفیدِ متمایز از کارت در تم‌های متناوب */
+  /* بوم تصویر محصول — سفیدِ متمایز از کارت */
   .img-canvas {
-    background-color: #fafcfa;
+    background-color: #fafcfb;
   }
   .dark .img-canvas {
-    background-color: #182a22;
+    background-color: #16281f;
   }
 
-  /* هاورِ نرم و باوقار */
+  /* هاورِ محافظه‌کار — فقط بوردر و سایهٔ نرم، بدون جابه‌جایی */
   .card-lift {
     transition:
-      transform 250ms ease,
       box-shadow 250ms ease,
       border-color 250ms ease;
   }
   .card-lift:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lift);
+    box-shadow: var(--shadow-card);
   }
 
-  /* متن طلایی گرادیانی — فقط برای لوگو و اعداد تأکیدی */
+  /* متن سبز گرادیانی — فقط برای لوگو و اعداد تأکیدی */
   .text-gold-gradient {
     background-image: linear-gradient(
       120deg,
-      var(--gold-strong),
-      var(--gold) 38%,
-      color-mix(in oklab, var(--gold) 55%, white) 55%,
-      var(--gold)
+      var(--fresh-strong),
+      var(--fresh) 40%,
+      color-mix(in oklab, var(--fresh) 55%, white) 60%,
+      var(--fresh-strong)
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -397,7 +445,7 @@
     display: none;
   }
 
-  /* محو تدریجی لبه‌ها (نوار برندها) */
+  /* محو تدریجی لبه‌ها */
   .mask-fade-x {
     -webkit-mask-image: linear-gradient(
       to left,
@@ -413,6 +461,29 @@
       black 93%,
       transparent
     );
+  }
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  }
+
+  /* شیشه مات */
+  .glass {
+    background-color: color-mix(in oklab, var(--card) 78%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* اسکلت براق */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--muted) 40%,
+      color-mix(in oklab, var(--card) 65%, var(--muted)) 50%,
+      var(--muted) 60%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
   }
 
   /* ارتفاع امن برای ناوبری پایین موبایل */

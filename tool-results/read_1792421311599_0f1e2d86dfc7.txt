@@ -1,0 +1,1004 @@
+     1→/**
+     2→ * دادهٔ پیش‌نمایش ایستا (فاز ۱) — ساختار عیناً هم‌شکل خروجی فاز ۳ از دیتابیس است؛
+     3→ * در فاز ۳، این فایل با دادهٔ زندهٔ API جایگزین می‌شود.
+     4→ *
+     5→ * ⚠️ این فایل DATA خالص است — هیچ JSX/کامپوننتی اینجا نوشته نمی‌شود.
+     6→ */
+     7→
+     8→import type {
+     9→  AdGridDTO,
+    10→  AdLayoutSpecDTO,
+    11→  ArticleDetail,
+    12→  ArticleSummary,
+    13→  BrandSummary,
+    14→  CategoryNode,
+    15→  HomeSectionDTO,
+    16→  HomeSlideDTO,
+    17→  NeedCardDTO,
+    18→  ProductDetail,
+    19→  ProductSpecDTO,
+    20→  ProductSummary,
+    21→} from "@/types/shop";
+    22→import { discountPercent } from "@/lib/format";
+    23→
+    24→/* ── درخت دسته‌بندی‌ها (۹ دستهٔ اصلی + فرزندان) ── */
+    25→export const PREVIEW_CATEGORIES: CategoryNode[] = [
+    26→  {
+    27→    id: "c-bp",
+    28→    title: "فشارسنج",
+    29→    slug: "blood-pressure",
+    30→    iconKey: "blood-pressure",
+    31→    children: [
+    32→      { id: "c-bp-arm", title: "بازویی", slug: "bp-arm", iconKey: null, children: [] },
+    33→      { id: "c-bp-wrist", title: "مچی", slug: "bp-wrist", iconKey: null, children: [] },
+    34→      { id: "c-bp-aneroid", title: "عقربه‌ای", slug: "bp-aneroid", iconKey: null, children: [] },
+    35→      { id: "c-bp-acc", title: "لوازم جانبی", slug: "bp-accessories", iconKey: null, children: [] },
+    36→    ],
+    37→  },
+    38→  {
+    39→    id: "c-glucose",
+    40→    title: "قندسنج و دیابت",
+    41→    slug: "glucose",
+    42→    iconKey: "glucose",
+    43→    children: [
+    44→      { id: "c-gl-meter", title: "قندسنج", slug: "glucose-meter", iconKey: null, children: [] },
+    45→      { id: "c-gl-strips", title: "نوار و لانست", slug: "glucose-strips", iconKey: null, children: [] },
+    46→      { id: "c-gl-acc", title: "کیف و لوازم جانبی", slug: "glucose-accessories", iconKey: null, children: [] },
+    47→    ],
+    48→  },
+    49→  {
+    50→    id: "c-therm",
+    51→    title: "دماسنج",
+    52→    slug: "thermometer",
+    53→    iconKey: "thermometer",
+    54→    children: [
+    55→      { id: "c-therm-ir", title: "بدون‌تماس", slug: "therm-contactless", iconKey: null, children: [] },
+    56→      { id: "c-therm-dig", title: "دیجیتال", slug: "therm-digital", iconKey: null, children: [] },
+    57→      { id: "c-therm-ear", title: "گوشی و پیشانی", slug: "therm-ear", iconKey: null, children: [] },
+    58→    ],
+    59→  },
+    60→  {
+    61→    id: "c-resp",
+    62→    title: "تنفسی و اکسیژن",
+    63→    slug: "respiratory",
+    64→    iconKey: "respiratory",
+    65→    children: [
+    66→      { id: "c-resp-ox", title: "پالس اکسیمتر", slug: "pulse-oximeter", iconKey: null, children: [] },
+    67→      { id: "c-resp-neb", title: "بخور و نبولایزر", slug: "nebulizer", iconKey: null, children: [] },
+    68→      { id: "c-resp-spiro", title: "اسپایرومتر", slug: "spirometer", iconKey: null, children: [] },
+    69→      { id: "c-resp-mask", title: "ماسک اکسیژن", slug: "oxygen-mask", iconKey: null, children: [] },
+    70→    ],
+    71→  },
+    72→  {
+    73→    id: "c-wheel",
+    74→    title: "ویلچر و سه‌چرخه",
+    75→    slug: "wheelchair",
+    76→    iconKey: "wheelchair",
+    77→    children: [
+    78→      { id: "c-wheel-fold", title: "ویلچر تاشار", slug: "wheelchair-folding", iconKey: null, children: [] },
+    79→      { id: "c-wheel-std", title: "ویلچر کلاسیک", slug: "wheelchair-standard", iconKey: null, children: [] },
+    80→      { id: "c-wheel-tri", title: "سه‌چرخه", slug: "tricycle", iconKey: null, children: [] },
+    81→      { id: "c-wheel-parts", title: "لوازم یدک", slug: "wheelchair-parts", iconKey: null, children: [] },
+    82→    ],
+    83→  },
+    84→  {
+    85→    id: "c-bed",
+    86→    title: "تخت و بستری",
+    87→    slug: "beds",
+    88→    iconKey: "beds",
+    89→    children: [
+    90→      { id: "c-bed-el", title: "تخت برقی", slug: "bed-electric", iconKey: null, children: [] },
+    91→      { id: "c-bed-man", title: "تخت دستی", slug: "bed-manual", iconKey: null, children: [] },
+    92→      { id: "c-bed-mattress", title: "تشک ضدزخم", slug: "anti-bedsore-mattress", iconKey: null, children: [] },
+    93→      { id: "c-bed-acc", title: "لوازم بستری", slug: "bed-accessories", iconKey: null, children: [] },
+    94→    ],
+    95→  },
+    96→  {
+    97→    id: "c-ortho",
+    98→    title: "ارتوپدی و حمایت",
+    99→    slug: "orthopedic",
+   100→    iconKey: "orthopedic",
+   101→    children: [
+   102→      { id: "c-ortho-lumbar", title: "کمربند طبی", slug: "lumbar-belt", iconKey: null, children: [] },
+   103→      { id: "c-ortho-cervical", title: "طوق گردنی", slug: "cervical-collar", iconKey: null, children: [] },
+   104→      { id: "c-ortho-wrist", title: "مچ‌بند", slug: "wrist-brace", iconKey: null, children: [] },
+   105→      { id: "c-ortho-knee", title: "زانوبند", slug: "knee-brace", iconKey: null, children: [] },
+   106→    ],
+   107→  },
+   108→  {
+   109→    id: "c-mask",
+   110→    title: "ماسک و مصرفی",
+   111→    slug: "masks",
+   112→    iconKey: "masks",
+   113→    children: [
+   114→      { id: "c-mask-surgical", title: "ماسک جراحی", slug: "mask-surgical", iconKey: null, children: [] },
+   115→      { id: "c-mask-n95", title: "ماسک N95", slug: "mask-n95", iconKey: null, children: [] },
+   116→      { id: "c-mask-gloves", title: "دستکش یکبارمصرف", slug: "gloves", iconKey: null, children: [] },
+   117→      { id: "c-mask-antiseptic", title: "آنتی‌سپتیک و ضدعفونی", slug: "antiseptic", iconKey: null, children: [] },
+   118→    ],
+   119→  },
+   120→  {
+   121→    id: "c-scale",
+   122→    title: "ترازو و سلامت خانگی",
+   123→    slug: "scales",
+   124→    iconKey: "scales",
+   125→    children: [
+   126→      { id: "c-scale-dig", title: "ترازوی دیجیتال", slug: "scale-digital", iconKey: null, children: [] },
+   127→      { id: "c-scale-body", title: "آنالیزاتور بدن", slug: "scale-body-analyzer", iconKey: null, children: [] },
+   128→      { id: "c-scale-acc", title: "لوازم جانبی", slug: "scale-accessories", iconKey: null, children: [] },
+   129→    ],
+   130→  },
+   131→];
+   132→
+   133→/* ── برندها ── */
+   134→export const PREVIEW_BRANDS: BrandSummary[] = [
+   135→  { id: "b-omron", title: "اومرون", slug: "omron" },
+   136→  { id: "b-beurer", title: "بویرون", slug: "beurer" },
+   137→  { id: "b-microlife", title: "مایکرولایف", slug: "microlife" },
+   138→  { id: "b-rossmax", title: "راسمکس", slug: "rossmax" },
+   139→  { id: "b-medisana", title: "مدیسانا", slug: "medisana" },
+   140→  { id: "b-salamat", title: "سلامت‌سازان", slug: "salamat-sazan" },
+   141→];
+   142→
+   143→/* ── واژه‌های پرجستجو (فاز ۳: از ادمین) ── */
+   144→export const PREVIEW_POPULAR_SEARCHES: string[] = [
+   145→  "فشارسنج",
+   146→  "ماسک",
+   147→  "قندسنج",
+   148→  "پالس اکسیمتر",
+   149→  "ترازو",
+   150→  "ویلچر",
+   151→];
+   152→
+   153→/* ══════════════════════════ محصولات (۱۵) — آینهٔ عین prisma/seed.ts ══════════════════════════ */
+   154→
+   155→/**
+   156→ * دادهٔ زیر عیناً از seed آمده است (عنوان/قیمت/موجودی/تخفیف/تنوع/specs/توضیحات HTML).
+   157→ * تصویر هر محصول از جایگاهش در seed می‌آید: /placeholders/product-{n}-{a,b}.svg
+   158→ */
+   159→
+   160→interface PreviewVariantRow {
+   161→  title: string;
+   162→  price: number;
+   163→  stock: number;
+   164→  isDefault: boolean;
+   165→}
+   166→
+   167→interface PreviewProductRow {
+   168→  slug: string;
+   169→  title: string;
+   170→  brandTitle: string;
+   171→  price: number;
+   172→  comparePrice: number | null;
+   173→  /** موجودی کل: محصول ساده = stock؛ تنوع‌دار = مجموع موجودی تنوع‌ها (همان قاعدهٔ seed) */
+   174→  totalStock: number;
+   175→  isNew: boolean;
+   176→  isFeatured: boolean;
+   177→  categoryTitle: string;
+   178→  categorySlug: string;
+   179→  categoryParentTitle: string;
+   180→  shortDescription: string;
+   181→  description: string;
+   182→  specs: ProductSpecDTO[];
+   183→  variants: PreviewVariantRow[];
+   184→}
+   185→
+   186→const PREVIEW_PRODUCT_ROWS: PreviewProductRow[] = [
+   187→  {
+   188→    slug: "omron-m2-blood-pressure",
+   189→    title: "فشارسنج بازویی اومرون M2",
+   190→    brandTitle: "اومرون",
+   191→    price: 2850000,
+   192→    comparePrice: 3200000,
+   193→    totalStock: 12,
+   194→    isNew: false,
+   195→    isFeatured: true,
+   196→    categoryTitle: "بازویی",
+   197→    categorySlug: "bp-arm",
+   198→    categoryParentTitle: "فشارسنج",
+   199→    shortDescription:
+   200→      "فشارسنج بازویی اومرون M2 با نمایشگر بزرگ و تشخیص ضربان نامنظم قلب؛ انتخابی مطمئن برای پایش فشار خون در خانه.",
+   201→    description:
+   202→      "<p>فشارسنج بازویی اومرون M2 با الگوریتم اندازه‌گیری پایدار، دقت قابل اعتمادی برای پایش روزانهٔ فشار خون در خانه فراهم می‌کند و نمایشگر بزرگ آن، خواندن اعداد را حتی برای چشم‌های خسته آسان می‌کند.</p>" +
+   203→      "<p>این مدل هنگام اندازه‌گیری، ضربان نامنظم قلب را تشخیص می‌دهد و در صورت بروز آن با نشانگر خاصی به شما اطلاع می‌دهد. کاف استاندارد آن برای دور بازوی بیشتر بزرگسالان مناسب است.</p>" +
+   204→      "<p>کار با M2 ساده است: کاف را روی بازو بگذارید، بنشینید و با فشردن یک دکمه نتیجه را در چند لحظه ببینید. برای نتیجهٔ مطمئن‌تر، پنج دقیقه استراحت و قرار دادن بازو در سطح قلب توصیه می‌شود.</p>",
+   205→    specs: [
+   206→      { key: "برند", value: "اومرون ژاپن" },
+   207→      { key: "گارانتی", value: "۱۸ ماه" },
+   208→      { key: "نوع", value: "بازویی دیجیتال" },
+   209→      { key: "نمایشگر", value: "LCD بزرگ" },
+   210→    ],
+   211→    variants: [],
+   212→  },
+   213→  {
+   214→    slug: "beurer-bm19",
+   215→    title: "فشارسنج مچی بویرون BM 19",
+   216→    brandTitle: "بویرون",
+   217→    price: 1950000,
+   218→    comparePrice: 2200000,
+   219→    totalStock: 8,
+   220→    isNew: false,
+   221→    isFeatured: false,
+   222→    categoryTitle: "مچی",
+   223→    categorySlug: "bp-wrist",
+   224→    categoryParentTitle: "فشارسنج",
+   225→    shortDescription:
+   226→      "فشارسنج مچی سبک و کم‌حجم بویرون BM 19 برای اندازه‌گیری سریع فشار خون در خانه، محل کار و سفر.",
+   227→    description:
+   228→      "<p>فشارسنج مچی بویرون BM 19 برای کسانی طراحی شده که به اندازه‌گیری سریع و کم‌دردسر در سفر، محل کار یا خانه نیاز دارند. وزن سبک و ابعاد جمع‌وجور آن، جاگیری در کیف دستی را آسان می‌کند.</p>" +
+   229→      "<p>صفحه‌نمایش روشن، اعداد فشار خون و ضربان قلب را با خوانایی بالا نشان می‌دهد. برای اندازه‌گیری دقیق‌تر، مچ را در ارتفاع قلب و با کف دست رو به بالا قرار دهید.</p>",
+   230→    specs: [
+   231→      { key: "برند", value: "بویرون" },
+   232→      { key: "کشور سازنده", value: "آلمان" },
+   233→      { key: "نوع", value: "مچی دیجیتال" },
+   234→      { key: "گارانتی", value: "۱۲ ماه" },
+   235→    ],
+   236→    variants: [],
+   237→  },
+   238→  {
+   239→    slug: "rossmax-tg300",
+   240→    title: "قندسنج راسمکس TG 300",
+   241→    brandTitle: "راسمکس",
+   242→    price: 1680000,
+   243→    comparePrice: null,
+   244→    totalStock: 10,
+   245→    isNew: false,
+   246→    isFeatured: false,
+   247→    categoryTitle: "قندسنج",
+   248→    categorySlug: "glucose-meter",
+   249→    categoryParentTitle: "قندسنج و دیابت",
+   250→    shortDescription:
+   251→      "قندسنج راسمکس TG 300 با نیاز به قطرهٔ خون کوچک و نمایشگر روشن؛ در سه نسخهٔ بدون نوار و همراه نوار.",
+   252→    description:
+   253→      "<p>قندسنج راسمکس TG 300 با یک قطرهٔ کوچک خون، نتیجهٔ اندازه‌گیری را روی نمایشگر روشن نشان می‌دهد و برای پایش روزانهٔ قند خون در خانه مناسب است.</p>" +
+   254→      "<p>این محصول در سه نسخهٔ «بدون نوار»، «همراه ۵۰ نوار» و «همراه ۱۰۰ نوار» عرضه می‌شود تا بسته با مصرف خود، اقتصادی‌ترین انتخاب را داشته باشید. نوارهای همراه، نوارهای استاندارد سازگار با همین مدل هستند.</p>" +
+   255→      "<p>برای نتیجهٔ دقیق‌تر، دست‌ها را گرم کنید، اولین قطرهٔ خون را پاک کرده و از قطرهٔ دوم استفاده کنید؛ این نکتهٔ کوچک تفاوت محسوسی در عدد نهایی ایجاد می‌کند.</p>",
+   256→    specs: [
+   257→      { key: "برند", value: "راسمکس" },
+   258→      { key: "کشور سازنده", value: "سوئیس" },
+   259→      { key: "نوع", value: "قندسنج انگشتی" },
+   260→      { key: "گارانتی", value: "۱۲ ماه" },
+   261→    ],
+   262→    variants: [
+   263→      { title: "بدون نوار", price: 1680000, stock: 5, isDefault: true },
+   264→      { title: "همراه ۵۰ نوار", price: 2150000, stock: 3, isDefault: false },
+   265→      { title: "همراه ۱۰۰ نوار", price: 2490000, stock: 2, isDefault: false },
+   266→    ],
+   267→  },
+   268→  {
+   269→    slug: "beurer-gl50-strips",
+   270→    title: "نوار قند بویرون بستهٔ ۵۰ عددی",
+   271→    brandTitle: "بویرون",
+   272→    price: 690000,
+   273→    comparePrice: null,
+   274→    totalStock: 40,
+   275→    isNew: false,
+   276→    isFeatured: false,
+   277→    categoryTitle: "نوار و لانست",
+   278→    categorySlug: "glucose-strips",
+   279→    categoryParentTitle: "قندسنج و دیابت",
+   280→    shortDescription:
+   281→      "نوارهای تست قند بویرون بستهٔ ۵۰ عددی؛ سازگار با قندسنج‌های بویرون با کدگذاری خودکار.",
+   282→    description:
+   283→      "<p>نوارهای تست قند بویرون برای استفاده با قندسنج‌های بویرون طراحی شده‌اند و با کدگذاری خودکار، نیاز به ورود دستی کد را از بین می‌برند.</p>" +
+   284→      "<p>برای حفظ دقت اندازه‌گیری، نوارها را در دمای اتاق و دور از رطوبت نگه دارید و درب بسته را بلافاصله پس از برداشتن هر نوار ببندید. هر بسته حاوی ۵۰ نوار است.</p>",
+   285→    specs: [
+   286→      { key: "برند", value: "بویرون" },
+   287→      { key: "تعداد در بسته", value: "۵۰ عدد" },
+   288→      { key: "نوع", value: "نوار تست قند خون" },
+   289→      { key: "سازگاری", value: "قندسنج‌های بویرون" },
+   290→    ],
+   291→    variants: [],
+   292→  },
+   293→  {
+   294→    slug: "beurer-ft90",
+   295→    title: "دماسنج بدون‌تماس بویرون FT 90",
+   296→    brandTitle: "بویرون",
+   297→    price: 1150000,
+   298→    comparePrice: 1390000,
+   299→    totalStock: 15,
+   300→    isNew: true,
+   301→    isFeatured: true,
+   302→    categoryTitle: "بدون‌تماس",
+   303→    categorySlug: "therm-contactless",
+   304→    categoryParentTitle: "دماسنج",
+   305→    shortDescription:
+   306→      "دماسنج بدون‌تماس بویرون FT 90 با اندازه‌گیری سریع دما از فاصلهٔ چند سانتی‌متری؛ مناسب کودکان و استفادهٔ روزمرهٔ خانواده.",
+   307→    description:
+   308→      "<p>دماسنج بدون‌تماس بویرون FT 90 با فناوری مادون قرمز، دمای بدن را از فاصلهٔ چند سانتی‌متری و در چند ثانیه می‌سنجد؛ بدون تماس با پوست و بدون ناراحت کردن کودک خواب.</p>" +
+   309→      "<p>نمایشگر روشن آن همراه با نشانگر تب، وضعیت دما را در یک نگاه مشخص می‌کند و بدنهٔ سبک آن استفادهٔ مکرر در طول شبانه‌روز را آسان می‌کند.</p>" +
+   310→      "<p>برای نتیجهٔ مطمئن‌تر، فاصلهٔ سنسور را طبق راهنمای دستگاه رعایت کنید و پیش از اندازه‌گیری، عرق یا موی پیشانی را کنار بزنید.</p>",
+   311→    specs: [
+   312→      { key: "برند", value: "بویرون" },
+   313→      { key: "کشور سازنده", value: "آلمان" },
+   314→      { key: "نوع", value: "بدون‌تماس مادون قرمز" },
+   315→      { key: "گارانتی", value: "۱۲ ماه" },
+   316→    ],
+   317→    variants: [],
+   318→  },
+   319→  {
+   320→    slug: "omron-mc245",
+   321→    title: "دماسنج دیجیتال اومرون MC-245",
+   322→    brandTitle: "اومرون",
+   323→    price: 420000,
+   324→    comparePrice: null,
+   325→    totalStock: 25,
+   326→    isNew: false,
+   327→    isFeatured: false,
+   328→    categoryTitle: "دیجیتال",
+   329→    categorySlug: "therm-digital",
+   330→    categoryParentTitle: "دماسنج",
+   331→    shortDescription:
+   332→      "دماسنج دیجیتال اومرون MC-245 با نوک انعطاف‌پذیر و اندازه‌گیری سریع؛ انتخابی مطمئن برای جعبهٔ کمک‌های اولیهٔ خانه.",
+   333→    description:
+   334→      "<p>دماسنج دیجیتال اومرون MC-245 با نوک انعطاف‌پذیر و اندازه‌گیری سریع، انتخابی مطمئن برای جعبهٔ کمک‌های اولیهٔ خانه است و برای کودکان و بزرگسالان قابل استفاده است.</p>" +
+   335→      "<p>بدنهٔ ضدآب، ضدعفونی آسان را ممکن می‌کند و بوق پایان اندازه‌گیری، منتظر ماندن را راحت می‌کند.</p>",
+   336→    specs: [
+   337→      { key: "برند", value: "اومرون" },
+   338→      { key: "کشور سازنده", value: "ژاپن" },
+   339→      { key: "نوع", value: "دیجیتال با نوک انعطاف‌پذیر" },
+   340→      { key: "گارانتی", value: "۱۲ ماه" },
+   341→    ],
+   342→    variants: [],
+   343→  },
+   344→  {
+   345→    slug: "rossmax-sb210",
+   346→    title: "پالس اکسیمتر انگشتی راسمکس SB210",
+   347→    brandTitle: "راسمکس",
+   348→    price: 1890000,
+   349→    comparePrice: null,
+   350→    totalStock: 0,
+   351→    isNew: false,
+   352→    isFeatured: false,
+   353→    categoryTitle: "پالس اکسیمتر",
+   354→    categorySlug: "pulse-oximeter",
+   355→    categoryParentTitle: "تنفسی و اکسیژن",
+   356→    shortDescription:
+   357→      "پالس اکسیمتر انگشتی راسمکس SB210 برای پایش ضربان قلب و اکسیژن خون؛ به‌زودی موجود می‌شود.",
+   358→    description:
+   359→      "<p>پالس اکسیمتر انگشتی راسمکس SB210 ضربان قلب و درصد اشباع اکسیژن خون را در چند ثانیه نمایش می‌دهد و برای پایش تنفسی در خانه کاربردی است.</p>" +
+   360→      "<p>این محصول در حال حاضر ناموجود است و به‌زودی موجود می‌شود. می‌توانید از طریق دکمهٔ «خبرم کن»، به محض شارژ موجودی پیام اطلاع‌رسانی دریافت کنید.</p>",
+   361→    specs: [
+   362→      { key: "برند", value: "راسمکس" },
+   363→      { key: "نوع", value: "پالس اکسیمتر انگشتی" },
+   364→      { key: "گارانتی", value: "۱۲ ماه" },
+   365→      { key: "وضعیت موجودی", value: "به‌زودی موجود می‌شود" },
+   366→    ],
+   367→    variants: [],
+   368→  },
+   369→  {
+   370→    slug: "medisana-uhw",
+   371→    title: "بخور سرد خانگی مدیسانا UHW",
+   372→    brandTitle: "مدیسانا",
+   373→    price: 890000,
+   374→    comparePrice: null,
+   375→    totalStock: 10,
+   376→    isNew: false,
+   377→    isFeatured: false,
+   378→    categoryTitle: "بخور و نبولایزر",
+   379→    categorySlug: "nebulizer",
+   380→    categoryParentTitle: "تنفسی و اکسیژن",
+   381→    shortDescription:
+   382→      "دستگاه بخور سرد خانگی مدیسانا UHW با کارکرد کم‌صدا و قطعات قابل شست‌وشو؛ مناسب استفادهٔ روزمره در خانه.",
+   383→    description:
+   384→      "<p>بخور سرد خانگی مدیسانا UHW با کارکرد کم‌صدا برای استفادهٔ مداوم در اتاق خواب یا کنار کودک مناسب است و محلول را به‌صورت ذرات ریز بخار سرد منتقل می‌کند.</p>" +
+   385→      "<p>قطعات قابل جداشدن، شست‌وشو و ضدعفونی را ساده می‌کنند و حجم مناسب مخزن، پوشش اتاق‌های کوچک تا متوسط را می‌دهد.</p>" +
+   386→      "<p>پیش از هر بار استفاده، مخزن را با آب تمیز پر کنید و پس از پایان کار، باقی‌ماندهٔ محلول را دور بریزید تا از رسوب و رشد میکروب جلوگیری شود.</p>",
+   387→    specs: [
+   388→      { key: "برند", value: "مدیسانا" },
+   389→      { key: "کشور سازنده", value: "آلمان" },
+   390→      { key: "نوع", value: "بخور سرد خانگی" },
+   391→      { key: "گارانتی", value: "۱۲ ماه" },
+   392→    ],
+   393→    variants: [],
+   394→  },
+   395→  {
+   396→    slug: "tri-ball-spirometer",
+   397→    title: "اسپایرومتر سه‌گلوله (تری‌فلو)",
+   398→    brandTitle: "سلامت‌سازان",
+   399→    price: 350000,
+   400→    comparePrice: null,
+   401→    totalStock: 18,
+   402→    isNew: false,
+   403→    isFeatured: false,
+   404→    categoryTitle: "اسپایرومتر",
+   405→    categorySlug: "spirometer",
+   406→    categoryParentTitle: "تنفسی و اکسیژن",
+   407→    shortDescription:
+   408→      "اسپایرومتر سه‌گلولهٔ تری‌فلو برای تمرین تنفس و بازتوانی ریه؛ سبک، ساده و قابل حمل.",
+   409→    description:
+   410→      "<p>اسپایرومتر سه‌گلولهٔ تری‌فلو ابزاری ساده برای تمرین تنفس و بازتوانی ریه است؛ سه گلولهٔ آن با بالا آمدن، میزان جریان دم را به‌صورت دیداری نشان می‌دهند.</p>" +
+   411→      "<p>این وسیله برای دورهٔ نقاهت پس از جراحی، مشکلات تنفسی مزمن یا تمرین‌های منظم تنفس توصیه می‌شود و سبکی آن استفاده در خانه و سفر را آسان می‌کند.</p>",
+   412→    specs: [
+   413→      { key: "برند", value: "سلامت‌سازان" },
+   414→      { key: "کشور سازنده", value: "ایران" },
+   415→      { key: "نوع", value: "اسپایرومتر تشویقی" },
+   416→      { key: "کاربرد", value: "تمرین تنفس و بازتوانی" },
+   417→    ],
+   418→    variants: [],
+   419→  },
+   420→  {
+   421→    slug: "salamat-folding-wheelchair",
+   422→    title: "ویلچر تاشار سلامت‌سازان",
+   423→    brandTitle: "سلامت‌سازان",
+   424→    price: 8900000,
+   425→    comparePrice: null,
+   426→    totalStock: 5,
+   427→    isNew: false,
+   428→    isFeatured: true,
+   429→    categoryTitle: "ویلچر تاشار",
+   430→    categorySlug: "wheelchair-folding",
+   431→    categoryParentTitle: "ویلچر و سه‌چرخه",
+   432→    shortDescription:
+   433→      "ویلچر تاشار سلامت‌سازان با بدنهٔ سبک و جمع‌شدن آسان؛ در سه سایز ۱۶، ۱۸ و ۲۰ اینچ.",
+   434→    description:
+   435→      "<p>ویلچر تاشار سلامت‌سازان با بدنهٔ سبک و مکانیزم تاشار، در صندوق عقب بیشتر خودروها جا می‌شود و برای جابه‌جایی‌های شهری و سفر انتخابی کاربردی است.</p>" +
+   436→      "<p>این مدل در سه سایز ۱۶، ۱۸ و ۲۰ اینچ عرضه می‌شود؛ سایز مناسب به دور لگن کاربر و میزان استفادهٔ روزانه بستگی دارد و کارشناسان ما در انتخاب، رایگان همراه شما هستند.</p>" +
+   437→      "<p>تاش کردن و باز کردن ویلچر بدون ابزار انجام می‌شود و ترمز دستی دوطرفه، ایمنی توقف در شیب را افزایش می‌دهد.</p>",
+   438→    specs: [
+   439→      { key: "برند", value: "سلامت‌سازان" },
+   440→      { key: "کشور سازنده", value: "ایران" },
+   441→      { key: "نوع", value: "تاشار" },
+   442→      { key: "سایزها", value: "۱۶، ۱۸ و ۲۰ اینچ" },
+   443→      { key: "گارانتی", value: "۶ ماه" },
+   444→    ],
+   445→    variants: [
+   446→      { title: "۱۶ اینچ", price: 8900000, stock: 2, isDefault: true },
+   447→      { title: "۱۸ اینچ", price: 9400000, stock: 2, isDefault: false },
+   448→      { title: "۲۰ اینچ", price: 9900000, stock: 1, isDefault: false },
+   449→    ],
+   450→  },
+   451→  {
+   452→    slug: "electric-hospital-bed",
+   453→    title: "تخت بیمارستانی برقی دو موتوره",
+   454→    brandTitle: "سلامت‌سازان",
+   455→    price: 28500000,
+   456→    comparePrice: null,
+   457→    totalStock: 1,
+   458→    isNew: false,
+   459→    isFeatured: false,
+   460→    categoryTitle: "تخت برقی",
+   461→    categorySlug: "bed-electric",
+   462→    categoryParentTitle: "تخت و بستری",
+   463→    shortDescription:
+   464→      "تخت بیمارستانی برقی دو موتوره با تنظیم زاویهٔ پشت و پا از راه دور؛ برای مراقحت طولانی‌مدت در خانه.",
+   465→    description:
+   466→      "<p>تخت بیمارستانی برقی دو موتوره با ریموت، زاویهٔ پشت و پا را به‌صورت نرم و کم‌صدا تنظیم می‌کند و برای مراقبت طولانی‌مدت در خانه، بخش زیادی از فشار جسمی را از روی مراقب برمی‌دارد.</p>" +
+   467→      "<p>ریل‌های کناری جداشدنی ایمنی بیمار را تأمین می‌کنند و چرخ‌های دارای ترمز، جابه‌جایی تخت در اتاق را آسان می‌کنند.</p>" +
+   468→      "<p>به دلیل ابعاد و وزن این محصول، ارسال آن با هماهنگی تلفنی انجام می‌شود؛ پیش از ثبت سفارش با پشتیبانی تماس بگیرید تا زمان‌بندی ارسال دقیق شود.</p>",
+   469→    specs: [
+   470→      { key: "برند", value: "سلامت‌سازان" },
+   471→      { key: "کشور سازنده", value: "ایران" },
+   472→      { key: "نوع", value: "برقی دو موتوره" },
+   473→      { key: "گارانتی", value: "۱۲ ماه" },
+   474→    ],
+   475→    variants: [],
+   476→  },
+   477→  {
+   478→    slug: "lumbar-support-belt",
+   479→    title: "کمربند طبی مهره‌دار",
+   480→    brandTitle: "سلامت‌سازان",
+   481→    price: 780000,
+   482→    comparePrice: null,
+   483→    totalStock: 18,
+   484→    isNew: false,
+   485→    isFeatured: false,
+   486→    categoryTitle: "کمربند طبی",
+   487→    categorySlug: "lumbar-belt",
+   488→    categoryParentTitle: "ارتوپدی و حمایت",
+   489→    shortDescription:
+   490→      "کمربند طبی مهره‌دار برای حمایت از کمر در فعالیت‌های روزمره؛ در چهار سایز از S تا XL.",
+   491→    description:
+   492→      "<p>کمربند طبی مهره‌دار با مهره‌های چهارگانهٔ انعطاف‌پذیر، از کمر در فعالیت‌های روزمره، بلند کردن وسایل و ایستادن‌های طولانی حمایت می‌کند.</p>" +
+   493→      "<p>پارچهٔ مشبک تنفس‌پذیر تعریق را کاهش می‌دهد و بندهای چسبی قابل تنظیم، فشار را متناسب با راحتی شما تنظیم می‌کنند.</p>" +
+   494→      "<p>برای انتخاب سایز، دور کمر را اندازه بگیرید؛ در صورت تردید بین دو سایز، سایز بزرگ‌تر را انتخاب کنید. استفادهٔ مداوم و طولانی‌مدت باید با توصیهٔ پزشک باشد.</p>",
+   495→    specs: [
+   496→      { key: "برند", value: "سلامت‌سازان" },
+   497→      { key: "کشور سازنده", value: "ایران" },
+   498→      { key: "سایزبندی", value: "از S تا XL" },
+   499→      { key: "جنس", value: "پارچهٔ مشبک تنفس‌پذیر" },
+   500→    ],
+   501→    variants: [
+   502→      { title: "S", price: 780000, stock: 6, isDefault: false },
+   503→      { title: "M", price: 780000, stock: 5, isDefault: true },
+   504→      { title: "L", price: 780000, stock: 4, isDefault: false },
+   505→      { title: "XL", price: 780000, stock: 3, isDefault: false },
+   506→    ],
+   507→  },
+   508→  {
+   509→    slug: "surgical-mask-50",
+   510→    title: "ماسک جراحی سه‌لایه بستهٔ ۵۰ عددی",
+   511→    brandTitle: "سلامت‌سازان",
+   512→    price: 195000,
+   513→    comparePrice: 250000,
+   514→    totalStock: 100,
+   515→    isNew: false,
+   516→    isFeatured: false,
+   517→    categoryTitle: "ماسک جراحی",
+   518→    categorySlug: "mask-surgical",
+   519→    categoryParentTitle: "ماسک و مصرفی",
+   520→    shortDescription:
+   521→      "ماسک جراحی سه‌لایه با فیلتراسیون مناسب و نفس‌گیری راحت؛ بستهٔ ۵۰ عددی برای استفادهٔ روزمره.",
+   522→    description:
+   523→      "<p>ماسک جراحی سه‌لایه با لایهٔ میانی فیلتر، برای استفادهٔ روزمره در اماکن عمومی، محل کار و سفر مناسب است و نفس‌گیری راحت را حفظ می‌کند.</p>" +
+   524→      "<p>بندهای لاستیکی، تنظیم سریع را ممکن می‌کنند و هر بسته حاوی ۵۰ ماسک است؛ برای بهداشت خانواده در فصل سرماخوردگی انتخابی اقتصادی است.</p>",
+   525→    specs: [
+   526→      { key: "برند", value: "سلامت‌سازان" },
+   527→      { key: "تعداد در بسته", value: "۵۰ عدد" },
+   528→      { key: "لایه", value: "سه‌لایه" },
+   529→      { key: "کاربرد", value: "استفادهٔ روزمرهٔ بهداشتی" },
+   530→    ],
+   531→    variants: [],
+   532→  },
+   533→  {
+   534→    slug: "beurer-gs27",
+   535→    title: "ترازوی دیجیتال بویرون GS 27",
+   536→    brandTitle: "بویرون",
+   537→    price: 1290000,
+   538→    comparePrice: null,
+   539→    totalStock: 9,
+   540→    isNew: false,
+   541→    isFeatured: false,
+   542→    categoryTitle: "ترازوی دیجیتال",
+   543→    categorySlug: "scale-digital",
+   544→    categoryParentTitle: "ترازو و سلامت خانگی",
+   545→    shortDescription:
+   546→      "ترازوی دیجیتال بویرون GS 27 با صفحهٔ شیشه‌ای و نمایشگر روشن؛ ظاهری تمیز و جمع‌وجور برای خانه.",
+   547→    description:
+   548→      "<p>ترازوی دیجیتال بویرون GS 27 با صفحهٔ شیشه‌ای و سکوی پهن، ظاهری تمیز و مدرن در حمام یا اتاق خواب ایجاد می‌کند.</p>" +
+   549→      "<p>نمایشگر روشن اعداد را در یک نگاه می‌خواند و دستگاه با فشردن پا روشن می‌شود؛ بدون نیاز به دکمه. دقت اندازه‌گیری برای پایش روزانهٔ وزن کافی است.</p>",
+   550→    specs: [
+   551→      { key: "برند", value: "بویرون" },
+   552→      { key: "کشور سازنده", value: "آلمان" },
+   553→      { key: "نوع", value: "ترازوی دیجیتال شخصی" },
+   554→      { key: "گارانتی", value: "۱۲ ماه" },
+   555→    ],
+   556→    variants: [],
+   557→  },
+   558→  {
+   559→    slug: "medisana-bs430",
+   560→    title: "ترازوی آنالیزاتور بدن مدیسانا BS 430",
+   561→    brandTitle: "مدیسانا",
+   562→    price: 2150000,
+   563→    comparePrice: 2480000,
+   564→    totalStock: 7,
+   565→    isNew: true,
+   566→    isFeatured: true,
+   567→    categoryTitle: "آنالیزاتور بدن",
+   568→    categorySlug: "scale-body-analyzer",
+   569→    categoryParentTitle: "ترازو و سلامت خانگی",
+   570→    shortDescription:
+   571→      "ترازوی آنالیزاتور بدن مدیسانا BS 430 برای پایش وزن، چربی و آب بدن؛ همراه مسیر سلامت شما.",
+   572→    description:
+   573→      "<p>ترازوی آنالیزاتور بدن مدیسانا BS 430 علاوه بر وزن، شاخص‌های ترکیب بدن مانند درصد چربی و آب بدن را تخمین می‌زند و تصویری کامل‌تر از روند سلامت شما می‌دهد.</p>" +
+   574→      "<p>حافظهٔ چندکاربره به هر عضو خانواده اجازه می‌دهد روند خود را جداگانه دنبال کند و نمایشگر روشن، خواندن اعداد را آسان می‌کند.</p>" +
+   575→      "<p>برای نتیجهٔ پایدارتر، همیشه صبح ناشتا و در شرایط یکسان اندازه‌گیری کنید. داده‌های آنالیز بدن برای آگاهی و پیگیری است و جایگزین تشخیص پزشک نیست.</p>",
+   576→    specs: [
+   577→      { key: "برند", value: "مدیسانا" },
+   578→      { key: "کشور سازنده", value: "آلمان" },
+   579→      { key: "نوع", value: "آنالیزاتور بدن" },
+   580→      { key: "گارانتی", value: "۱۲ ماه" },
+   581→    ],
+   582→    variants: [],
+   583→  },
+   584→];
+   585→
+   586→/** ساخت ProductSummary از ردیف seed (id ها slug-محور: p-<slug>) */
+   587→function toProductSummary(row: PreviewProductRow, index: number): ProductSummary {
+   588→  return {
+   589→    id: `p-${row.slug}`,
+   590→    slug: row.slug,
+   591→    title: row.title,
+   592→    image: `/placeholders/product-${index + 1}-a.svg`,
+   593→    price: row.price,
+   594→    comparePrice: row.comparePrice,
+   595→    inStock: row.totalStock > 0,
+   596→    brandTitle: row.brandTitle,
+   597→    isNew: row.isNew,
+   598→    isFeatured: row.isFeatured,
+   599→    categorySlug: row.categorySlug,
+   600→  } satisfies ProductSummary;
+   601→}
+   602→
+   603→export const PREVIEW_PRODUCTS: ProductSummary[] = PREVIEW_PRODUCT_ROWS.map(toProductSummary);
+   604→
+   605→export const PREVIEW_PRODUCT_DETAILS: Record<string, ProductDetail> = Object.fromEntries(
+   606→  PREVIEW_PRODUCT_ROWS.map((row, index) => {
+   607→    const summary = toProductSummary(row, index);
+   608→    return [
+   609→      row.slug,
+   610→      {
+   611→        ...summary,
+   612→        shortDescription: row.shortDescription,
+   613→        description: row.description,
+   614→        images: [
+   615→          { url: `/placeholders/product-${index + 1}-a.svg`, alt: row.title },
+   616→          { url: `/placeholders/product-${index + 1}-b.svg`, alt: row.title },
+   617→        ],
+   618→        variants: row.variants.map((variant, variantIndex) => ({
+   619→          id: `pv-${row.slug}-${variantIndex + 1}`,
+   620→          title: variant.title,
+   621→          price: variant.price,
+   622→          comparePrice: null,
+   623→          stock: variant.stock,
+   624→          isDefault: variant.isDefault,
+   625→        })),
+   626→        specs: row.specs,
+   627→        categoryTitle: row.categoryTitle,
+   628→        categorySlug: row.categorySlug,
+   629→        categoryParentTitle: row.categoryParentTitle,
+   630→        totalStock: row.totalStock,
+   631→      } satisfies ProductDetail,
+   632→    ];
+   633→  }),
+   634→);
+   635→
+   636→/* ══════════════════════════ اسلایدهای هیرو (۳) ══════════════════════════ */
+   637→
+   638→export const PREVIEW_SLIDES: HomeSlideDTO[] = [
+   639→  {
+   640→    id: "slide-1",
+   641→    title: "تجهیزات پزشکی اصل، با خیال راحت",
+   642→    subtitle: "بیش از ۸۰ برند معتبر جهانی — اومرون، بویرون، مدیسانا و…",
+   643→    imageUrl: "/placeholders/slide-1.svg",
+   644→    ctaLabel: "دیدن محصولات",
+   645→    ctaHref: "/products",
+   646→  },
+   647→  {
+   648→    id: "slide-2",
+   649→    title: "برای هر خانه، یک دستگاه سلامت",
+   650→    subtitle: "از فشارسنج و قندسنج تا بخور و ترازوی هوشمند",
+   651→    imageUrl: "/placeholders/slide-2.svg",
+   652→    ctaLabel: "خرید بر اساس نیاز",
+   653→    ctaHref: "/products",
+   654→  },
+   655→  {
+   656→    id: "slide-3",
+   657→    title: "قبل از خرید، با کارشناس مشورت کنید",
+   658→    subtitle: "مشاورهٔ تخصصی رایگان — انتخاب درست، هزینهٔ کمتر",
+   659→    imageUrl: "/placeholders/slide-3.svg",
+   660→    ctaLabel: "تماس با کارشناس",
+   661→    ctaHref: "/contact",
+   662→  },
+   663→];
+   664→
+   665→/* ══════════════════════════ خرید بر اساس نیاز (۶) ══════════════════════════ */
+   666→
+   667→export const PREVIEW_NEEDS: NeedCardDTO[] = [
+   668→  {
+   669→    id: "need-bp",
+   670→    title: "کنترل فشار خون",
+   671→    description: "فشارسنج‌های بازویی و مچی با دقت بالینیک",
+   672→    iconKey: "blood-pressure",
+   673→    href: "/products?category=blood-pressure",
+   674→    isActive: true,
+   675→    sortOrder: 1,
+   676→  },
+   677→  {
+   678→    id: "need-glucose",
+   679→    title: "مدیریت دیابت",
+   680→    description: "قندسنج، نوار و لانست برای پایش روزانه",
+   681→    iconKey: "glucose",
+   682→    href: "/products?category=glucose",
+   683→    isActive: true,
+   684→    sortOrder: 2,
+   685→  },
+   686→  {
+   687→    id: "need-resp",
+   688→    title: "سلامت تنفس",
+   689→    description: "بخور، پالس‌اکسیمتر و ماسک اکسیژن",
+   690→    iconKey: "respiratory",
+   691→    href: "/products?category=respiratory",
+   692→    isActive: true,
+   693→    sortOrder: 3,
+   694→  },
+   695→  {
+   696→    id: "need-bed",
+   697→    title: "مراقبت از بیمار",
+   698→    description: "تخت برقی، تشک ضدزخم و لوازم بستری",
+   699→    iconKey: "beds",
+   700→    href: "/products?category=beds",
+   701→    isActive: true,
+   702→    sortOrder: 4,
+   703→  },
+   704→  {
+   705→    id: "need-ortho",
+   706→    title: "توان‌بخشی و ارتوپدی",
+   707→    description: "کمربند طبی، زانوبند و طوق گردنی",
+   708→    iconKey: "orthopedic",
+   709→    href: "/products?category=orthopedic",
+   710→    isActive: true,
+   711→    sortOrder: 5,
+   712→  },
+   713→  {
+   714→    id: "need-mask",
+   715→    title: "بهداشت و مصرفی",
+   716→    description: "ماسک، دستکش و اقلام ضدعفونی",
+   717→    iconKey: "masks",
+   718→    href: "/products?category=masks",
+   719→    isActive: true,
+   720→    sortOrder: 6,
+   721→  },
+   722→];
+   723→
+   724→/* ══════════════════════════ گرید تبلیغات عکسی ══════════════════════════
+   725→ *
+   726→ * ادمین: چیدمان (layout) را انتخاب می‌کند، برای هر اسلات تصویر آپلود می‌کند،
+   727→ * مقصد کلیک را تعیین می‌کند و هر کاشی را جداگانه فعال/غیرفعال می‌کند.
+   728→ * AD_LAYOUT_SPECS ابعاد دقیق هر اسلات را به طراح نشان می‌دهد (پیکسل @۲x).
+   729→ */
+   730→
+   731→export const AD_LAYOUT_SPECS: Record<AdLayoutSpecDTO["key"], AdLayoutSpecDTO> = {
+   732→  bento: {
+   733→    key: "bento",
+   734→    title: "بنتو — مربع بزرگ + مستطیل + دو مربع",
+   735→    slots: [
+   736→      { name: "مربع بزرگ (چپ)", ratio: "۱:۱", sizeHint: "۱۴۴۰×۱۴۴۰ پیکسل" },
+   737→      { name: "مستطیل عریض (بالا-راست)", ratio: "۲:۱", sizeHint: "۱۴۴۰×۷۲۰ پیکسل" },
+   738→      { name: "مربع کوچک (پایین-راست ۱)", ratio: "۱:۱", sizeHint: "۷۲۰×۷۲۰ پیکسل" },
+   739→      { name: "مربع کوچک (پایین-راست ۲)", ratio: "۱:۱", sizeHint: "۷۲۰×۷۲۰ پیکسل" },
+   740→    ],
+   741→  },
+   742→  duo: {
+   743→    key: "duo",
+   744→    title: "جفت — دو مستطیل عریض",
+   745→    slots: [
+   746→      { name: "مستطیل ۱", ratio: "۱۲:۵", sizeHint: "۱۶۸۰×۷۰۰ پیکسل" },
+   747→      { name: "مستطیل ۲", ratio: "۱۲:۵", sizeHint: "۱۶۸۰×۷۰۰ پیکسل" },
+   748→    ],
+   749→  },
+   750→  trio: {
+   751→    key: "trio",
+   752→    title: "سه‌تایی — سه مربع",
+   753→    slots: [
+   754→      { name: "مربع ۱", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+   755→      { name: "مربع ۲", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+   756→      { name: "مربع ۳", ratio: "۱:۱", sizeHint: "۱۰۰۰×۱۰۰۰ پیکسل" },
+   757→    ],
+   758→  },
+   759→};
+   760→
+   761→export const PREVIEW_ADS: AdGridDTO = {
+   762→  layout: "bento",
+   763→  tiles: [
+   764→    {
+   765→      id: "ad-1",
+   766→      slotIndex: 0,
+   767→      imageUrl: "/placeholders/ad-big-1.svg",
+   768→      title: "فشارسنج‌های دیجیتال",
+   769→      subtitle: "دقت بالینیک، دو سال گارانتی",
+   770→      href: "/products?category=blood-pressure",
+   771→      isActive: true,
+   772→      sortOrder: 1,
+   773→    },
+   774→    {
+   775→      id: "ad-2",
+   776→      slotIndex: 1,
+   777→      imageUrl: "/placeholders/ad-wide-1.svg",
+   778→      title: "اقلام مصرفی اورجینال",
+   779→      subtitle: "نوار قند، لانست و ماسک",
+   780→      href: "/products?category=masks",
+   781→      isActive: true,
+   782→      sortOrder: 2,
+   783→    },
+   784→    {
+   785→      id: "ad-3",
+   786→      slotIndex: 2,
+   787→      imageUrl: "/placeholders/ad-square-1.svg",
+   788→      title: "بخور و نبولایزر",
+   789→      subtitle: null,
+   790→      href: "/products?category=nebulizer",
+   791→      isActive: true,
+   792→      sortOrder: 3,
+   793→    },
+   794→    {
+   795→      id: "ad-4",
+   796→      slotIndex: 3,
+   797→      imageUrl: "/placeholders/ad-square-2.svg",
+   798→      title: "تشک ضدزخم",
+   799→      subtitle: null,
+   800→      href: "/products?category=anti-bedsore-mattress",
+   801→      isActive: true,
+   802→      sortOrder: 4,
+   803→    },
+   804→  ],
+   805→};
+   806→
+   807→/* ══════════════════════════ بخش‌های صفحهٔ خانه (۸) ══════════════════════════ */
+   808→
+   809→export const PREVIEW_HOME_SECTIONS: HomeSectionDTO[] = [
+   810→  { key: "hero", title: null, subtitle: null, sortOrder: 0, isActive: true },
+   811→  {
+   812→    key: "needs",
+   813→    title: "خرید بر اساس نیاز",
+   814→    subtitle: "به جای جست‌وجوی دسته‌ها، بگویید دغدغه‌تان چیست",
+   815→    sortOrder: 1,
+   816→    isActive: true,
+   817→  },
+   818→  { key: "ads", title: null, subtitle: null, sortOrder: 2, isActive: true },
+   819→  {
+   820→    key: "productRail",
+   821→    title: "محبوب‌ترین‌ها",
+   822→    subtitle: "انتخاب واقعی مشتریان، به‌روزرسانی هفتگی",
+   823→    sortOrder: 3,
+   824→    isActive: true,
+   825→  },
+   826→  {
+   827→    key: "expertPicks",
+   828→    title: "منتخب کارشناس سلامت",
+   829→    subtitle: "تیم کارشناسی ما این قلم‌ها را با وسواس انتخاب کرده است",
+   830→    sortOrder: 4,
+   831→    isActive: true,
+   832→  },
+   833→  { key: "brands", title: "برندهای همراه ما", subtitle: null, sortOrder: 5, isActive: true },
+   834→  {
+   835→    key: "articles",
+   836→    title: "مجلهٔ سلامت",
+   837→    subtitle: "خواندنی‌های کاربردی برای سلامتی خانواده",
+   838→    sortOrder: 6,
+   839→    isActive: true,
+   840→  },
+   841→  { key: "aboutStore", title: "دربارهٔ بسلامت", subtitle: null, sortOrder: 7, isActive: true },
+   842→];
+   843→
+   844→/* ══════════════════════════ مجلهٔ سلامت (۲ دسته + ۳ مقاله) ══════════════════════════ */
+   845→
+   846→const DAY_MS = 86_400_000;
+   847→
+   848→/** ISO نسبت به «اکنونِ» بارگذاری ماژول — آینهٔ قاعدهٔ seed (۲۰/۱۲/۵ روز پیش) */
+   849→function daysAgoIso(days: number): string {
+   850→  return new Date(Date.now() - days * DAY_MS).toISOString();
+   851→}
+   852→
+   853→interface PreviewArticleRow {
+   854→  slug: string;
+   855→  title: string;
+   856→  excerpt: string;
+   857→  coverUrl: string;
+   858→  categoryTitle: string;
+   859→  publishedDaysAgo: number;
+   860→  contentHtml: string;
+   861→}
+   862→
+   863→const PREVIEW_ARTICLE_ROWS: PreviewArticleRow[] = [
+   864→  {
+   865→    slug: "choosing-home-blood-pressure-monitor",
+   866→    title: "راهنمای انتخاب فشارسنج خانگی؛ بازویی یا مچی؟",
+   867→    excerpt: "تفاوت‌های فشارسنج بازویی و مچی و نکاتی که پیش از خرید باید بدانید.",
+   868→    coverUrl: "/placeholders/article-1.svg",
+   869→    categoryTitle: "راهنمای خرید",
+   870→    publishedDaysAgo: 20,
+   871→    contentHtml:
+   872→      "<p>پایش منظم فشار خون در خانه، بخشی مهم از مدیریت سلامت است؛ اما پیش از خرید فشارسنج باید بدانید کدام نوع به نیاز شما نزدیک‌تر است.</p>" +
+   873→      "<h2>تفاوت فشارسنج بازویی و مچی چیست؟</h2>" +
+   874→      "<p>در مدل‌های بازویی، کاف روی بازو باد می‌کند و اندازه‌گیری معمولاً دقیق‌تر و پایدارتر انجام می‌شود؛ مدل‌های مچی سبک‌تر و جمع‌وجورترند و برای سفر مناسب‌اند، اما به جای‌گذاری درست مچ در سطح قلب حساس‌ترند.</p>" +
+   875→      "<ul>" +
+   876→      "<li>برای استفادهٔ روزمرهٔ خانگی و نیاز به پایش دقیق، مدل بازویی پیشنهاد می‌شود.</li>" +
+   877→      "<li>برای سفر و اندازه‌گیری‌های گاه‌به‌گاه، مدل مچی راحت‌تر است.</li>" +
+   878→      "<li>دور بازوی شما باید با محدودهٔ کاف دستگاه سازگار باشد؛ برای بازوهای درشت، کاف بزرگ‌تر لازم است.</li>" +
+   879→      "<li>قابلیت تشخیص ضربان نامنظم برای افراد مسن و بیماران قلبی مفید است.</li>" +
+   880→      "</ul>" +
+   881→      "<p>صحت‌سنجی دستگاه را فراموش نکنید: فشارسنج را سالی یک بار با دستگاه استاندارد مطب یا داروخانه مقایسه کنید و در صورت اختلاف محسوس، آن را کالیبره کنید.</p>" +
+   882→      "<p>پیش از خرید، گارانتی و خدمات پس از فروش را بررسی کنید و از فروشندهٔ معتبر خرید کنید؛ چند اندازه‌گیری اول را با نشستن صحیح و پنج دقیقه استراحت قبلی تکرار کنید تا به عدد مطمئن برسید.</p>",
+   883→  },
+   884→  {
+   885→    slug: "glucometer-care-tips",
+   886→    title: "۷ نکتهٔ مهم در نگهداری قندسنج",
+   887→    excerpt: "با این هفت نکتهٔ ساده، قندسنج شما دقیق‌تر کار می‌کند و عمر دستگاه طولانی‌تر می‌شود.",
+   888→    coverUrl: "/placeholders/article-2.svg",
+   889→    categoryTitle: "راهنمای خرید",
+   890→    publishedDaysAgo: 12,
+   891→    contentHtml:
+   892→      "<p>قندسنج از آن دسته دستگاه‌هایی است که با کمی مراقبت، سال‌ها همراه شما می‌ماند و نتایج قابل اتکایی می‌دهد؛ این هفت نکته را جدی بگیرید.</p>" +
+   893→      "<h2>کارهای ساده‌ای که عمر دستگاه را زیاد می‌کند</h2>" +
+   894→      "<ul>" +
+   895→      "<li>دستگاه را در جای خشک و خنک نگه دارید؛ رطوبت دشمن اصلی برد الکترونیکی است.</li>" +
+   896→      "<li>نوارها را دربسته و در دمای اتاق نگه دارید و هرگز آن‌ها را در یخچال نگذارید.</li>" +
+   897→      "<li>سنسور دستگاه را فقط با پارچهٔ نرم و کمی الکل تمیز کنید و فشار نیاورید.</li>" +
+   898→      "<li>لانست‌ها یکبارمصرف‌اند؛ تکرار استفاده هم دردناک است و هم نمونهٔ خون را آلوده می‌کند.</li>" +
+   899→      "<li>پیش از اندازه‌گیری دست‌ها را گرم کنید و از قطرهٔ دوم خون استفاده کنید.</li>" +
+   900→      "<li>دستگاه را در معرض تابش مستقیم آفتاب و کنار وسایل گرم قرار ندهید.</li>" +
+   901→      "<li>با شروع هر بستهٔ نو، کد نوارها را مطابق راهنمای دستگاه وارد یا کالیبره کنید.</li>" +
+   902→      "</ul>" +
+   903→      "<p>اگر اعداد به‌طور مداوم با احساس شما نمی‌خواند، پیش از تعویض دستگاه، با نوار تازه و بررسی نحوهٔ نمونه‌گیری مشکل را ردیابی کنید؛ در بیشتر موارد، مشکل از نوار یا نمونه‌گیری است نه خود دستگاه.</p>",
+   904→  },
+   905→  {
+   906→    slug: "contactless-thermometer-guide",
+   907→    title: "استفادهٔ درست از دماسنج بدون‌تماس",
+   908→    excerpt:
+   909→      "فاصلهٔ درست، پیشانی تمیز و چند اندازه‌گیری مقایسه‌ای؛ کلید گرفتن عدد قابل اعتماد از دماسنج بدون‌تماس.",
+   910→    coverUrl: "/placeholders/article-3.svg",
+   911→    categoryTitle: "سلامت خانگی",
+   912→    publishedDaysAgo: 5,
+   913→    contentHtml:
+   914→      "<p>دماسنج بدون‌تماس وقتی درست استفاده شود، یکی از راحت‌ترین ابزارهای پایش دما در خانه است؛ اما چند اشتباه رایج، اعداد را چند درجه جابه‌جا می‌کند.</p>" +
+   915→      "<h2>پیش از اندازه‌گیری</h2>" +
+   916→      "<ul>" +
+   917→      "<li>دستگاه را چند دقیقه پیش از استفاده در دمای اتاق قرار دهید.</li>" +
+   918→      "<li>عرق، مو یا کلاه را از پیشانی کنار بزنید؛ سنسور باید مسیر آزاد ببیند.</li>" +
+   919→      "<li>فاصلهٔ پیشنهادی سازنده (معمولاً سه تا پنج سانتی‌متر) را رعایت کنید.</li>" +
+   920→      "</ul>" +
+   921→      "<h2>هنگام و پس از اندازه‌گیری</h2>" +
+   922→      "<p>دماسنج را موازی پیشانی، از میانه به سمت شقیقه حرکت دهید و چند اندازه‌گیری پشت‌سرهم را با هم مقایسه کنید؛ عدد بالاتر را مبنا قرار دهید.</p>" +
+   923→      "<p>دما را در ساعات ثابتی از روز ثبت کنید تا روند واقعی مشخص شود و اگر عدد با علائم بدن نمی‌خواند، یک اندازه‌گیری مکمل هم انجام دهید. دماسنج را تمیز و دور از نور مستقیم نگه دارید.</p>",
+   924→  },
+   925→];
+   926→
+   927→export const PREVIEW_ARTICLES: ArticleSummary[] = PREVIEW_ARTICLE_ROWS.map((row) => ({
+   928→  id: `a-${row.slug}`,
+   929→  slug: row.slug,
+   930→  title: row.title,
+   931→  excerpt: row.excerpt,
+   932→  coverUrl: row.coverUrl,
+   933→  publishedAt: daysAgoIso(row.publishedDaysAgo),
+   934→  categoryTitle: row.categoryTitle,
+   935→}));
+   936→
+   937→export const PREVIEW_ARTICLE_DETAILS: Record<string, ArticleDetail> = Object.fromEntries(
+   938→  PREVIEW_ARTICLES.map((summary, index) => {
+   939→    const row = PREVIEW_ARTICLE_ROWS[index];
+   940→    if (!row) throw new Error("ناهم‌خوانی PREVIEW_ARTICLE_ROWS با PREVIEW_ARTICLES");
+   941→    return [row.slug, { ...summary, contentHtml: row.contentHtml } satisfies ArticleDetail];
+   942→  }),
+   943→);
+   944→
+   945→/* ══════════════════════════ تب‌های محصولات صفحهٔ خانه ══════════════════════════ */
+   946→
+   947→export type ProductTabKey = "bestseller" | "new" | "discount";
+   948→
+   949→export const PRODUCT_TABS: { key: ProductTabKey; label: string }[] = [
+   950→  { key: "bestseller", label: "پرفروش‌ها" },
+   951→  { key: "new", label: "جدیدترین‌ها" },
+   952→  { key: "discount", label: "تخفیف‌دار" },
+   953→];
+   954→
+   955→/** ترتیب دستی پرفروش‌ها — محصولات پرفروش‌تر اول (۸ مورد) */
+   956→const BESTSELLER_SLUGS = [
+   957→  "omron-m2-blood-pressure", // فشارسنج M2
+   958→  "surgical-mask-50", // ماسک جراحی
+   959→  "beurer-gl50-strips", // نوار قند
+   960→  "beurer-ft90", // دماسنج FT90
+   961→  "beurer-gs27", // ترازو GS27
+   962→  "rossmax-tg300", // قندسنج TG300
+   963→  "medisana-uhw", // بخور
+   964→  "medisana-bs430", // آنالیزاتور بدن
+   965→] as const;
+   966→
+   967→/**
+   968→ * محصول‌های هر تب صفحهٔ خانه:
+   969→ * - bestseller: ترتیب دستی منطقی ۸تایی
+   970→ * - new: isNewها اول (تازه‌تر از seed اول‌تر)، سپس تازه‌ترین createdAtها تا ۸ مورد
+   971→ *   (createdAt آینهٔ seed است: پخش خطی روی ۶۰ روز؛ ایندکس بالاتر = جدیدتر)
+   972→ * - discount: فقط comparePrice != null، مرتب بر اساس درصد تخفیف (نزولی)
+   973→ *   توجه: در seed فقط ۵ محصول comparePrice دارند؛ تب عین داده است.
+   974→ */
+   975→export function getPreviewProductsByTab(tab: ProductTabKey): ProductSummary[] {
+   976→  switch (tab) {
+   977→    case "bestseller": {
+   978→      const bySlug = new Map(PREVIEW_PRODUCTS.map((product) => [product.slug, product]));
+   979→      return BESTSELLER_SLUGS.map((slug) => bySlug.get(slug)).filter(
+   980→        (product): product is ProductSummary => product != null,
+   981→      );
+   982→    }
+   983→    case "new": {
+   984→      return [...PREVIEW_PRODUCTS]
+   985→        .map((product, index) => ({ product, index }))
+   986→        .sort((a, b) => {
+   987→          if (a.product.isNew !== b.product.isNew) return a.product.isNew ? -1 : 1;
+   988→          return b.index - a.index;
+   989→        })
+   990→        .slice(0, 8)
+   991→        .map((row) => row.product);
+   992→    }
+   993→    case "discount": {
+   994→      return PREVIEW_PRODUCTS.map((product) => ({
+   995→        product,
+   996→        percent: discountPercent(product.price, product.comparePrice),
+   997→      }))
+   998→        .filter((row) => row.percent != null)
+   999→        .sort((a, b) => (b.percent ?? 0) - (a.percent ?? 0))
+  1000→        .map((row) => row.product);
+  1001→    }
+  1002→  }
+  1003→}
+  1004→

@@ -1,35 +1,54 @@
 import Link from "next/link";
+import { format } from "date-fns-jalali";
 import {
-  Clock,
-  Headset,
-  Instagram,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Phone,
-  Send,
-  ShieldCheck,
-} from "lucide-react";
+  IconBrandInstagram,
+  IconBrandTelegram,
+  IconBrandWhatsapp,
+  IconClock,
+  IconHeadset,
+  IconMail,
+  IconMapPin,
+  IconPhone,
+  IconShieldCheck,
+} from "@tabler/icons-react";
 
-import { Logo, Pattern } from "@/components/shared/brand-assets";
+import { Logo, Watermark } from "@/components/shared/brand-assets";
 import { brand, SOCIAL_LABELS, type SocialConfig } from "@/config/brand";
 import { formatPhoneFa, toFa } from "@/lib/format";
 import { PREVIEW_CATEGORIES } from "@/lib/preview-data";
 
 const FOOTER_LINK_CLASS =
-  "block text-[13px] leading-8 text-on-metallic-muted transition-colors hover:text-gold";
+  "block text-[13px] leading-8 text-on-metallic-muted transition-colors hover:text-fresh";
 
-const COLUMN_TITLE_CLASS = "text-[13px] font-black text-gold";
+const COLUMN_TITLE_CLASS = "text-sm font-black text-on-metallic";
 
-/** آیکون شبکهٔ اجتماعی — سه شبکهٔ اصلی lucide؛ شبکه‌های داخلی حرف اول نام */
+/** آیکون شبکهٔ اجتماعی — سه شبکهٔ اصلی با تبلر؛ شبکه‌های داخلی حرف اول نام */
 function SocialIcon({ social }: { social: SocialConfig }) {
   switch (social.key) {
     case "telegram":
-      return <Send className="size-4" aria-hidden="true" />;
+      return (
+        <IconBrandTelegram
+          className="size-4"
+          stroke={1.75}
+          aria-hidden="true"
+        />
+      );
     case "whatsapp":
-      return <MessageCircle className="size-4" aria-hidden="true" />;
+      return (
+        <IconBrandWhatsapp
+          className="size-4"
+          stroke={1.75}
+          aria-hidden="true"
+        />
+      );
     case "instagram":
-      return <Instagram className="size-4" aria-hidden="true" />;
+      return (
+        <IconBrandInstagram
+          className="size-4"
+          stroke={1.75}
+          aria-hidden="true"
+        />
+      );
     default:
       return (
         <span className="text-sm font-bold leading-none">
@@ -43,27 +62,36 @@ export function Footer() {
   const activeSocials = brand.socials.filter(
     (social) => social.defaultHref !== "",
   );
-  const year = toFa(new Date().getFullYear());
+  /* سال شمسی برای حق نشر */
+  const year = toFa(format(new Date(), "yyyy"));
 
   return (
     <footer className="relative overflow-hidden bg-metallic text-on-metallic">
-      <Pattern className="text-gold opacity-[0.05]" />
-      <div className="gold-hairline absolute inset-x-0 top-0" aria-hidden="true" />
+      {/* عمق بدون پترن — هالهٔ محو + واترمارک نشان برند */}
+      <div
+        className="glow start-[-12rem] top-[-8rem] size-96 bg-fresh/10"
+        aria-hidden="true"
+      />
+      <Watermark className="bottom-[-3rem] end-[-3rem] size-80 text-fresh/10" />
 
       {/* ── باند مشاوره ── */}
-      <div className="relative border-b border-white/10">
+      <div className="relative border-b border-on-metallic/15">
         <div className="shell flex flex-wrap items-center justify-between gap-x-6 gap-y-4 py-6">
           <p className="flex items-center gap-3.5 text-sm font-black md:text-base">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold">
-              <Headset className="size-5" aria-hidden="true" />
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-fresh/40 bg-fresh/10 text-fresh">
+              <IconHeadset
+                className="size-5"
+                stroke={1.75}
+                aria-hidden="true"
+              />
             </span>
             قبل از خرید، با کارشناس {brand.name} مشورت کنید
           </p>
           <a
             href={`tel:${brand.contact.phone}`}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-gold px-6 text-sm font-black text-gold-foreground transition-all duration-300 hover:brightness-110"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-fresh-strong px-6 text-sm font-black text-primary-foreground transition-all duration-300 hover:brightness-110"
           >
-            <Phone className="size-4" aria-hidden="true" />
+            <IconPhone className="size-4" stroke={1.75} aria-hidden="true" />
             <span dir="ltr">{formatPhoneFa(brand.contact.phone)}</span>
           </a>
         </div>
@@ -83,7 +111,7 @@ export function Footer() {
                 key={social.key}
                 href={social.defaultHref}
                 aria-label={SOCIAL_LABELS[social.key]}
-                className="flex size-10 items-center justify-center rounded-full border border-white/15 text-on-metallic-muted transition-all duration-300 hover:border-gold hover:bg-gold hover:text-gold-foreground"
+                className="flex size-10 items-center justify-center rounded-full border border-on-metallic/20 text-on-metallic-muted transition-all duration-300 hover:border-fresh hover:text-fresh"
               >
                 <SocialIcon social={social} />
               </a>
@@ -150,8 +178,9 @@ export function Footer() {
           <h3 className={COLUMN_TITLE_CLASS}>تماس با {brand.name}</h3>
           <ul className="mt-4 space-y-1">
             <li className="flex items-start gap-3">
-              <MapPin
-                className="mt-2 size-4 shrink-0 text-gold"
+              <IconMapPin
+                className="mt-2 size-4 shrink-0 text-fresh"
+                stroke={1.75}
                 aria-hidden="true"
               />
               <span className="text-[13px] leading-7 text-on-metallic-muted">
@@ -159,43 +188,46 @@ export function Footer() {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <Phone
-                className="mt-2 size-4 shrink-0 text-gold"
+              <IconPhone
+                className="mt-2 size-4 shrink-0 text-fresh"
+                stroke={1.75}
                 aria-hidden="true"
               />
               <span className="block">
                 <a
                   href={`tel:${brand.contact.phone}`}
                   dir="ltr"
-                  className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-gold"
+                  className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
                 >
                   {formatPhoneFa(brand.contact.phone)}
                 </a>
                 <a
                   href={`tel:${brand.contact.phoneAlt}`}
                   dir="ltr"
-                  className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-gold"
+                  className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
                 >
                   {formatPhoneFa(brand.contact.phoneAlt)}
                 </a>
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <Mail
-                className="mt-2 size-4 shrink-0 text-gold"
+              <IconMail
+                className="mt-2 size-4 shrink-0 text-fresh"
+                stroke={1.75}
                 aria-hidden="true"
               />
               <a
                 href={`mailto:${brand.contact.email}`}
-                className="text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-gold"
+                className="text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
               >
                 {brand.contact.email}
               </a>
             </li>
             {brand.contact.hours.map((entry) => (
               <li key={entry.days} className="flex items-start gap-3">
-                <Clock
-                  className="mt-2 size-4 shrink-0 text-gold"
+                <IconClock
+                  className="mt-2 size-4 shrink-0 text-fresh"
+                  stroke={1.75}
                   aria-hidden="true"
                 />
                 <span className="text-[13px] leading-7 text-on-metallic-muted">
@@ -208,20 +240,31 @@ export function Footer() {
       </div>
 
       {/* ── نوار پایانی ── */}
-      <div className="relative border-t border-white/10">
+      <div className="relative border-t border-on-metallic/15">
         <div className="shell flex flex-col items-center justify-between gap-4 py-5 md:flex-row">
           <p className="text-[11px] text-on-metallic-muted">
             © {year} {brand.name} — تمامی حقوق محفوظ است.
           </p>
+          <p className="text-[11px] text-on-metallic-muted">
+            طراحی و توسعه — {brand.name}
+          </p>
 
           {/* جوازها — placeholder تا فاز ۷ */}
           <div className="flex items-center gap-3" aria-label="جوازها">
-            <span className="flex h-11 w-28 flex-col items-center justify-center rounded-lg border border-white/15 text-[9px] leading-4 text-on-metallic-muted">
-              <ShieldCheck className="size-4 text-gold" aria-hidden="true" />
+            <span className="flex h-11 w-28 flex-col items-center justify-center rounded-lg border border-on-metallic/15 text-[9px] leading-4 text-on-metallic-muted">
+              <IconShieldCheck
+                className="size-4 text-fresh"
+                stroke={1.75}
+                aria-hidden="true"
+              />
               نماد اعتماد الکترونیکی
             </span>
-            <span className="flex h-11 w-28 flex-col items-center justify-center rounded-lg border border-white/15 text-[9px] leading-4 text-on-metallic-muted">
-              <ShieldCheck className="size-4 text-gold" aria-hidden="true" />
+            <span className="flex h-11 w-28 flex-col items-center justify-center rounded-lg border border-on-metallic/15 text-[9px] leading-4 text-on-metallic-muted">
+              <IconShieldCheck
+                className="size-4 text-fresh"
+                stroke={1.75}
+                aria-hidden="true"
+              />
               ساماندهی رسانه‌های دیجیتال
             </span>
           </div>

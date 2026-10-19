@@ -1,13 +1,12 @@
 /**
  * صفحهٔ جستجو — Server Component
  * ─────────────────────────────
- * q خام کاربر (بدون toFa) نمایش داده می‌شود؛ چیپ‌های جستجوهای پرطرفدار
- * همیشه زیر عنوان هستند. CatalogView با تمام پارامترها (مثل فروشگاه)
- * مقداردهی می‌شود تا بازخوانی لینک‌های همگام‌شده با URL درست باشد.
+ * همان موتور CatalogView؛ باند هدر «نتایج جستجو برای «q»» را از همان state
+ * می‌سازد و چیپ‌های جستجوهای پرطرفدار زیر باند می‌نشیند.
+ * noindex می‌ماند (نتایج جستجوی کاربر نباید ایندکس شود).
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import {
   CatalogView,
@@ -89,44 +88,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   return (
-    <div className="shell py-8 md:py-12">
-      {/* عنوان — q خامِ کاربر، بدون تبدیل ارقام */}
-      <h1 className="text-xl font-black text-foreground md:text-2xl">
-        {q ? (
-          <>
-            نتایج جستجو برای «{q}»
-          </>
-        ) : (
-          "جستجو در فروشگاه"
-        )}
-      </h1>
-
-      {/* جستجوهای پرطرفدار */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground">
-          جستجوهای پرطرفدار:
-        </span>
-        {PREVIEW_POPULAR_SEARCHES.map((term) => (
-          <Link
-            key={term}
-            href={`/search?q=${encodeURIComponent(term)}`}
-            className="rounded-full bg-accent px-3 py-1.5 text-xs text-accent-foreground transition-colors hover:bg-gold/20"
-          >
-            {term}
-          </Link>
-        ))}
-      </div>
-
-      <div className="mt-6 md:mt-8">
-        <CatalogView
-          products={PREVIEW_PRODUCTS}
-          categories={PREVIEW_CATEGORIES}
-          brands={PREVIEW_BRANDS}
-          categoryByProduct={categoryByProduct}
-          initialFilters={initialFilters}
-          showHeading={false}
-        />
-      </div>
-    </div>
+    <CatalogView
+      products={PREVIEW_PRODUCTS}
+      categories={PREVIEW_CATEGORIES}
+      brands={PREVIEW_BRANDS}
+      categoryByProduct={categoryByProduct}
+      initialFilters={initialFilters}
+      shopTitle="جستجو در فروشگاه"
+      popularSearches={PREVIEW_POPULAR_SEARCHES}
+    />
   );
 }

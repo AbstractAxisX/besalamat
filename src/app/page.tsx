@@ -1,26 +1,29 @@
 import type { Metadata } from "next";
+
+import { AboutStore } from "@/components/home/about-store";
+import { AdGrid } from "@/components/home/ad-grid";
+import { ArticlesTeaser } from "@/components/home/articles-teaser";
+import { BrandsMarquee } from "@/components/home/brands-marquee";
+import { ExpertPicks } from "@/components/home/expert-picks";
+import { Hero } from "@/components/home/hero";
+import { NeedsSection } from "@/components/home/needs-section";
+import { ProductRail, type RailTab } from "@/components/home/product-rail";
+import { Reveal } from "@/components/shared/motion";
+import { SectionHeading } from "@/components/shared/section-heading";
 import { brand } from "@/config/brand";
 import {
+  PREVIEW_ADS,
   PREVIEW_ARTICLES,
-  PREVIEW_BANNERS,
   PREVIEW_BRANDS,
-  PREVIEW_CATEGORIES,
   PREVIEW_HOME_SECTIONS,
+  PREVIEW_NEEDS,
+  PREVIEW_POPULAR_SEARCHES,
   PREVIEW_PRODUCTS,
   PREVIEW_SLIDES,
+  PRODUCT_TABS,
   getPreviewProductsByTab,
 } from "@/lib/preview-data";
-import type { HomeSectionKey } from "@/types/shop";
-import { HeroSlider } from "@/components/home/hero-slider";
-import { TrustBar } from "@/components/home/trust-bar";
-import { CategoryIndex } from "@/components/home/category-index";
-import { DealBanner } from "@/components/home/deal-banner";
-import { BestsellerRail } from "@/components/home/bestseller-rail";
-import { ExpertPicks } from "@/components/home/expert-picks";
-import { HomeBanners } from "@/components/home/home-banners";
-import { BrandsStrip } from "@/components/home/brands-strip";
-import { ArticlesTeaser } from "@/components/home/articles-teaser";
-import { AboutStore } from "@/components/home/about-store";
+import type { HomeSectionDTO } from "@/types/shop";
 
 export const metadata: Metadata = {
   title: brand.meta.defaultTitle,
@@ -34,80 +37,122 @@ export const metadata: Metadata = {
   },
 };
 
-/** دادهٔ مشتق — یک‌بار در سطح ماژول */
-const DEAL_PRODUCT = getPreviewProductsByTab("discount")[0] ?? null;
-const BESTSELLERS = getPreviewProductsByTab("bestseller");
-const EXPERT_PICKS = PREVIEW_PRODUCTS.filter((product) => product.isFeatured);
+/** تب‌های ریل محصولات — حداکثر ۸ قلم در هر تب (مصرف کلاینت سبک می‌ماند) */
+const RAIL_TABS: RailTab[] = PRODUCT_TABS.map((tab) => ({
+  key: tab.key,
+  label: tab.label,
+  products: getPreviewProductsByTab(tab.key).slice(0, 8),
+}));
+
+/** محصولات شاخص برای «منتخب کارشناس سلامت» */
+const FEATURED_PRODUCTS = PREVIEW_PRODUCTS.filter(
+  (product) => product.isFeatured,
+);
+
+/** کارت محصول شناور هیرو */
+const SPOTLIGHT = PREVIEW_PRODUCTS[0];
 
 /**
- * فاز ۱: دادهٔ ایستا از preview-data.
- * TODO(فاز ۳): همین کامپوز، با دادهٔ زنده از دیتابیس تغذیه می‌شود
- * (Slides/Banners/HomePageSections از DB + محصولات از سرویس).
+ * صفحهٔ خانه — کامپوز ۸ بخشی از PREVIEW_HOME_SECTIONS (ترتیب و فعال‌بودن از داده).
+ * فاز ۳: همین کامپوز با دادهٔ زندهٔ API تغذیه می‌شود.
  */
 export default function HomePage() {
   const sections = [...PREVIEW_HOME_SECTIONS]
     .filter((section) => section.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const renderSection = (key: HomeSectionKey) => {
-    const section = sections.find((item) => item.key === key);
-    if (!section) return null;
-
-    switch (key) {
+  const renderSection = (section: HomeSectionDTO) => {
+    switch (section.key) {
       case "hero":
-        return <HeroSlider key={key} slides={PREVIEW_SLIDES} />;
-      case "trust":
-        return <TrustBar key={key} />;
-      case "categories":
         return (
-          <CategoryIndex
-            key={key}
-            categories={PREVIEW_CATEGORIES}
-            title={section.title ?? "دسته‌بندی محصولات"}
-            subtitle={section.subtitle}
+          <Hero
+            key={section.key}
+            slides={PREVIEW_SLIDES}
+            spotlight={SPOTLIGHT}
+            productCount={PREVIEW_PRODUCTS.length}
+            popularSearches={PREVIEW_POPULAR_SEARCHES.slice(0, 3)}
           />
         );
-      case "deal":
-        return DEAL_PRODUCT ? (
-          <DealBanner key={key} product={DEAL_PRODUCT} />
-        ) : null;
-      case "bestsellers":
+
+      case "needs":
         return (
-          <BestsellerRail
-            key={key}
-            title={section.title ?? "پرفروش‌های این هفته"}
-            subtitle={section.subtitle}
-            products={BESTSELLERS}
+          <NeedsSection
+            key={section.key}
+            title={section.title ?? "خرید بر اساس نیاز"}
+            subtitle={section.subtitle ?? undefined}
+            needs={PREVIEW_NEEDS}
           />
         );
+
+      case "ads":
+        return (
+          <section
+            key={section.key}
+            className="shell py-14 md:py-20"
+            aria-label="فرصت‌های خرید"
+          >
+            <SectionHeading
+              eyebrow="تخفیف‌ها و پیشنهادها"
+              title="فرصت‌های خرید"
+              subtitle="پیشنهادهای منتخب تیم فروشگاه"
+            />
+            <Reveal>
+              <AdGrid data={PREVIEW_ADS} />
+            </Reveal>
+          </section>
+        );
+
+      case "productRail":
+        return (
+          <ProductRail
+            key={section.key}
+            title={section.title ?? "محبوب‌ترین‌ها"}
+            subtitle={section.subtitle ?? undefined}
+            tabs={RAIL_TABS}
+          />
+        );
+
       case "expertPicks":
         return (
           <ExpertPicks
-            key={key}
+            key={section.key}
             title={section.title ?? "منتخب کارشناس سلامت"}
             subtitle={section.subtitle}
-            products={EXPERT_PICKS}
+            products={FEATURED_PRODUCTS}
           />
         );
-      case "banners":
-        return <HomeBanners key={key} banners={PREVIEW_BANNERS} />;
+
       case "brands":
-        return <BrandsStrip key={key} brands={PREVIEW_BRANDS} />;
+        return (
+          <BrandsMarquee
+            key={section.key}
+            title={section.title ?? "برندهای همراه ما"}
+            brands={PREVIEW_BRANDS}
+          />
+        );
+
       case "articles":
         return (
           <ArticlesTeaser
-            key={key}
+            key={section.key}
             title={section.title ?? "مجلهٔ سلامت"}
             subtitle={section.subtitle}
             articles={PREVIEW_ARTICLES}
           />
         );
+
       case "aboutStore":
-        return <AboutStore key={key} title={section.title ?? "دربارهٔ ما"} />;
+        return (
+          <AboutStore
+            key={section.key}
+            title={section.title ?? "دربارهٔ ما"}
+          />
+        );
+
       default:
         return null;
     }
   };
 
-  return <>{sections.map((section) => renderSection(section.key))}</>;
+  return <>{sections.map((section) => renderSection(section))}</>;
 }

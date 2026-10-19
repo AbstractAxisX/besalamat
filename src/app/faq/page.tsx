@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { formatTomanPlain, toFa } from "@/lib/format";
+import { JsonLd } from "@/components/shared/json-ld";
+import { faqJsonLd } from "@/lib/jsonld";
 
 export const metadata: Metadata = {
   title: "پرسش‌های متداول",
@@ -63,6 +65,8 @@ const FAQS = [
 
 export default function FaqPage() {
   return (
+    <>
+      <JsonLd data={faqJsonLd(FAQS)} />
     <div className="shell pb-8 md:pb-12">
       <div className="mx-auto max-w-3xl">
         {/* الگوی PageHero — یکنواخت در صفحات محتوایی */}
@@ -112,5 +116,6 @@ export default function FaqPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

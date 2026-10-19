@@ -1,18 +1,20 @@
 "use client";
 
 /**
- * کارت محصول — واحد پول‌ساز فروشگاه
+ * کارت محصول — واحد پول‌ساز فروشگاه (نسخهٔ ۲۰۲۶)
  * ─────────────────────────────
- * کلاینت به‌خاطر «افزودن سریع به سبد» که در دسکتاپ با هاور ظاهر می‌شود؛
- * در موبایل لمسِ کارت به صفحهٔ محصول می‌رود (بدون دکمه‌های ریزِ خطاخطر).
+ * قواعد طراحی (سفارش مشتری):
+ *  - تصویر مربع ۱:۱؛ نگهدارندهٔ تصویر p-2؛ خود عکس rounded-2xl (راندد لارج)
+ *  - هاور: فقط یک بوردر ظریف — بدون اسکیل، بدون جابه‌جایی
+ *  - دکمهٔ افزودن به سبد: همیشه‌دیدنی، دایره‌ای، گوشهٔ تصویر (لمس‌پذیر)
+ * کلاینت به‌خاطر اکشن سبد خرید (zustand) و toast.
  */
 
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ShoppingBag } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { discountPercent, formatTomanPlain, toFa } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
@@ -50,66 +52,72 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <Link
       href={`/products/${product.slug}`}
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card",
-        "transition-all duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-lift",
-        "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "group relative flex h-full flex-col rounded-2xl border border-border/60 bg-card",
+        "transition-[border-color,box-shadow] duration-300 hover:border-primary/35 hover:shadow-card",
+        "outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/40",
         className,
       )}
     >
-      {/* ناحیهٔ تصویر */}
-      <div className="img-canvas relative aspect-square overflow-hidden p-4 md:p-6">
-        <Image
-          src={product.image}
-          alt={product.title}
-          fill
-          sizes="(max-width:768px) 50vw, 25vw"
-          className={cn(
-            "object-contain transition-transform duration-500 group-hover:scale-[1.06]",
-            !product.inStock && "opacity-40 grayscale",
-          )}
-        />
+      {/* ناحیهٔ تصویر — نگهدارنده p-2، بوم مربع با گوشهٔ لارج */}
+      <div className="p-2">
+        <div className="img-canvas relative aspect-square overflow-hidden rounded-2xl">
+          <Image
+            src={product.image}
+            alt={product.title}
+            fill
+            sizes="(max-width:768px) 50vw, 25vw"
+            className={cn(
+              "object-contain",
+              !product.inStock && "opacity-40 grayscale",
+            )}
+          />
 
-        {/* بج‌ها */}
-        <div className="absolute top-3 start-3 flex flex-col items-start gap-1.5">
-          {discount != null && product.inStock ? (
-            <span className="rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-black text-gold-foreground">
-              ٪{toFa(discount)}
-            </span>
-          ) : null}
-          {product.isNew && product.inStock ? (
-            <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">
-              جدید
-            </span>
-          ) : null}
-          {!product.inStock ? (
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-bold text-secondary-foreground">
-              ناموجود
-            </span>
+          {/* بج‌ها — گوشهٔ بالا-راست */}
+          <div className="absolute top-2.5 start-2.5 flex flex-col items-start gap-1.5">
+            {discount != null && product.inStock ? (
+              <span className="rounded-full bg-destructive px-2 py-0.5 text-[11px] font-black text-destructive-foreground">
+                ٪{toFa(discount)}
+              </span>
+            ) : null}
+            {product.isNew && product.inStock ? (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
+                جدید
+              </span>
+            ) : null}
+            {!product.inStock ? (
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-secondary-foreground">
+                ناموجود
+              </span>
+            ) : null}
+          </div>
+
+          {/* افزودن سریع — دکمهٔ دایره‌ای همیشه‌دیدنی، گوشهٔ پایین-چپ تصویر */}
+          {product.inStock ? (
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              aria-label={`افزودن ${product.title} به سبد خرید`}
+              className={cn(
+                "absolute bottom-2.5 end-2.5 z-10 flex size-9 items-center justify-center rounded-full",
+                "border border-border/70 bg-card/95 text-foreground shadow-soft backdrop-blur",
+                "transition-colors duration-200 hover:bg-primary hover:text-primary-foreground hover:border-primary",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+            >
+              <IconPlus className="size-4.5" aria-hidden="true" />
+            </button>
           ) : null}
         </div>
-
-        {/* افزودن سریع — فقط دسکتاپ با هاور */}
-        {product.inStock ? (
-          <button
-            type="button"
-            onClick={handleQuickAdd}
-            aria-label={`افزودن ${product.title} به سبد خرید`}
-            className="absolute inset-x-4 bottom-3 hidden h-10 translate-y-14 items-center justify-center gap-2 rounded-xl bg-primary/95 text-xs font-bold text-primary-foreground opacity-0 backdrop-blur transition-all duration-300 hover:bg-primary group-hover:translate-y-0 group-hover:opacity-100 focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
-          >
-            <ShoppingBag className="size-4" aria-hidden="true" />
-            افزودن به سبد
-          </button>
-        ) : null}
       </div>
 
       {/* بدنه */}
-      <div className="flex flex-1 flex-col p-3.5 md:p-4">
+      <div className="flex flex-1 flex-col px-3.5 pb-4 pt-1 md:px-4">
         {product.brandTitle ? (
           <p className="text-[11px] font-medium text-muted-foreground">
             {product.brandTitle}
           </p>
         ) : null}
-        <h3 className="mt-1 line-clamp-2 min-h-10 text-[13px] leading-5 font-medium text-foreground transition-colors group-hover:text-primary md:min-h-12 md:text-sm md:leading-6">
+        <h3 className="mt-1 line-clamp-2 min-h-10 text-[13px] leading-5 font-semibold text-foreground transition-colors group-hover:text-primary md:min-h-12 md:text-sm md:leading-6">
           {product.title}
         </h3>
 
@@ -148,20 +156,22 @@ export function ProductCardSkeleton({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        "relative block h-full overflow-hidden rounded-2xl border border-border/70 bg-card",
+        "relative block h-full overflow-hidden rounded-2xl border border-border/60 bg-card",
         className,
       )}
     >
-      <Skeleton className="img-canvas aspect-square rounded-none" />
-      <div className="p-3.5 md:p-4">
-        <Skeleton className="h-3 w-16" />
+      <div className="p-2">
+        <div className="img-canvas aspect-square rounded-2xl" />
+      </div>
+      <div className="px-3.5 pb-4 pt-1 md:px-4">
+        <div className="skeleton-shimmer h-3 w-16 rounded-full" />
         <div className="mt-2 space-y-1.5">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/5" />
+          <div className="skeleton-shimmer h-4 w-full rounded-full" />
+          <div className="skeleton-shimmer h-4 w-3/5 rounded-full" />
         </div>
         <div className="mt-4 space-y-1">
-          <Skeleton className="h-3 w-14" />
-          <Skeleton className="h-6 w-28" />
+          <div className="skeleton-shimmer h-3 w-14 rounded-full" />
+          <div className="skeleton-shimmer h-6 w-28 rounded-full" />
         </div>
       </div>
     </div>

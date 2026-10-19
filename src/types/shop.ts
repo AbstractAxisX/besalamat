@@ -55,6 +55,8 @@ export interface ProductSummary {
   brandTitle: string | null;
   isNew: boolean;
   isFeatured: boolean;
+  /** اسلاگ دستهٔ مستقیم — برای فیلتر سریع (مگامنو، نیازها) */
+  categorySlug: string | null;
 }
 
 /** صفحهٔ جزئیات محصول */
@@ -89,12 +91,10 @@ export interface CartLine {
 /* ── هوم داینامیک ── */
 export type HomeSectionKey =
   | "hero"
-  | "trust"
-  | "categories"
-  | "deal"
-  | "bestsellers"
+  | "needs"
+  | "ads"
+  | "productRail"
   | "expertPicks"
-  | "banners"
   | "brands"
   | "articles"
   | "aboutStore";
@@ -116,12 +116,59 @@ export interface HomeSlideDTO {
   ctaHref: string | null;
 }
 
-export interface HomeBannerDTO {
+/* ── خرید بر اساس نیاز ── */
+export interface NeedCardDTO {
   id: string;
-  title: string | null;
+  title: string;
+  description: string;
+  /** آیکون تبلر — کلید نگاشت به کامپوننت */
+  iconKey: string;
+  /** مقصد کلیک — معمولاً فیلتر دستهٔ مرتبط */
+  href: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+/* ── گرید تبلیغات عکسی ── */
+
+/** قالب چیدمان — هر قالب اسلات‌های مشخص با نسبت دقیق دارد */
+export type AdLayoutKey = "bento" | "duo" | "trio";
+
+export interface AdLayoutSpecDTO {
+  key: AdLayoutKey;
+  /** عنوان فارسی قالب برای ادمین */
+  title: string;
+  /** تعداد اسلات‌ها */
+  slots: AdSlotSpecDTO[];
+}
+
+export interface AdSlotSpecDTO {
+  /** نام اسلات برای ادمین/طراح */
+  name: string;
+  /** نسبت تصویر — مثلاً 1 یعنی مربع */
+  ratio: string;
+  /** ابعاد پیشنهادی دقیق برای طراح (px @2x) */
+  sizeHint: string;
+}
+
+export interface AdTileDTO {
+  id: string;
+  /** اسلات چیدمان: index در آرایهٔ اسلات‌های قالب */
+  slotIndex: number;
   imageUrl: string;
-  href: string | null;
-  slot: number;
+  /** متن روی تصویر (اختیاری) */
+  title: string | null;
+  subtitle: string | null;
+  /** مقصد کلیک — محصول/دسته/جستجو/لینک خارجی */
+  href: string;
+  /** ادمین فعال/غیرفعال می‌کند */
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface AdGridDTO {
+  layout: AdLayoutKey;
+  tiles: AdTileDTO[];
 }
 
 /* ── وبلاگ ── */

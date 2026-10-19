@@ -341,3 +341,122 @@ Stage Summary:
 - تصمیم بصری ۳ — «روانشناسی فروش»: شمارش معکوس، مدال رتبه، سود شما، نوار پیشرفت ارسال رایگان، نوارهای چسبان خرید موبایل، چیپ‌های فیلتر فعال
 - فایل‌های جدید: category-index، deal-banner، bestseller-rail، expert-picks، cart/cart-view | حذف: category-cards، product-tabs
 - همهٔ توکن‌ها توکنی (هیچ هگز خام در کامپوننت‌ها به‌جز img-canvas)، white-label حفظ شد (آستانهٔ ارسال و نرخ از brand.ts)
+
+---
+Task ID: 1 (foundation)
+Agent: main-orchestrator
+Task: بازطراحی کامل — زیرساخت: دیزاین‌سیستم سبز/سفید، تایپ‌ها، داده‌ها، کامپوننت‌های مشترک، سئو
+
+Work Log:
+- @tabler/icons-react نصب شد (پکیج آیکون جدید به‌جای lucide برای کدهای جدید)
+- globals.css کامل بازنویسی: حذف کامل طلایی/زرد → فقط سبز+سفید؛ --primary #0B4634، --fresh #1E9E6A، پس‌زمینه #F6FAF7؛ shell عریض max-w-[1440px]؛ سایه‌های نرم‌تر؛ انیمیشن‌های keyframes (float/marquee/pulse/shimmer)؛ کلاس‌های glow/glass/mask-fade-b/skeleton-shimmer؛ حذف رفتار translate در card-lift
+- scripts/gen-placeholders.ts بازنویسی و ۴۸ SVG بازتولید: پالت سبز جدید، حذف کامل پترن ستاره‌ای مشبک، کاشی‌های تبلیغ جدید (ad-big-1/wide-1/square-1/2/duo-1/2/trio-1/2/3)، اسلایدها ۴:۵ (۱۰۸۰×۱۳۵۰)
+- types/shop.ts: HomeSectionKey جدید (hero/needs/ads/productRail/expertPicks/brands/articles/aboutStore)؛ حذف trust/categories/deal/bestsellers/banners؛ DTOهای جدید: NeedCardDTO, AdLayoutKey (bento/duo/trio), AdLayoutSpecDTO, AdSlotSpecDTO, AdTileDTO, AdGridDTO؛ ProductSummary += categorySlug
+- preview-data.ts: PREVIEW_NEEDS (۶ نیاز با iconKey و href)؛ AD_LAYOUT_SPECS (ابعاد دقیق px @2x برای طراح) + PREVIEW_ADS (bento، ۴ کاشی فعال)؛ PREVIEW_HOME_SECTIONS جدید؛ متن اسلایدها به‌روز؛ toProductSummary += categorySlug
+- کامپوننت‌های مشترک: product-card v2 (مربع ۱:۱، نگهدارنده p-2، عکس rounded-2xl، هاور فقط بوردر ظریف، دکمهٔ + دایره‌ای همیشه‌دیدنی)؛ category-icon → تبلر؛ section-heading v2 (اکسنت fresh)؛ motion.tsx (Reveal/CountUp/StaggerList/StaggerItem)؛ marquee.tsx؛ brand-assets (حذف Pattern، سبز، Watermark حفظ)؛ search-dialog + store/search (cmdk، شورت‌کات Ctrl+K و /، جستجوی لحظه‌ای نرمالایز فارسی، اخیر localStorage، پرطرفدار)
+- سئو: layout.tsx (metadata کامل: keywords/OG/Twitter/robots/canonical + viewport themeColor + JsonLd Organization/WebSite در body)؛ lib/jsonld.ts (organization/webSite/product/breadcrumb/article/faq)؛ components/shared/json-ld.tsx؛ app/sitemap.ts؛ app/robots.ts (حذف public/robots.txt)؛ app/manifest.ts؛ Product JSON-LD در products/[slug]؛ Article JSON-LD در blog/[slug]؛ FAQ JSON-LD در faq
+- پاکسازی: حذف ۵ کامپوننت منسوخ home (trust-bar/category-index/deal-banner/bestseller-rail/home-banners)؛ حذف Pattern از همهٔ مصرف‌کننده‌ها؛ page.tsx موقت (ایجنت وظیفهٔ ۳ بازنویسی می‌کند)
+- tsc پاک (فقط خطاهای ازپیش‌موجود examples/skills)؛ سرور ۲۰۰
+
+Stage Summary:
+- فایل‌ها: globals.css، types/shop.ts، lib/preview-data.ts، lib/jsonld.ts، scripts/gen-placeholders.ts، ۴۸ placeholder SVG، components/shared/{product-card در product/, category-icon, section-heading, motion, marquee, brand-assets, search-dialog, json-ld}، store/search.ts، app/{layout, sitemap, robots, manifest}.ts، app/page.tsx (موقت)، JSON-LD در products/[slug] و blog/[slug] و faq
+- قراردادهای جدید برای ایجنت‌ها: PREVIEW_NEEDS/PREVIEW_ADS/AD_LAYOUT_SPECS؛ ProductCard v2 (همان export)؛ SearchDialog از store: useSearchDialogStore((s)=>s.openDialog)؛ آیکون فقط @tabler/icons-react؛ ممنوع: کلاس‌های gold، Pattern، پترن مشبک
+- ایجنت‌های بعدی: 2=layout shell (header/megamenu/mobile/footer/bottom-nav)، 3=homepage (hero/needs/ads/rail/expert/brands/articles/about)، 4=catalog (header فروشگاه/sidbar درختی/slider قیمت/سرچ/چیپ‌ها)
+
+---
+Task ID: 4
+Agent: frontend-styling-expert
+Task: بازسازی کامل کاتالوگ (/products) + هم‌راستاسازی /search — باند هدر فروشگاهِ چشم‌نواز، سایدبار درختی، اسلایدر قیمت، جستجوی درون‌کاتالوگ، چیپ‌ها، صفحه‌بندی و حالت خالی
+
+Work Log:
+- خواندن worklog (بخش Task 1) + کدهای فعلی کاتالوگ/داده/tایپ‌ها + همهٔ primitiveهای ui (slider/collapsible/drawer/pagination/breadcrumb/select/switch/input/separator)؛ راستی‌آزمایی وجود آیکون‌های تبلر (IconPackageOff/IconAdjustmentsHorizontal/IconArrowsSort/IconSparkles/…) در پکیج
+- فایل جدید shop-header.tsx: باند bg-metallic full-bleed با border-b border-fresh/20 + Watermark غول‌پیکر (-end-16 -top-16 size-72 md:size-96 rotate-12 text-fresh/10) + دو glow (fresh/15 و primary/40)؛ بریدکرامب روشن text-[11px] (لینک text-on-metallic-muted hover:text-fresh، جاری text-on-metallic، جداکننده IconChevronLeft size-3)؛ h1 دیده‌شو text-2xl md:text-[2rem] font-black text-on-metallic؛ توضیح text-[13px] leading-7 max-w-2xl؛ عنوان با AnimatePresence mode=wait (y 8→0، initial=false) و چیپ شمار با pop کوچک key=count
+- تصمیم خوانایی: چیپ شمارِ باند با «glass» خام (سفیدِ ۷۸٪) متنِ text-on-metallic را نامرئی می‌کرد → چیپ شیشه‌ایِ تیره دست‌ساز: border-fresh/25 bg-primary/30 backdrop-blur-sm text-on-metallic (روحِ glass حفظ، کنتراست تضمین)
+- catalog-view.tsx بازنویسی کامل با حفظ معماری URL-sync (router.replace بدون اسکرول، مقادیر غیرپیش‌فرض فقط): state فیلتر/سورت/صفحه/نما؛ ساختار جدید ShopHeader → shell → جستجوهای پرطرفدار → تولبار (دکمهٔ فیلتر موبایل + جستجو + سورت + نما + شمار ms-auto) → چیپ‌های فعال → grid lg:grid-cols-[17rem_minmax(0,1fr)] → صفحه‌بندی
+- جستجوی درون‌کاتالوگ: ورودی محلی + commit روی Enter/دکمهٔ پاک‌سازی + دیبانس ۴۰۰ms با useEffect timer؛ تغییرات بیرونی (چیپ/ریست) با ref مقایسه و به ورودی برمی‌گردد (بدون踩 کردن تایپِ کاربر)
+- چیپ‌های فیلتر فعال: bg-secondary rounded-full text-[11px] با X تبلر و hover:bg-fresh-soft + «حذف همه» text-destructive؛ قیمت به‌صورت یک چیپ ترکیبی «از X تا Y تومان»
+- عنوان/توصیح/بریدکرامب باند reactive از state: جستجو → «نتایج جستجو برای «q»»، دسته → نام دسته + «خرید آنلاین … با ضمانت اصالت کالا و ارسال سریع»، پیش‌فرض → shopTitle (پروپ جدید، پیش‌فرض «فروشگاه بسلامت»؛ صفحهٔ جستجو «جستجو در فروشگاه» می‌دهد)
+- گرید نتایج: StaggerList/StaggerItem با key=page|sort|view|فیلترها (پخشِ دوبارهٔ نرم در صفحه‌بندی/فیلتر)؛ سایدبار sticky top-[172px] (ارتفاع واقعی هدر ۱۶۰px + ۱۲ حاشیه — به‌جای top-28 نادرستِ سفته) با max-h و اسکرول داخلی
+- دراور موبایل: هدر «فیلترها» + شمار، پنل با اسکرول، فوتر دو دکمه [حذف همه outline flex-1][نمایش N کالا flex-2] + pb محیط safe-area
+- filter-panel.tsx بازنویسی کامل: درخت دسته‌بندی با Collapsible در هر والد — ردیف = انتخاب دسته (آیکون در size-8 bg-secondary/70 + عنوان + بج شمارش) و شورانِ جدا = باز/بستن (data-[state=open]:rotate-180، aria-expanded خودکار رادیکس)؛ «همهٔ دسته‌ها» با IconLayoutGrid/IconCheck؛ فرزندان با نقطهٔ fresh/60 و شمارش؛ شمارش‌ها از product.categorySlug
+- اسلایدر قیمت دومفهومی: PRICE_MAX=ceil(سقف قیمت محصولات به ۱۰۰k)=۲۸٬۵۰۰٬۰۰۰، step ۵۰k، مقدار محلی حین درگ و اعمال فقط با onValueCommit (انتهای مسیر = حذف فیلتر همان طرف)؛ عنوان بخش + div.mt-2 دور اسلایدر (دقیقاً «مارجین تاپ ۲» که مشتری خواست) + خط جمع زندهٔ «X — Y تومان» که حین درگ زنده به‌روز می‌شود؛ ورودی‌های از/تا با همان الگوی مستحکم commit روی blur/Enter
+- جایگزینی lint-error: همگام‌سازی اسلایدر با والد از effect به الگوی «تنظیم state حین رندر» (React docs) — بدون effect، بدون cascading render
+- product-grid.tsx (فقط restyle): حالت خالی جدید (IconPackageOff در جعبهٔ size-16 rounded-3xl bg-secondary p-4 + «محصولی مطابق فیلترها پیدا نشد» + دکمهٔ h-10 rounded-full bg-primary «حذف فیلترها» با onReset اختیاری)؛ پروپ‌های افزایشی stagger/onReset (پیش‌فرض خاموش — cart و PDP بی‌تفاوت)؛ کلاس‌های گرید دست‌نخورده
+- products/page.tsx لاغر شد: متادیتا «فروشگاه تجهیزات پزشکی» (با template → «… | بسلامت»)؛ همان تجزیهٔ امن searchParams؛ باند/بریدکرامب/بریدکرامب JSON-LD به کلاینت سپرده شد (آیتم‌های درخت‌واره client-derived)
+- search/page.tsx: همان CatalogView با shopTitle «جستجو در فروشگاه» + popularSearches → ردیف «جستجوهای پرطرفدار:» با IconSparkles و پیل‌های /search?q=… زیر باند؛ robots noindex حفظ شد
+- لیست‌ویو (view=list) با نگاشت URL حفظ و کاملاً بازطراحی شد (بدون هیچ کلاس gold: بج تخفیف bg-destructive، جدید bg-primary، بوردر hover primary/35)
+- tsc پاک | bun run lint exit 0 | بدون dev server (مجاز نبود؛ سرور هم خاموش بود) — راستی‌آزمایی استاتیک کامل انجام شد
+
+Stage Summary:
+- فایل‌ها: NEW src/components/catalog/shop-header.tsx؛ REWRITE catalog-view.tsx، filter-panel.tsx، app/products/page.tsx، app/search/page.tsx؛ RESTYLE product/product-grid.tsx
+- قرارداد عمومی حفظ شد: CatalogView/CatalogInitialFilters/CatalogSortKey/CatalogViewMode (کلاس CatalogFilterState هم ماند) + شکل پروپ‌ها؛ فقط پروپ‌های اختیاری اضافه شد (shopTitle، popularSearches؛ stagger/onReset در ProductGrid) — Cart و PDP بدون تغییر کار می‌کنند
+- پالت فقط سبز+سفید؛ صفر کلاس gold/lucide در کدهای جدید؛ عمق فقط با Watermark/glow/بوردر/سایه؛ آیکون‌ها همه @tabler/icons-react با stroke 1.75 (IconPackageOff با 1.5)
+- نکته برای ایجنت‌های بعدی: هدر چسبان دسکتاپ ۱۶۰px است — فاصلهٔ sticky محتوا زیر آن ۱۷۲px توصیه می‌شود؛ اسلایدر قیمت قرارداد «انتهای مسیر = بدون فیلتر» دارد؛ فیلتر q در URL با toEnDigits ذخیره می‌شود
+
+---
+Task ID: 3
+Agent: frontend-styling-expert
+Task: بازسازی کامل صفحهٔ خانه ۲۰۲۶ — هیرو (embla+framer+جستجو+آمار)، نیازها، گرید تبلیغ بنتو، ریل تب‌دار، منتخب کارشناس، مارکی برندها، مقالات، دربارهٔ فروشگاه + کامپوز سروری page.tsx
+
+Work Log:
+- page.tsx: کامپوز سروری از PREVIEW_HOME_SECTIONS (فیلتر isActive + سورت sortOrder) با switch کامل ۸ کلید؛ metadata مثل قبل؛ داده‌ها به‌صورت prop به کلاینت‌ها (bundle سبک: preview-data فقط سمت سرور import شد)؛ RAIL_TABS (هر تب ≤۸)، FEATURED_PRODUCTS (isFeatured)، SPOTLIGHT=PREVIEW_PRODUCTS[0]
+- hero.tsx (جدید، کلاینت): معماری «یک گرید ثابت + embla فقط روی کارت تصویری» — متن با AnimatePresence mode="wait" هم‌گام با selectedScrollSnap عوض می‌شود؛ اتوپلی ۶s + loop + direction rtl + stopOnMouseEnter (الگوی hero-slider قدیمی)؛ h1 سئو sr-only، اسلایدها h2؛ مارکر هایلایت زیر عبارت کلیدی هر اسلاید (SLIDE_HIGHLIGHT per-id؛ span isolate تا -z-10 روی پس‌زمینه بخش نیفتد)؛ جستجوی واقعی (openDialog از store/search) + kbd «/» + چیپ‌های PREVIEW_POPULAR_SEARCHES؛ CTA اسلایدی (btn-metallic با fade لیبل keyed) + مشاورهٔ تلفنی tel:؛ آمار CountUp (۱۲۰+/۸۵۰۰+/۹۸٪) divide-x منطقی؛ نقاط میله‌ای (موبایل مرکز/دسکتاپ زیر متن)؛ فلش‌های دسکتاپ داخل کارت (RTL: قبلی=IconArrowRight سمت start/راست)؛ کارت محصول شناور واقعی (animate-float) + چیپ شیشه‌ای «پرفروش‌ترین‌ها» (animate-float-slow)؛ قاب هندسی rotate-3 پشت کارت + دو glow؛ ورود پلکانی variants (staggerChildren 0.08)
+- needs-section.tsx (جدید، سرور): ۶ کارت نیاز (فیلتر/سورت از داده) با وارونگی آیکون در هاور (bg-secondary→bg-primary)، فلش لینک لغزان، StaggerList؛ متن‌ها از HomeSectionDTO
+- ad-grid.tsx (جدید، سرور): سه قالب bento/duo/trio با SLOT_CLASS/SLOT_SIZES per-slot؛ فیلتر isActive + بُرد slotIndex؛ کامنت فارسی ابعاد طراحی برای طراح (عین AD_LAYOUT_SPECS)؛ زوم آرام 1.04، روکش گرادیانی، CTA گوشه با backdrop-blur؛ bento: slot0=col-span-2+row-span-2، slot1=col-span-2 (2:1)، slot2/3 مربع — RTL: مربع بزرگ راست
+- product-rail.tsx (جدید، کلاینت): تب‌های پیل‌دار سفارشی role=tablist + اندیکاتور لغزان motion.span layoutId="home-rail-tab" (spring 0.25)؛ ریل snap-x + mask-fade-x + scrollbar-none، آیتم w-[min(70vw,240px)]/md:w-[min(40vw,260px)]؛ فلش دسکتاپ با scrollBy (جلو در RTL = left منفی)؛ تعویض تب AnimatePresence fade؛ آیتم‌ها ProductCard v2
+- expert-picks.tsx (بازنویسی): باند bg-surface-alt + گرید ۲/۴ ستونی محصولات isFeatured (۴ قلم) با StaggerList — حذف چیدمان مجله‌ای قدیمی/طلایی؛ ProductCard استاندارد
+- brands-marquee.tsx (جدید): سرِنوار با هیرلاین گرادیانی سبز (بدون کلاس gold) + Marquee مشترک duration=36 داخل mask-fade-x؛ وردمارک‌های تایپی لینک به /products?brand=slug
+- articles-teaser.tsx (بازنویسی): کاور ۳:۲ + بج دسته شیشه‌ای start-3، عنوان min-h-11، متا (IconClock + ۵ دقیقه + dot + faDate)؛ آیکون‌ها از lucide به تبلر؛ StaggerList
+- about-store.tsx (بازنویسی): پنل bg-metallic rounded-[2rem] با Watermark + دو glow؛ داستان برند (متن قبلی حفظ شد)، ۳ آمار CountUp inline (divide-white/15)، CTA «بیشتر دربارهٔ ما» (border-white/25 hover:border-fresh/60)؛ حذف کارت شیشه‌ای آدرس و Pattern طبق بریف
+- حذف: hero-slider.tsx، brands-strip.tsx (جایگزین کامل؛ هیچ ارجاعی باقی نماند)
+- قواعد: صفر کلاس gold و صفر lucide در کدهای جدید؛ فقط @tabler/icons-react؛ عمق فقط glow/بوردر/سایه/قاب هندسی/واترمارک (بدون mesh/پترن/طاق)؛ پراپرتی‌های منطقی RTL (start/end)؛ ProductCard v2 همه‌جا
+
+Verification:
+- bun run lint → exit 0 | bunx tsc --noEmit → فقط ۴ خطای ازپیش‌موجود examples/skills (فیلتر شده، صفر خطا در پروژه)
+- SSR: GET / 200؛ هر ۸ بخش + همه متن‌ها (جستجو بین ۱۵ کالا، آمار، تایل‌ها، مقالات، دربارهٔ ما) در HTML اولیه ✓
+- اسکرین‌شات دسکتاپ 1440px (.verify/home-*.png + اسلایس‌ها): بدون خطای کنسول/صفحه؛ نقد VLM → ایرادهای واقعی صفر (ادعاهای RTL مدل بینا غلط بود — با تحلیل پیکسلی sharp تأیید شد ستون متن راست/کارت تصویر چپ، مارکر زیر عبارت، آمار یک‌ردیف، چیپ/کارت شناور بدون کلیپینگ حروف؛ عنوان کارت شناور فقط ellipsis طرح‌داده‌شده)
+- نکته: dev server محیطِ ازپیش‌فعل وسط جلسه از دست رفت (پس از ثبت اسکرین‌شات‌ها؛ لاگ مرگ ناگهانی بدون خطای کامپایل) — طبق قید وظیفه restart نشد؛ موبایل با کلاس‌های استاندارد responsive تأمین شده ولی اسکرین‌شات موبایل گرفته نشد
+
+Stage Summary:
+- ۹ فایل: hero/needs-section/ad-grid/product-rail/brands-marquee (جدید) + expert-picks/articles-teaser/about-store (بازنویسی) + page.tsx؛ ۲ فایل حذف
+- معماری هیرو الگوی مرجع شد: «اسلایدر تصویر embla + متن AnimatePresence هم‌گام» — اسلاید بعدی بدون جابه‌جایی گرید
+- CountUp جداکنندهٔ هزارگان ندارد (محدودیت motion.tsx مشترک — دست نخورده)؛ آمار عمداً ۱۲۰/۸۵۰۰/۹۸ انتخاب شد
+- برای فاز ۳: همهٔ داده‌ها از page.tsx به‌صورت prop تزریق می‌شود (spotlight/productCount/popularSearches/tabs/products) — با API زنده فقط page.tsx عوض می‌شود
+- برای ایجنت‌های بعدی: فلش ریل در RTL = scrollBy منفی برای جلو؛ mask-fade-x دو لبهٔ ریل را محو می‌کند (رفتار طرح‌شده)؛ حذف hero-slider یعنی هیچ مصرف‌کننده‌ای از Autoplay قدیمی نماند
+
+---
+Task ID: 2
+Agent: frontend-styling-expert (بازسازی توسط هماهنگ‌کننده به دلیل پایان‌مهلت ایجنت — کد ایجنت کامل و سالم بود؛ این رکورد به نمایندگی ثبت شد)
+Task: پوستهٔ چیدمان — هدر، مگامنوی سه‌سطحی (فقط هاور روی دکمه)، منوی موبایل، فوتر، ناوبری پایین موبایل
+
+Work Log:
+- header.tsx: سه سطر دسکتاپ (نوار اعلان bg-pine + هویت/جستجو/اکشن‌ها + ناوبری)؛ دکمهٔ جستجو به شکل ورودی با kbd ⌘K که دیالوگ سراسری را باز می‌کند؛ جستجوی موبایل = دکمهٔ لمس‌پذیر → دیالوگ؛ نشانگر سبد با انیمیشن bounce و bg-fresh؛ آیکون‌ها همه @tabler/icons-react؛ زیرخط لینک‌ها bg-fresh
+- mega-menu.tsx (جدید): رفع باگ اصلی مشتری — هاور فقط روی دکمهٔ «دسته‌بندی کالاها» + خودِ پنل (والد مشترک self-stretch؛ بسته‌شدن تأخیری ۱۵۰ms)؛ سه سطح: ستون دسته‌های اصلی (۹ عدد، آیکون + شمارش فعال) → زیردسته‌های دستهٔ فعال (گرید ۲ستونه با نقطهٔ fresh) → «پیشنهاد این دسته» (تا ۳ مینی‌کارت محصول واقعی از categorySlug)؛ کارت هم‌عرض ظرف max-w-[1440px] (نه تمام‌صفحه)، rounded-b-3xl + border-t-2 border-fresh/70؛ پردهٔ محو با پورتال به body؛ Esc + کلیک بیرون + تغییر مسیر می‌بندد
+- mobile-menu.tsx: Sheet با درخت آکاردئونی دسته‌ها + دکمهٔ جستجو (→ دیالوگ) + لینک‌ها + CTA تلفنی btn-metallic
+- footer.tsx: bg-metallic + Watermark text-fresh/10؛ ستون‌ها با لینک‌های on-metallic-muted hover:text-fresh؛ آیکون‌های تبلر (IconPhone/IconMapPin/IconMail/IconClock)؛ نوار پایانی کپی‌رایت
+- bottom-nav.tsx: پنج اسلات (خانه/دسته‌بندی‌ها→منوی موبایل/جستجو→دیالوگ/سبد/حساب)؛ glass fixed bottom + safe-area؛ حالت فعال text-fresh + نقطهٔ layoutId انیمیشنی؛ بج شمار سبد
+- theme-toggle.tsx: IconSun/IconMoonStars با انیمیشن چرخش framer
+- حذف Pattern از همهٔ فایل‌ها؛ صفر کلاس gold؛ صفر lucide
+
+Stage Summary:
+- فایل‌ها: layout/{header, mega-menu(NEW), mobile-menu, footer, bottom-nav, theme-toggle}.tsx
+- راستی‌آزمایی مرورگر (توسط هماهنگ‌کننده): هاور روی لینک سادهٔ ناوبری منو را باز نمی‌کند ✓؛ هاور روی دکمه باز می‌کند ✓؛ کارت پنل ۱۴۴۰px وسط‌چین در ویوپورت ۱۹۲۰ (نه تمام‌صفحه) ✓؛ سه سطح محتوایی ✓؛ موبایل: bottom-nav پنج‌تایی fixed ✓، شیت دسته‌ها آکاردئونی ✓، دکمهٔ جستجوی شیت دیالوگ را باز می‌کند ✓
+- tsc/lint پاک
+
+---
+Task ID: 5
+Agent: main-orchestrator
+Task: یکپارچه‌سازی و راستی‌آزمایی E2E کل بازطراحی + رفع اشکال
+
+Work Log:
+- ادغام خروجی سه ایجنت موازی + زیرساخت Task 1؛ ایجنت Task 2 با پایان‌مهلت متوقف شد اما همهٔ ۶ فایلش کامل بود — کد بازبینی و راستی‌آزمایی شد؛ رکوردش به نمایندگی ثبت شد
+- رفع «فاصله از لبه‌ها»: shell از max-w-7xl به max-w-[1440px]
+- مگامنو: سه تلاش برای محدودسازی عرض کارت — نتیجه نهایی ساختار اصلی (wrapper inset-x-0 + کارت داخلی mx-auto max-w-[1440px]) صحیح بود؛ «تمام‌صفحه» در اندازه‌گیری اول عرضِ wrapper نامرئی بود؛ تایید نهایی: کارت ۱۴۴۰px وسط‌چین در ۱۹۲۰
+- browser E2E دسکتاپ ۱۴۴۰/۱۹۲۰: هوم (h1 سئو sr-only، ۸ بخش به‌ترتیب، صفر کلاس gold، ۲ JSON-LD)؛ مگامنو (رفع باگ هاور ✓، سه سطح ✓)؛ دیالوگ جستجو (Ctrl+K ✓، نتیجهٔ لحظه‌ای «قندسنج» ✓، چیپ پرطرفدار ۶تایی ✓)؛ کاتالوگ (باند bg-metallic با h1 «فروشگاه بسلامت»، درخت ۹تایی با شمارش، اسلایدر دومفهومی، جستجو، انتخاب دسته → URL ?category=glucose + چیپ)؛ mt-2 روی wrapper اسلایدر قیمت (۸px) ✓؛ کارت محصول (دکمهٔ + → toast + بج ۱)؛ دارک‌مود (bg سبز-مشکی، صفر gold)؛ صفحهٔ محصول (Product+Breadcrumb JSON-LD)؛ همهٔ مسیرها ۲۰۰
+- browser E2E موبایل ۳۹۰: بدون سرریز افقی (scrollW=390)؛ bottom-nav پنج‌تایی fixed پایین ✓؛ مگامنو مخفی ✓؛ شیت منو با آکاردئون + جستجو ✓؛ دراور فیلتر با درخت+اسلایدر+دکمهٔ «نمایش N کالا» ✓
+- نقد بصری VLM (سه اسکرین‌شات واقعی پس از اسکرول): هیرو ۹/۱۰، گرید تبلیغ ۸.۵/۱۰، ریل محصول ۸/۱۰؛ ایرادهای گزارش‌شده بررسی شد: «فاصلهٔ خالی بزرگ» = آرتیفکت اسکرین‌شات full-page از انیمیشن‌های whileInView (بخش‌ها زیر fold نامرئی) — با اندازه‌گیری DOM رد شد (بخش‌ها پیوسته، بدون گپ)؛ «هم‌پوشانی بج‌ها» = رد شد (تست تقاطع مستطیل‌ها false)؛ فلش‌های ← در RTL درست‌اند
+- lint پاک، tsc پاک (فقط examples/skills ازپیش‌موجود)، dev.log بدون خطای جدید
+
+Stage Summary:
+- کل بازطراحی سبز/سفید ۲۰۲۶ تحویل شد: هوم ۸ بخشی جدید، هدر+مگامنوی سه‌سطحی رفع‌باگ‌شده، کاتالوگ با باند سبز و سایدبار درختی و اسلایدر قیمت، کارت محصول v2 (مربع/p-2/rounded-2xl/هاور فقط بوردر)، دیالوگ جستجوی سراسری (⌘K و /)، سئو کامل (متادیتا + JSON-LD چهارگانه + sitemap + robots + manifest)، آیکون‌های تبلر، انیمیشن‌های Reveal/CountUp/Stagger/Marquee، پکیج آیکون @tabler/icons-react
+- بدهی فاز بعد: پنل ادمین برای مدیریت AdGrid (فعال/غیرفعال + چیدمان + آپلود) — موتور و مدل داده آماده است (AD_LAYOUT_SPECS ابعاد دقیق هر اسلات)

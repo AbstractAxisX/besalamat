@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 import { ThemeProvider } from "next-themes";
@@ -7,8 +7,12 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
+import { JsonLd } from "@/components/shared/json-ld";
+import { SearchDialog } from "@/components/shared/search-dialog";
 import { brand } from "@/config/brand";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/jsonld";
 
+/* ── سئوی سراسری ── */
 export const metadata: Metadata = {
   metadataBase: new URL(brand.domain),
   title: {
@@ -16,19 +20,78 @@ export const metadata: Metadata = {
     template: brand.meta.titleTemplate,
   },
   description: brand.meta.defaultDescription,
+  applicationName: brand.name,
+  keywords: [
+    "لوازم پزشکی",
+    "تجهیزات پزشکی",
+    "فروشگاه لوازم پزشکی",
+    "فشارسنج",
+    "قندسنج",
+    "بخور",
+    "ویلچر",
+    "تخت بیمار",
+    "اقلام مصرفی پزشکی",
+    brand.name,
+  ],
+  authors: [{ name: brand.name, url: brand.domain }],
+  creator: brand.name,
+  publisher: brand.name,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: brand.meta.defaultTitle,
-    description: brand.meta.defaultDescription,
     type: "website",
     locale: "fa_IR",
+    url: brand.domain,
+    siteName: brand.name,
+    title: brand.meta.defaultTitle,
+    description: brand.meta.defaultDescription,
+    images: [
+      {
+        url: brand.meta.ogImage,
+        width: 1200,
+        height: 630,
+        alt: brand.name,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: brand.meta.defaultTitle,
+    description: brand.meta.defaultDescription,
+    images: [brand.meta.ogImage],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  formatDetection: {
+    telephone: false,
   },
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/logo.svg",
   },
+  category: "shopping",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0b4634" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a1511" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -69,8 +132,12 @@ export default function RootLayout({
             <div className="h-16 md:hidden" aria-hidden="true" />
           </div>
           <BottomNav />
+          <SearchDialog />
           <Toaster position="top-center" dir="rtl" richColors closeButton />
         </ThemeProvider>
+        {/* سئوی ساختاریافته — سراسری */}
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={webSiteJsonLd()} />
       </body>
     </html>
   );

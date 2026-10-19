@@ -13,6 +13,8 @@ import { ChevronLeft } from "lucide-react";
 import { ProductDetail } from "@/components/product/product-detail";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { JsonLd } from "@/components/shared/json-ld";
+import { breadcrumbJsonLd, productJsonLd } from "@/lib/jsonld";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +28,7 @@ import {
   PREVIEW_PRODUCT_DETAILS,
   PREVIEW_PRODUCTS,
 } from "@/lib/preview-data";
+import { brand } from "@/config/brand";
 import type { CategoryNode, ProductSummary } from "@/types/shop";
 
 interface ProductPageProps {
@@ -105,8 +108,34 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const truncatedTitle =
     product.title.length > 48 ? `${product.title.slice(0, 48)}…` : product.title;
 
+  const productUrl = `${brand.domain}/products/${product.slug}`;
+
+  /* سئوی ساختاریافته — Product + BreadcrumbList */
+  const breadcrumbEntries = [
+    { name: "خانه", url: brand.domain },
+    ...(parentCategory
+      ? [
+          {
+            name: parentCategory.title,
+            url: `${brand.domain}/products?category=${parentCategory.slug}`,
+          },
+        ]
+      : []),
+    ...(product.categoryTitle && product.categorySlug
+      ? [
+          {
+            name: product.categoryTitle,
+            url: `${brand.domain}/products?category=${product.categorySlug}`,
+          },
+        ]
+      : []),
+    { name: product.title, url: productUrl },
+  ];
+
   return (
     <div className="shell py-8 md:py-12">
+      <JsonLd data={productJsonLd(product, productUrl)} />
+      <JsonLd data={breadcrumbJsonLd(breadcrumbEntries)} />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

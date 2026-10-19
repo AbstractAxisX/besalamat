@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import {
   LogoMark,
-  Pattern,
   Watermark,
 } from "@/components/shared/brand-assets";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ export default function NotFound() {
   return (
     <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
       {/* تزئینات بسیار محو */}
-      <Pattern className="text-pine opacity-[0.03] dark:text-gold dark:opacity-[0.04]" />
       <Watermark className="top-1/2 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 text-pine opacity-[0.045] dark:text-gold dark:opacity-[0.06]" />
 
       <div className="shell relative py-16 text-center">

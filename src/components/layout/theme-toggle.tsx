@@ -2,14 +2,14 @@
 
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
-import { Moon, Sun } from "lucide-react";
+import { IconMoonStars, IconSun } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 
 /**
- * تعویض پوستهٔ روشن/تیره — دکمهٔ دایره‌ای ghost
+ * تعویض پوستهٔ روشن/تیره — دکمهٔ دایره‌ای ghost با آیکون‌های تبلر.
  * آیکون‌ها با CSS سوییچ می‌شوند (بدون mismatch هایدریشن)؛
- * چرخش ظریف framer فقط هنگام تعویض اجرا می‌شود.
+ * چرخش + مقیاس ظریف framer فقط هنگام تعویض اجرا می‌شود.
  */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -19,19 +19,23 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      className="size-9 rounded-full"
-      aria-label="تغییر پوسته روشن/تیره"
+      className="size-10 rounded-full"
+      aria-label="تغییر پوستهٔ روشن/تیره"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       <motion.span
         key={resolvedTheme ?? "init"}
         className="flex"
-        initial={{ rotate: -30, opacity: 0 }}
-        animate={{ rotate: 0, opacity: 1 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+        initial={{ rotate: -60, opacity: 0, scale: 0.6 }}
+        animate={{ rotate: 0, opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <Sun className="size-5 dark:hidden" aria-hidden="true" />
-        <Moon className="hidden size-5 dark:flex" aria-hidden="true" />
+        <IconSun className="size-5 dark:hidden" stroke={1.75} aria-hidden="true" />
+        <IconMoonStars
+          className="hidden size-5 dark:flex"
+          stroke={1.75}
+          aria-hidden="true"
+        />
       </motion.span>
     </Button>
   );

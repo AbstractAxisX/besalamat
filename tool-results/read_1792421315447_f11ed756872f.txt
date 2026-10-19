@@ -1,0 +1,760 @@
+     1→"use client";
+     2→
+     3→/**
+     4→ * نمای کاتالوگ — تولبار شناور، چیپ‌های فیلتر فعال، سایدبار چسبان
+     5→ * ─────────────────────────────
+     6→ * کل منطق سمت کلاینت روی دادهٔ props (بدون fetch)؛ هر تغییر state در URL
+     7→ * همگام می‌شود (router.replace بدون اسکرول) تا لینک‌ها قابل اشتراک باشند.
+     8→ * FilterPanel کاملاً کنترل‌شده است — state نزد همین کامپوننت می‌ماند.
+     9→ */
+    10→
+    11→import { useEffect, useMemo, useState } from "react";
+    12→import Image from "next/image";
+    13→import Link from "next/link";
+    14→import { usePathname, useRouter } from "next/navigation";
+    15→import {
+    16→  ChevronLeft,
+    17→  ChevronRight,
+    18→  LayoutGrid,
+    19→  List,
+    20→  SearchX,
+    21→  SlidersHorizontal,
+    22→  X,
+    23→} from "lucide-react";
+    24→
+    25→import { FilterPanel } from "@/components/catalog/filter-panel";
+    26→import { ProductGrid } from "@/components/product/product-grid";
+    27→import { Button } from "@/components/ui/button";
+    28→import {
+    29→  Drawer,
+    30→  DrawerContent,
+    31→  DrawerDescription,
+    32→  DrawerFooter,
+    33→  DrawerHeader,
+    34→  DrawerTitle,
+    35→  DrawerTrigger,
+    36→} from "@/components/ui/drawer";
+    37→import {
+    38→  Pagination,
+    39→  PaginationContent,
+    40→  PaginationEllipsis,
+    41→  PaginationItem,
+    42→  PaginationLink,
+    43→} from "@/components/ui/pagination";
+    44→import {
+    45→  Select,
+    46→  SelectContent,
+    47→  SelectItem,
+    48→  SelectTrigger,
+    49→  SelectValue,
+    50→} from "@/components/ui/select";
+    51→import {
+    52→  discountPercent,
+    53→  formatTomanPlain,
+    54→  toEnDigits,
+    55→  toFa,
+    56→} from "@/lib/format";
+    57→import { cn } from "@/lib/utils";
+    58→import type { BrandSummary, CategoryNode, ProductSummary } from "@/types/shop";
+    59→
+    60→/* ── انواع عمومی (مصرف صفحه‌های سرور) ── */
+    61→
+    62→export type CatalogSortKey = "newest" | "cheapest" | "expensive" | "popular";
+    63→export type CatalogViewMode = "grid" | "list";
+    64→
+    65→/** state فیلترها — برند به‌صورت آرایه‌ای از اسلاگ‌ها */
+    66→export interface CatalogFilterState {
+    67→  category: string | null;
+    68→  brands: string[];
+    69→  min: number | null;
+    70→  max: number | null;
+    71→  inStock: boolean;
+    72→  discount: boolean;
+    73→  q: string | null;
+    74→}
+    75→
+    76→/** مقدار اولیهٔ ساخته‌شده از searchParams در صفحهٔ سرور */
+    77→export interface CatalogInitialFilters {
+    78→  category?: string;
+    79→  brand?: string | string[];
+    80→  q?: string;
+    81→  sort?: CatalogSortKey;
+    82→  view?: CatalogViewMode;
+    83→  page?: number;
+    84→  min?: number;
+    85→  max?: number;
+    86→  inStock?: boolean;
+    87→  discount?: boolean;
+    88→}
+    89→
+    90→const PAGE_SIZE = 8;
+    91→
+    92→/** ارتفاع هدر دسکتاپ (۳ سطر) برای چسباندن تولبار/سایدبار درست زیر آن */
+    93→const DESKTOP_HEADER_H = 160;
+    94→const TOOLBAR_H = 76;
+    95→
+    96→const SORT_OPTIONS: { key: CatalogSortKey; label: string }[] = [
+    97→  { key: "newest", label: "جدیدترین" },
+    98→  { key: "cheapest", label: "ارزان‌ترین" },
+    99→  { key: "expensive", label: "گران‌ترین" },
+   100→  { key: "popular", label: "محبوب‌ترین" },
+   101→];
+   102→
+   103→/* ── ابزارهای خالص ── */
+   104→
+   105→/** نرمال‌سازی متن جستجو: ارقام لاتین + ی/ک یکسان‌شده */
+   106→function normalizeText(value: string): string {
+   107→  return toEnDigits(value)
+   108→    .replace(/ي/g, "ی")
+   109→    .replace(/ك/g, "ک")
+   110→    .trim()
+   111→    .toLowerCase();
+   112→}
+   113→
+   114→/** مجموعهٔ اسلاگ‌های یک دستهٔ انتخابی — والد، فرزندانش را هم شامل می‌شود */
+   115→function collectCategorySlugs(
+   116→  categories: CategoryNode[],
+   117→  slug: string,
+   118→): Set<string> | null {
+   119→  for (const parent of categories) {
+   120→    if (parent.slug === slug) {
+   121→      return new Set([parent.slug, ...parent.children.map((child) => child.slug)]);
+   122→    }
+   123→    if (parent.children.some((child) => child.slug === slug)) {
+   124→      return new Set([slug]);
+   125→    }
+   126→  }
+   127→  return null;
+   128→}
+   129→
+   130→/** عنوان دستهٔ فعال (والد یا فرزند) */
+   131→function findCategoryTitle(
+   132→  categories: CategoryNode[],
+   133→  slug: string,
+   134→): string | null {
+   135→  for (const parent of categories) {
+   136→    if (parent.slug === slug) return parent.title;
+   137→    const child = parent.children.find((item) => item.slug === slug);
+   138→    if (child) return child.title;
+   139→  }
+   140→  return null;
+   141→}
+   142→
+   143→/** پنجرهٔ صفحات: [۱، …، ۴، ۵، ۶، …، ۲۰] */
+   144→function pageWindow(current: number, total: number): (number | "ellipsis")[] {
+   145→  if (total <= 7) {
+   146→    return Array.from({ length: total }, (_, index) => index + 1);
+   147→  }
+   148→  const items: (number | "ellipsis")[] = [1];
+   149→  const start = Math.max(2, current - 1);
+   150→  const end = Math.min(total - 1, current + 1);
+   151→  if (start > 2) items.push("ellipsis");
+   152→  for (let page = start; page <= end; page += 1) items.push(page);
+   153→  if (end < total - 1) items.push("ellipsis");
+   154→  items.push(total);
+   155→  return items;
+   156→}
+   157→
+   158→interface CatalogViewProps {
+   159→  products: ProductSummary[];
+   160→  categories: CategoryNode[];
+   161→  brands: BrandSummary[];
+   162→  /** slug محصول → دستهٔ فرزند (برای فیلتر دسته‌بندی) */
+   163→  categoryByProduct: Record<string, string | null>;
+   164→  initialFilters: CatalogInitialFilters;
+   165→  /** صفحهٔ جستجو عنوان خودش را دارد و سرِ کاتالوگ را نمی‌خواهد */
+   166→  showHeading?: boolean;
+   167→}
+   168→
+   169→interface ActiveChip {
+   170→  key: string;
+   171→  label: string;
+   172→  clear: () => void;
+   173→}
+   174→
+   175→export function CatalogView({
+   176→  products,
+   177→  categories,
+   178→  brands,
+   179→  categoryByProduct,
+   180→  initialFilters,
+   181→}: CatalogViewProps) {
+   182→  const router = useRouter();
+   183→  const pathname = usePathname();
+   184→
+   185→  const [filters, setFilters] = useState<CatalogFilterState>(() => ({
+   186→    category: initialFilters.category ?? null,
+   187→    brands:
+   188→      initialFilters.brand == null
+   189→        ? []
+   190→        : Array.isArray(initialFilters.brand)
+   191→          ? initialFilters.brand
+   192→          : [initialFilters.brand],
+   193→    min: initialFilters.min ?? null,
+   194→    max: initialFilters.max ?? null,
+   195→    inStock: initialFilters.inStock ?? false,
+   196→    discount: initialFilters.discount ?? false,
+   197→    q: initialFilters.q ?? null,
+   198→  }));
+   199→  const [sort, setSort] = useState<CatalogSortKey>(
+   200→    initialFilters.sort ?? "newest",
+   201→  );
+   202→  const [view, setView] = useState<CatalogViewMode>(
+   203→    initialFilters.view === "list" ? "list" : "grid",
+   204→  );
+   205→  const [page, setPage] = useState(Math.max(1, initialFilters.page ?? 1));
+   206→  const [filtersOpen, setFiltersOpen] = useState(false);
+   207→
+   208→  /* تغییر فیلتر همیشه به صفحهٔ اول برمی‌گردد */
+   209→  const updateFilters = (patch: Partial<CatalogFilterState>) => {
+   210→    setFilters((prev) => ({ ...prev, ...patch }));
+   211→    setPage(1);
+   212→  };
+   213→
+   214→  const resetFilters = () => {
+   215→    setFilters({
+   216→      category: null,
+   217→      brands: [],
+   218→      min: null,
+   219→      max: null,
+   220→      inStock: false,
+   221→      discount: false,
+   222→      q: null,
+   223→    });
+   224→    setPage(1);
+   225→  };
+   226→
+   227→  /* ── فیلتر + سورت (روی دادهٔ props) ── */
+   228→
+   229→  const brandTitleBySlug = useMemo(
+   230→    () => new Map(brands.map((brand) => [brand.slug, brand.title])),
+   231→    [brands],
+   232→  );
+   233→
+   234→  const filtered = useMemo(() => {
+   235→    const query = filters.q?.trim();
+   236→    const needle = query ? normalizeText(query) : null;
+   237→    const categorySlugs = filters.category
+   238→      ? collectCategorySlugs(categories, filters.category)
+   239→      : null;
+   240→    const selectedBrandTitles = new Set(
+   241→      filters.brands
+   242→        .map((slug) => brandTitleBySlug.get(slug))
+   243→        .filter((title): title is string => title != null),
+   244→    );
+   245→
+   246→    const result = products.filter((product) => {
+   247→      if (categorySlugs) {
+   248→        const productCategory = categoryByProduct[product.slug] ?? null;
+   249→        if (productCategory == null || !categorySlugs.has(productCategory)) {
+   250→          return false;
+   251→        }
+   252→      }
+   253→      if (
+   254→        selectedBrandTitles.size > 0 &&
+   255→        !(product.brandTitle != null && selectedBrandTitles.has(product.brandTitle))
+   256→      ) {
+   257→        return false;
+   258→      }
+   259→      if (filters.min != null && product.price < filters.min) return false;
+   260→      if (filters.max != null && product.price > filters.max) return false;
+   261→      if (filters.inStock && !product.inStock) return false;
+   262→      if (filters.discount && product.comparePrice == null) return false;
+   263→      if (needle != null && needle !== "" && !normalizeText(product.title).includes(needle)) {
+   264→        return false;
+   265→      }
+   266→      return true;
+   267→    });
+   268→
+   269→    switch (sort) {
+   270→      case "cheapest":
+   271→        return [...result].sort((a, b) => a.price - b.price);
+   272→      case "expensive":
+   273→        return [...result].sort((a, b) => b.price - a.price);
+   274→      /* آرایهٔ preview قدیمی→جدید است؛ newest یعنی وارونهٔ آن */
+   275→      case "newest":
+   276→        return [...result].reverse();
+   277→      case "popular":
+   278→        return result;
+   279→    }
+   280→  }, [products, categories, categoryByProduct, brandTitleBySlug, filters, sort]);
+   281→
+   282→  /* ── صفحه‌بندی ── */
+   283→
+   284→  const totalCount = filtered.length;
+   285→  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+   286→  const safePage = Math.min(page, totalPages);
+   287→  const pageItems = useMemo(
+   288→    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+   289→    [filtered, safePage],
+   290→  );
+   291→
+   292→  const goToPage = (next: number) => {
+   293→    setPage(Math.min(Math.max(1, next), totalPages));
+   294→    window.scrollTo({ top: 0 });
+   295→  };
+   296→
+   297→  /* ── همگام‌سازی با URL (فقط مقادیر غیرپیش‌فرض) ── */
+   298→
+   299→  useEffect(() => {
+   300→    const params = new URLSearchParams();
+   301→    if (filters.category) params.set("category", filters.category);
+   302→    for (const slug of filters.brands) params.append("brand", slug);
+   303→    const query = filters.q?.trim();
+   304→    if (query) params.set("q", toEnDigits(query));
+   305→    if (sort !== "newest") params.set("sort", sort);
+   306→    if (view !== "grid") params.set("view", view);
+   307→    if (safePage > 1) params.set("page", String(safePage));
+   308→    if (filters.min != null) params.set("min", String(filters.min));
+   309→    if (filters.max != null) params.set("max", String(filters.max));
+   310→    if (filters.inStock) params.set("inStock", "1");
+   311→    if (filters.discount) params.set("discount", "1");
+   312→    const queryString = params.toString();
+   313→    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+   314→      scroll: false,
+   315→    });
+   316→  }, [filters, sort, view, safePage, pathname, router]);
+   317→
+   318→  /* ── مشتقات نمایشی ── */
+   319→
+   320→  const activeCategoryTitle = filters.category
+   321→    ? findCategoryTitle(categories, filters.category)
+   322→    : null;
+   323→
+   324→  const activeChips = useMemo<ActiveChip[]>(() => {
+   325→    const chips: ActiveChip[] = [];
+   326→    if (filters.category != null) {
+   327→      chips.push({
+   328→        key: "category",
+   329→        label: activeCategoryTitle ?? filters.category,
+   330→        clear: () => updateFilters({ category: null }),
+   331→      });
+   332→    }
+   333→    for (const slug of filters.brands) {
+   334→      chips.push({
+   335→        key: `brand-${slug}`,
+   336→        label: brandTitleBySlug.get(slug) ?? slug,
+   337→        clear: () =>
+   338→          updateFilters({
+   339→            brands: filters.brands.filter((item) => item !== slug),
+   340→          }),
+   341→      });
+   342→    }
+   343→    if (filters.min != null) {
+   344→      chips.push({
+   345→        key: "min",
+   346→        label: `از ${formatTomanPlain(filters.min)}`,
+   347→        clear: () => updateFilters({ min: null }),
+   348→      });
+   349→    }
+   350→    if (filters.max != null) {
+   351→      chips.push({
+   352→        key: "max",
+   353→        label: `تا ${formatTomanPlain(filters.max)}`,
+   354→        clear: () => updateFilters({ max: null }),
+   355→      });
+   356→    }
+   357→    if (filters.inStock) {
+   358→      chips.push({
+   359→        key: "inStock",
+   360→        label: "فقط موجود",
+   361→        clear: () => updateFilters({ inStock: false }),
+   362→      });
+   363→    }
+   364→    if (filters.discount) {
+   365→      chips.push({
+   366→        key: "discount",
+   367→        label: "فقط تخفیف‌دار",
+   368→        clear: () => updateFilters({ discount: false }),
+   369→      });
+   370→    }
+   371→    const query = filters.q?.trim();
+   372→    if (query) {
+   373→      chips.push({
+   374→        key: "q",
+   375→        label: `جستجو: «${query}»`,
+   376→        clear: () => updateFilters({ q: null }),
+   377→      });
+   378→    }
+   379→    return chips;
+   380→  }, [filters, activeCategoryTitle, brandTitleBySlug]);
+   381→
+   382→  const hasActiveFilters = activeChips.length > 0;
+   383→
+   384→  const filterPanel = (
+   385→    <FilterPanel
+   386→      categories={categories}
+   387→      brands={brands}
+   388→      filters={filters}
+   389→      onChange={updateFilters}
+   390→      onReset={resetFilters}
+   391→    />
+   392→  );
+   393→
+   394→  return (
+   395→    <div>
+   396→      {/* ── تولبار — شناورِ شیشه‌ای در دسکتاپ ── */}
+   397→      <div
+   398→        className="rounded-2xl border border-border/70 bg-card px-4 py-3 shadow-card lg:sticky lg:z-30 lg:bg-background/85 lg:backdrop-blur-md"
+   399→        style={{ top: `${DESKTOP_HEADER_H - 1}px` }}
+   400→      >
+   401→        <div className="flex flex-wrap items-center gap-3">
+   402→          {/* فیلتر موبایل — دراور پایین‌کش */}
+   403→          <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
+   404→            <DrawerTrigger asChild>
+   405→              <Button
+   406→                type="button"
+   407→                variant="outline"
+   408→                className="h-11 gap-2 rounded-full border-border/70 lg:hidden"
+   409→              >
+   410→                <SlidersHorizontal className="size-4" aria-hidden="true" />
+   411→                فیلترها
+   412→                {hasActiveFilters ? (
+   413→                  <span className="flex size-5 items-center justify-center rounded-full bg-gold text-[10px] font-black text-gold-foreground">
+   414→                    {toFa(activeChips.length)}
+   415→                  </span>
+   416→                ) : null}
+   417→              </Button>
+   418→            </DrawerTrigger>
+   419→            <DrawerContent className="rounded-t-3xl!">
+   420→              <DrawerHeader className="text-start">
+   421→                <DrawerTitle className="text-base font-bold">
+   422→                  فیلترها
+   423→                </DrawerTitle>
+   424→                <DrawerDescription className="sr-only">
+   425→                  فیلتر محصولات بر اساس دسته‌بندی، برند، قیمت و موجودی
+   426→                </DrawerDescription>
+   427→              </DrawerHeader>
+   428→              <div className="flex-1 overflow-y-auto px-4 pb-2">
+   429→                {filterPanel}
+   430→              </div>
+   431→              <DrawerFooter className="border-t border-border/60">
+   432→                {hasActiveFilters ? (
+   433→                  <Button
+   434→                    type="button"
+   435→                    variant="ghost"
+   436→                    className="h-9 text-destructive hover:text-destructive"
+   437→                    onClick={resetFilters}
+   438→                  >
+   439→                    حذف همهٔ فیلترها
+   440→                  </Button>
+   441→                ) : null}
+   442→                <Button
+   443→                  type="button"
+   444→                  className="h-12 rounded-xl text-base font-bold"
+   445→                  onClick={() => setFiltersOpen(false)}
+   446→                >
+   447→                  مشاهدهٔ {toFa(totalCount)} کالا
+   448→                </Button>
+   449→              </DrawerFooter>
+   450→            </DrawerContent>
+   451→          </Drawer>
+   452→
+   453→          {/* شمار نتیجه */}
+   454→          <p className="hidden text-sm text-muted-foreground lg:block">
+   455→            {toFa(totalCount)} کالا
+   456→          </p>
+   457→
+   458→          <div className="ms-auto flex items-center gap-2">
+   459→            {/* سورت */}
+   460→            <Select
+   461→              value={sort}
+   462→              onValueChange={(value) => {
+   463→                const option = SORT_OPTIONS.find((item) => item.key === value);
+   464→                if (option) {
+   465→                  setSort(option.key);
+   466→                  setPage(1);
+   467→                }
+   468→              }}
+   469→            >
+   470→              <SelectTrigger
+   471→                className="h-11 w-[10.5rem] rounded-full border-border/70"
+   472→                aria-label="مرتب‌سازی محصولات"
+   473→              >
+   474→                <SelectValue placeholder="مرتب‌سازی" />
+   475→              </SelectTrigger>
+   476→              <SelectContent>
+   477→                {SORT_OPTIONS.map((option) => (
+   478→                  <SelectItem key={option.key} value={option.key}>
+   479→                    {option.label}
+   480→                  </SelectItem>
+   481→                ))}
+   482→              </SelectContent>
+   483→            </Select>
+   484→
+   485→            {/* نمای شبکه/فهرست */}
+   486→            <div
+   487→              className="flex items-center gap-0.5 rounded-full border border-border/70 bg-card p-1"
+   488→              role="group"
+   489→              aria-label="نوع نمایش محصولات"
+   490→            >
+   491→              <Button
+   492→                type="button"
+   493→                variant="ghost"
+   494→                size="icon"
+   495→                className={cn(
+   496→                  "size-9 rounded-full",
+   497→                  view === "grid"
+   498→                    ? "bg-accent text-primary"
+   499→                    : "text-muted-foreground",
+   500→                )}
+   501→                onClick={() => setView("grid")}
+   502→                aria-label="نمای شبکه‌ای"
+   503→                aria-pressed={view === "grid"}
+   504→              >
+   505→                <LayoutGrid className="size-4" aria-hidden="true" />
+   506→              </Button>
+   507→              <Button
+   508→                type="button"
+   509→                variant="ghost"
+   510→                size="icon"
+   511→                className={cn(
+   512→                  "size-9 rounded-full",
+   513→                  view === "list"
+   514→                    ? "bg-accent text-primary"
+   515→                    : "text-muted-foreground",
+   516→                )}
+   517→                onClick={() => setView("list")}
+   518→                aria-label="نمای فهرستی"
+   519→                aria-pressed={view === "list"}
+   520→              >
+   521→                <List className="size-4" aria-hidden="true" />
+   522→              </Button>
+   523→            </div>
+   524→          </div>
+   525→        </div>
+   526→      </div>
+   527→
+   528→      {/* ── چیپ‌های فیلتر فعال ── */}
+   529→      {hasActiveFilters ? (
+   530→        <div
+   531→          className="mt-4 flex flex-wrap items-center gap-2"
+   532→          aria-label="فیلترهای فعال"
+   533→        >
+   534→          {activeChips.map((chip) => (
+   535→            <button
+   536→              key={chip.key}
+   537→              type="button"
+   538→              onClick={chip.clear}
+   539→              className="group inline-flex h-8 items-center gap-1.5 rounded-full border border-gold/40 bg-gold-soft/25 px-3 text-xs font-medium text-foreground transition-colors hover:bg-gold-soft/50 dark:bg-gold-soft/15 dark:hover:bg-gold-soft/25"
+   540→            >
+   541→              {chip.label}
+   542→              <X
+   543→                className="size-3.5 text-muted-foreground transition-colors group-hover:text-destructive"
+   544→                aria-hidden="true"
+   545→              />
+   546→            </button>
+   547→          ))}
+   548→          <button
+   549→            type="button"
+   550→            onClick={resetFilters}
+   551→            className="mr-1 text-xs font-medium text-destructive transition-colors hover:text-destructive/80"
+   552→          >
+   553→            حذف همه
+   554→          </button>
+   555→        </div>
+   556→      ) : null}
+   557→
+   558→      {/* ── بدنه: سایدبار فیلتر + محتوا ── */}
+   559→      <div className="mt-6 flex gap-8">
+   560→        <aside
+   561→          className="hidden w-64 shrink-0 lg:block"
+   562→          aria-label="فیلترهای محصولات"
+   563→        >
+   564→          <div
+   565→            className="sticky overflow-y-auto pb-4 pe-1"
+   566→            style={{
+   567→              top: `${DESKTOP_HEADER_H + TOOLBAR_H}px`,
+   568→              maxHeight: `calc(100vh - ${DESKTOP_HEADER_H + TOOLBAR_H + 24}px)`,
+   569→            }}
+   570→          >
+   571→            {filterPanel}
+   572→          </div>
+   573→        </aside>
+   574→
+   575→        <div className="min-w-0 flex-1">
+   576→          {totalCount === 0 ? (
+   577→            <div className="card-luxe flex flex-col items-center gap-4 px-4 py-20 text-center">
+   578→              <span className="flex size-16 items-center justify-center rounded-full bg-accent text-primary">
+   579→                <SearchX className="size-7" aria-hidden="true" />
+   580→              </span>
+   581→              <div>
+   582→                <p className="font-bold text-foreground">
+   583→                  {hasActiveFilters
+   584→                    ? "محصولی مطابق فیلترهای شما یافت نشد"
+   585→                    : "محصولی یافت نشد"}
+   586→                </p>
+   587→                <p className="mt-1 text-sm text-muted-foreground">
+   588→                  فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید
+   589→                </p>
+   590→              </div>
+   591→              {hasActiveFilters ? (
+   592→                <Button
+   593→                  type="button"
+   594→                  className="h-10 rounded-full px-6"
+   595→                  onClick={resetFilters}
+   596→                >
+   597→                  حذف فیلترها
+   598→                </Button>
+   599→              ) : null}
+   600→            </div>
+   601→          ) : view === "grid" ? (
+   602→            <ProductGrid products={pageItems} />
+   603→          ) : (
+   604→            <div className="space-y-3">
+   605→              {pageItems.map((product) => (
+   606→                <CatalogListCard key={product.id} product={product} />
+   607→              ))}
+   608→            </div>
+   609→          )}
+   610→
+   611→          {totalPages > 1 ? (
+   612→            <Pagination className="mt-10">
+   613→              <PaginationContent>
+   614→                {/* در RTL دکمهٔ «قبلی» سمت راست قرار می‌گیرد */}
+   615→                <PaginationItem>
+   616→                  <PaginationLink
+   617→                    href="#"
+   618→                    aria-label="صفحهٔ قبلی"
+   619→                    aria-disabled={safePage === 1}
+   620→                    className={cn(
+   621→                      "size-11",
+   622→                      safePage === 1 && "pointer-events-none opacity-40",
+   623→                    )}
+   624→                    onClick={(event) => {
+   625→                      event.preventDefault();
+   626→                      goToPage(safePage - 1);
+   627→                    }}
+   628→                  >
+   629→                    <ChevronRight className="size-4" aria-hidden="true" />
+   630→                  </PaginationLink>
+   631→                </PaginationItem>
+   632→
+   633→                {pageWindow(safePage, totalPages).map((item, index) =>
+   634→                  item === "ellipsis" ? (
+   635→                    <PaginationItem key={`ellipsis-${index}`}>
+   636→                      <PaginationEllipsis />
+   637→                    </PaginationItem>
+   638→                  ) : (
+   639→                    <PaginationItem key={item}>
+   640→                      <PaginationLink
+   641→                        href="#"
+   642→                        isActive={item === safePage}
+   643→                        className="size-11"
+   644→                        onClick={(event) => {
+   645→                          event.preventDefault();
+   646→                          goToPage(item);
+   647→                        }}
+   648→                      >
+   649→                        {toFa(item)}
+   650→                      </PaginationLink>
+   651→                    </PaginationItem>
+   652→                  ),
+   653→                )}
+   654→
+   655→                <PaginationItem>
+   656→                  <PaginationLink
+   657→                    href="#"
+   658→                    aria-label="صفحهٔ بعدی"
+   659→                    aria-disabled={safePage === totalPages}
+   660→                    className={cn(
+   661→                      "size-11",
+   662→                      safePage === totalPages && "pointer-events-none opacity-40",
+   663→                    )}
+   664→                    onClick={(event) => {
+   665→                      event.preventDefault();
+   666→                      goToPage(safePage + 1);
+   667→                    }}
+   668→                  >
+   669→                    <ChevronLeft className="size-4" aria-hidden="true" />
+   670→                  </PaginationLink>
+   671→                </PaginationItem>
+   672→              </PaginationContent>
+   673→            </Pagination>
+   674→          ) : null}
+   675→        </div>
+   676→      </div>
+   677→    </div>
+   678→  );
+   679→}
+   680→
+   681→/* ── کارت افقی نمای فهرستی ── */
+   682→
+   683→function CatalogListCard({ product }: { product: ProductSummary }) {
+   684→  const discount = discountPercent(product.price, product.comparePrice);
+   685→
+   686→  return (
+   687→    <div className="group card-luxe flex items-stretch gap-4 p-4 transition-all duration-300 hover:border-gold/40 hover:shadow-lift">
+   688→      <Link
+   689→        href={`/products/${product.slug}`}
+   690→        className="img-canvas relative size-24 shrink-0 overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:size-28"
+   691→      >
+   692→        <Image
+   693→          src={product.image}
+   694→          alt={product.title}
+   695→          fill
+   696→          sizes="112px"
+   697→          className={cn(
+   698→            "object-contain p-1.5 transition-transform duration-500 group-hover:scale-[1.06]",
+   699→            !product.inStock && "opacity-40 grayscale",
+   700→          )}
+   701→        />
+   702→      </Link>
+   703→
+   704→      <div className="flex min-w-0 flex-1 flex-col">
+   705→        {product.brandTitle ? (
+   706→          <p className="text-[11px] font-medium text-muted-foreground">
+   707→            {product.brandTitle}
+   708→          </p>
+   709→        ) : null}
+   710→        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+   711→          <h3 className="line-clamp-1 min-w-0 basis-full text-sm leading-6 font-medium text-foreground transition-colors group-hover:text-primary sm:basis-auto sm:flex-1">
+   712→            {product.title}
+   713→          </h3>
+   714→          {discount != null && product.inStock ? (
+   715→            <span className="rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-black text-gold-foreground">
+   716→              ٪{toFa(discount)}
+   717→            </span>
+   718→          ) : null}
+   719→          {product.isNew && product.inStock ? (
+   720→            <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground">
+   721→              جدید
+   722→            </span>
+   723→          ) : null}
+   724→          {!product.inStock ? (
+   725→            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-bold text-secondary-foreground">
+   726→              ناموجود
+   727→            </span>
+   728→          ) : null}
+   729→        </div>
+   730→
+   731→        <div className="mt-auto flex items-end justify-between gap-3 pt-2">
+   732→          {product.inStock ? (
+   733→            <div className="min-w-0">
+   734→              {product.comparePrice != null ? (
+   735→                <p className="text-xs text-muted-foreground line-through decoration-destructive/50">
+   736→                  {formatTomanPlain(product.comparePrice)}
+   737→                </p>
+   738→              ) : null}
+   739→              <p className="text-base font-black text-primary md:text-lg">
+   740→                {formatTomanPlain(product.price)}{" "}
+   741→                <span className="text-xs font-normal text-muted-foreground">
+   742→                  تومان
+   743→                </span>
+   744→              </p>
+   745→            </div>
+   746→          ) : (
+   747→            <p className="text-xs text-warning">به‌زودی موجود می‌شود</p>
+   748→          )}
+   749→          <Button
+   750→            asChild
+   751→            className="h-10 shrink-0 rounded-full px-6 text-xs font-bold"
+   752→          >
+   753→            <Link href={`/products/${product.slug}`}>مشاهدهٔ محصول</Link>
+   754→          </Button>
+   755→        </div>
+   756→      </div>
+   757→    </div>
+   758→  );
+   759→}
+   760→

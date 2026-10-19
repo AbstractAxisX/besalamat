@@ -1,13 +1,14 @@
 /**
- * تیزر مقالات — کارت‌های ادیتوریال با کاور و چشم‌بند طلایی
+ * تیزر مقالات — سه کارت ادیتوریال با کاور ۳:۲
  * ─────────────────────────────
- * Server Component؛ کل کارت یک Link به صفحهٔ مقاله است.
+ * Server Component + ورود پلکانی؛ کل کارت یک Link به مقاله.
  */
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { IconClock } from "@tabler/icons-react";
 
+import { StaggerItem, StaggerList } from "@/components/shared/motion";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { faDate } from "@/lib/jalali";
 import type { ArticleSummary } from "@/types/shop";
@@ -23,65 +24,65 @@ export function ArticlesTeaser({
   subtitle,
   articles,
 }: ArticlesTeaserProps) {
+  if (articles.length === 0) return null;
+
   return (
-    <section className="shell py-12 md:py-16">
+    <section className="shell py-14 md:py-20" aria-label={title}>
       <SectionHeading
-        eyebrow="مجله"
+        eyebrow="مجلهٔ سلامت"
         title={title}
         subtitle={subtitle ?? undefined}
         href="/blog"
         hrefLabel="همهٔ مقالات"
       />
 
-      <div className="grid gap-4 md:grid-cols-3 md:gap-5">
-        {articles.map((article, index) => (
-          <Link
-            key={article.id}
-            href={`/blog/${article.slug}`}
-            className="group card-luxe relative block h-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            {/* کاور */}
-            <div className="relative aspect-[16/10] overflow-hidden">
-              <Image
-                src={article.coverUrl}
-                alt={article.title}
-                fill
-                sizes="(max-width:768px) 100vw, 33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-              />
-              {/* چشم‌بند دسته روی کاور */}
-              {article.categoryTitle ? (
-                <span className="absolute bottom-3 start-3 rounded-full bg-pine/80 px-3 py-1 text-[10px] font-bold text-white backdrop-blur">
-                  {article.categoryTitle}
-                </span>
-              ) : null}
-            </div>
-
-            {/* بدنه */}
-            <div className="p-5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Calendar className="size-3.5" aria-hidden="true" />
-                {faDate(article.publishedAt)}
-              </span>
-
-              <h3 className="mt-2.5 line-clamp-2 text-[15px] leading-7 font-bold text-foreground transition-colors group-hover:text-primary">
-                {article.title}
-              </h3>
-              <p className="mt-2 line-clamp-2 text-[13px] leading-6 text-muted-foreground">
-                {article.excerpt}
-              </p>
-
-              <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-gold">
-                ادامهٔ مطلب
-                <ArrowLeft
-                  className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5"
-                  aria-hidden="true"
+      <StaggerList
+        className="grid grid-cols-1 gap-5 sm:grid-cols-3"
+        step={0.1}
+      >
+        {articles.map((article) => (
+          <StaggerItem key={article.id} className="h-full">
+            <Link
+              href={`/blog/${article.slug}`}
+              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card outline-none transition-colors duration-300 hover:border-fresh/60 focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {/* کاور + بج دسته */}
+              <span className="relative block aspect-[3/2] overflow-hidden">
+                <Image
+                  src={article.coverUrl}
+                  alt={article.title}
+                  fill
+                  sizes="(max-width:640px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
+                {article.categoryTitle ? (
+                  <span className="absolute start-3 top-3 rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold text-primary backdrop-blur">
+                    {article.categoryTitle}
+                  </span>
+                ) : null}
               </span>
-            </div>
-          </Link>
+
+              {/* بدنه */}
+              <span className="flex flex-1 flex-col p-4">
+                <h3 className="min-h-11 line-clamp-2 text-[14px] leading-6 font-bold text-foreground transition-colors group-hover:text-primary">
+                  {article.title}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted-foreground">
+                  {article.excerpt}
+                </p>
+                <p className="mt-3 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <IconClock className="size-3.5" aria-hidden="true" />
+                  ۵ دقیقه مطالعه
+                  <span aria-hidden="true" className="px-0.5">
+                    ·
+                  </span>
+                  {faDate(article.publishedAt)}
+                </p>
+              </span>
+            </Link>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerList>
     </section>
   );
 }

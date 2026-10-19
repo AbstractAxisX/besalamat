@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { Logo, Pattern, Watermark } from "@/components/shared/brand-assets";
+import { Logo, Watermark } from "@/components/shared/brand-assets";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
@@ -84,7 +84,6 @@ export default function AboutPage() {
     <>
       {/* هیروی وسیع متالیک */}
       <section className="bg-metallic relative overflow-hidden">
-        <Pattern className="text-gold opacity-[0.05]" />
         <Watermark className="top-1/2 end-[-5rem] h-80 w-80 -translate-y-1/2 text-gold opacity-[0.07] md:end-[-7rem] md:h-[24rem] md:w-[24rem]" />
         <div className="shell relative py-14 md:py-20">
           <Logo light />

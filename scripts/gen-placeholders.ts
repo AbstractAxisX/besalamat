@@ -1,21 +1,23 @@
 /**
- * تولید پلیس‌هولدرهای SVG — «بسلامت»
+ * تولید پلیس‌هولدرهای SVG — «بسلامت» (پالت ۲۰۲۶: سبز + سفید)
  * ────────────────────────────────
  * اجرا:   bun scripts/gen-placeholders.ts   (اسکریپت npm: assets:generate)
  * خروجی:  public/placeholders/*.svg
  *
  * ⚠️ SVGها به‌عنوان <img> لود می‌شوند و فونت اجرا نمی‌شود → هیچ متنی در فایل‌ها نیست.
  * بدون وابستگی خارجی (فقط node:fs). همهٔ رنگ‌ها از توکن‌های برند (globals.css).
+ * زبان بصری: حلقه‌های نرم، قوس‌ها، نقطه‌ها — بدون پترن مشبک.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-/* ── پالت برند ── */
-const PINE = "#0C3B2E"; // سبز کاجی
-const PINE_LIGHT = "#14532D"; // سبز روشن‌تر (متالیک)
-const GOLD = "#C9A24B"; // طلایی
-const IVORY = "#F7F6F1"; // عاجی
-const MIST = "#E9F3EC"; // سبز خیلی روشن
+/* ── پالت برند ۲۰۲۶ ── */
+const PINE = "#0B4634"; // سبز عمیق
+const PINE_LIGHT = "#0F5C43"; // سبز روشن‌تر (گرادیان عمیق)
+const FRESH = "#1E9E6A"; // سبز تازه — اکسنت
+const FRESH_SOFT = "#8FD4B3"; // سبز روشن ملایم — روی سطوح تیره
+const IVORY = "#F8FBF9"; // سفید سبزفام
+const MIST = "#E7F2EB"; // مه سبز خیلی روشن
 
 const OUT_DIR = join(process.cwd(), "public", "placeholders");
 
@@ -41,44 +43,45 @@ function lg(id: string, from: string, to: string, angle: number): string {
   );
 }
 
-/* ── پترن کاشی‌شوندهٔ ستارهٔ هشت‌پر (دو مربع، یکی ۴۵° چرخیده) ── */
-function starPattern(id: string, cell: number, side: number, sw: number, opacity: number): string {
-  const c = cell / 2;
-  const h = side / 2;
-  return (
-    `<pattern id="${id}" width="${n(cell)}" height="${n(cell)}" patternUnits="userSpaceOnUse">` +
-    `<g fill="none" stroke="${GOLD}" stroke-width="${n(sw)}" opacity="${opacity}" stroke-linejoin="round">` +
-    `<rect x="${n(c - h)}" y="${n(c - h)}" width="${n(side)}" height="${n(side)}"/>` +
-    `<rect x="${n(c - h)}" y="${n(c - h)}" width="${n(side)}" height="${n(side)}" transform="rotate(45 ${n(c)} ${n(c)})"/>` +
-    `</g></pattern>`
-  );
-}
-
-/* ── هالهٔ نور طلایی (گرادیان شعاعی) ── */
-function glowDef(id: string): string {
+/* ── هالهٔ نور سبز (گرادیان شعاعی) ── */
+function glowDef(id: string, color = FRESH): string {
   return (
     `<radialGradient id="${id}">` +
-    `<stop offset="0%" stop-color="${GOLD}" stop-opacity="0.14"/>` +
-    `<stop offset="55%" stop-color="${GOLD}" stop-opacity="0.05"/>` +
-    `<stop offset="100%" stop-color="${GOLD}" stop-opacity="0"/>` +
+    `<stop offset="0%" stop-color="${color}" stop-opacity="0.16"/>` +
+    `<stop offset="55%" stop-color="${color}" stop-opacity="0.06"/>` +
+    `<stop offset="100%" stop-color="${color}" stop-opacity="0"/>` +
     `</radialGradient>`
   );
 }
 
-/* ── حلقهٔ طلایی ── */
-function goldRing(cx: number, cy: number, r: number, sw: number, opacity: number): string {
-  return `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="none" stroke="${GOLD}" stroke-width="${n(sw)}" opacity="${opacity}"/>`;
+/* ── حلقهٔ سبز ── */
+function ring(cx: number, cy: number, r: number, sw: number, opacity: number, color = FRESH): string {
+  return `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="none" stroke="${color}" stroke-width="${n(sw)}" opacity="${opacity}"/>`;
 }
 
 function glowCircle(id: string, cx: number, cy: number, r: number): string {
   return `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="url(#${id})"/>`;
 }
 
-/* ── لوزی طلایی ── */
-function diamond(cx: number, cy: number, s: number, opacity: number): string {
+/* ── نقطهٔ توپر ── */
+function dot(cx: number, cy: number, r: number, opacity: number, color = FRESH): string {
+  return `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${color}" opacity="${opacity}"/>`;
+}
+
+/* ── علامت بعلاوهٔ ظریف ── */
+function plus(cx: number, cy: number, s: number, sw: number, opacity: number, color = FRESH): string {
   return (
-    `<path d="M ${n(cx)} ${n(cy - s)} L ${n(cx + s)} ${n(cy)} L ${n(cx)} ${n(cy + s)} L ${n(cx - s)} ${n(cy)} Z"` +
-    ` fill="${GOLD}" opacity="${opacity}"/>`
+    `<path d="M ${n(cx - s)} ${n(cy)} H ${n(cx + s)} M ${n(cx)} ${n(cy - s)} V ${n(cx === cx ? cy + s : cy + s)}" ` +
+    `stroke="${color}" stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}"/>`
+  );
+}
+
+/* ── قوس نرم ── */
+function arc(cx: number, cy: number, r: number, a0: number, a1: number, sw: number, opacity: number, color = FRESH): string {
+  const p = (a: number) => `${n(cx + r * Math.cos((a * Math.PI) / 180))} ${n(cy + r * Math.sin((a * Math.PI) / 180))}`;
+  return (
+    `<path d="M ${p(a0)} A ${n(r)} ${n(r)} 0 0 1 ${p(a1)}" fill="none" stroke="${color}" ` +
+    `stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}"/>`
   );
 }
 
@@ -100,7 +103,7 @@ function place(
   );
 }
 
-/* ══════════ گلیف‌های خطی مینیمال (۹ گلیف، مختصات محلی ±۱۰۰) ══════════ */
+/* ══════════ گلیف‌های خطی مینیمال (مختصات محلی ±۱۰۰) ══════════ */
 type GlyphKey =
   | "bp"
   | "glucose"
@@ -187,7 +190,7 @@ function cedarBranch(x: number, baseY: number, h: number, lean: number, sw: numb
     const side = i % 2 === 0 ? 1 : -1;
     out += `<path d="M ${n(px)} ${n(py)} l ${n(side * len)} ${n(len * 0.55)}"/>`;
   });
-  return `<g fill="none" stroke="${GOLD}" stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}">${out}</g>`;
+  return `<g fill="none" stroke="${FRESH_SOFT}" stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}">${out}</g>`;
 }
 
 /* ══════════ درخت سرو مینیمال (برای OG) ══════════ */
@@ -201,115 +204,115 @@ function cedarTree(cx: number, baseY: number, h: number, sw: number, opacity: nu
     out += `<path d="M ${n(cx)} ${n(y)} L ${n(cx - L)} ${n(y + droop)}"/>`;
     out += `<path d="M ${n(cx)} ${n(y)} L ${n(cx + L)} ${n(y + droop)}"/>`;
   });
-  return `<g fill="none" stroke="${GOLD}" stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}">${out}</g>`;
+  return `<g fill="none" stroke="${FRESH_SOFT}" stroke-width="${n(sw)}" stroke-linecap="round" opacity="${opacity}">${out}</g>`;
 }
 
 /* ══════════ تصویر محصول ۸۰۰×۸۰۰ — نسخهٔ a و b ══════════ */
 function productSvg(glyph: GlyphKey, variant: "a" | "b"): string {
   const isA = variant === "a";
-  const defs = lg("bg", IVORY, MIST, isA ? 135 : 315) + starPattern("stars", 112, 17, 1.1, 0.03);
-  const ring = isA ? goldRing(400, 400, 250, 2, 0.5) : goldRing(400, 400, 258, 1.5, 0.42);
+  const defs = lg("bg", IVORY, MIST, isA ? 135 : 315);
+  const r = isA ? ring(400, 400, 250, 2, 0.4) : ring(400, 400, 258, 1.5, 0.34);
   const g = isA
     ? place(GLYPHS[glyph], 400, 401, 1.55, -3, PINE, 3)
     : place(GLYPHS[glyph], 397, 396, 1.5, 5, PINE, 3);
-  const corner = isA ? diamond(72, 728, 15, 0.9) : diamond(728, 72, 13, 0.85);
+  const accents = isA
+    ? dot(72, 728, 7, 0.75) + plus(728, 72, 14, 2.5, 0.5)
+    : dot(728, 72, 6, 0.7) + plus(72, 728, 12, 2.5, 0.45);
   const body =
     `<rect width="800" height="800" fill="url(#bg)"/>` +
-    `<rect width="800" height="800" fill="url(#stars)"/>` +
-    ring + g + corner;
+    arc(400, 400, 300, -40, 60, 1.5, 0.2) +
+    r + g + accents;
   return svgDoc(800, 800, defs, body);
 }
 
-/* ══════════ اسلاید ۱۶۰۰×۷۲۰ — سه ترکیب‌بندی، فضای متنِ سمت راست خالی ══════════ */
+/* ══════════ اسلاید هیرو ۱۰۸۰×۱۳۵۰ (۴:۵) — عمق سبز، حلقه‌ها و شاخهٔ سرو ══════════ */
 function slideSvg(num: 1 | 2 | 3): string {
   const angle = num === 1 ? 120 : num === 2 ? 160 : 200;
   const defs =
     lg("bg", PINE, PINE_LIGHT, angle) +
-    starPattern("stars", 128, 19, 1.2, 0.05) +
     glowDef("glow");
 
   let art = "";
   if (num === 1) {
     art =
-      glowCircle("glow", 430, 400, 520) +
-      goldRing(430, 400, 310, 2, 0.16) +
-      goldRing(430, 400, 232, 1.5, 0.1) +
-      cedarBranch(310, 620, 330, -55, 2, 0.5) +
-      `<path d="M 120 640 H 560" stroke="${GOLD}" stroke-width="1" opacity="0.25"/>` +
-      diamond(588, 640, 9, 0.8);
+      glowCircle("glow", 540, 500, 620) +
+      ring(540, 560, 420, 2, 0.22) +
+      ring(540, 560, 330, 1.5, 0.14) +
+      arc(540, 560, 500, 200, 320, 1.5, 0.16) +
+      cedarBranch(360, 900, 360, -60, 2, 0.5) +
+      dot(180, 260, 6, 0.7) +
+      plus(900, 220, 16, 2.5, 0.55) +
+      dot(950, 980, 8, 0.5);
   } else if (num === 2) {
     art =
-      glowCircle("glow", 340, 330, 560) +
-      goldRing(150, 40, 420, 2.5, 0.18) +
-      goldRing(520, 430, 250, 2, 0.2) +
-      goldRing(520, 430, 180, 1.5, 0.12) +
-      cedarBranch(600, 660, 260, 70, 2, 0.45) +
-      diamond(170, 620, 12, 0.8);
+      glowCircle("glow", 420, 420, 620) +
+      ring(180, 200, 340, 2.5, 0.2) +
+      ring(700, 700, 280, 2, 0.22) +
+      ring(700, 700, 200, 1.5, 0.14) +
+      cedarBranch(780, 1080, 300, 70, 2, 0.45) +
+      dot(940, 300, 7, 0.65) +
+      plus(140, 900, 14, 2.5, 0.5);
   } else {
     art =
-      glowCircle("glow", 400, 360, 560) +
-      goldRing(400, 360, 330, 2, 0.12) +
-      goldRing(400, 360, 250, 2, 0.18) +
-      goldRing(400, 360, 170, 1.5, 0.26) +
-      cedarBranch(215, 665, 380, -70, 2, 0.5) +
-      `<path d="M 140 560 H 520" stroke="${GOLD}" stroke-width="1" opacity="0.2"/>` +
-      diamond(150, 130, 11, 0.8) +
-      diamond(250, 470, 8, 0.6) +
-      diamond(640, 110, 9, 0.7);
+      glowCircle("glow", 540, 480, 640) +
+      ring(540, 540, 440, 2, 0.16) +
+      ring(540, 540, 340, 2, 0.2) +
+      ring(540, 540, 230, 1.5, 0.28) +
+      cedarBranch(260, 1060, 400, -75, 2, 0.5) +
+      dot(180, 200, 8, 0.6) +
+      plus(920, 180, 16, 2.5, 0.5) +
+      dot(880, 1120, 6, 0.5);
   }
-  const body =
-    `<rect width="1600" height="720" fill="url(#bg)"/>` +
-    `<rect width="1600" height="720" fill="url(#stars)"/>` +
-    art;
-  return svgDoc(1600, 720, defs, body);
+  const body = `<rect width="1080" height="1350" fill="url(#bg)"/>` + art;
+  return svgDoc(1080, 1350, defs, body);
 }
 
-/* ══════════ بنر ۹۶۰×۴۰۰ — تناژ روشن + گلیف دسته ══════════ */
-function bannerSvg(glyph: GlyphKey, num: 1 | 2): string {
-  const first = num === 1;
-  const defs = lg("bg", IVORY, MIST, first ? 120 : 240) + starPattern("stars", 96, 15, 1, 0.035);
-  const ring = goldRing(208, 208, first ? 130 : 138, 1.75, first ? 0.45 : 0.38);
-  const g = place(GLYPHS[glyph], 208, 208, 0.8, first ? -4 : 4, PINE, 3);
-  const accents = first
-    ? `<path d="M 620 96 V 304" stroke="${GOLD}" stroke-width="1" opacity="0.25"/>` + diamond(872, 336, 12, 0.85)
-    : `<path d="M 320 336 H 640" stroke="${GOLD}" stroke-width="1" opacity="0.22"/>` + diamond(88, 64, 11, 0.8);
-  const body =
-    `<rect width="960" height="400" fill="url(#bg)"/>` +
-    `<rect width="960" height="400" fill="url(#stars)"/>` +
-    ring + g + accents;
-  return svgDoc(960, 400, defs, body);
+/* ══════════ کاشی تبلیغ — پس‌زمینهٔ روشن + گلیف بزرگ ══════════
+   ابعاد دقیقاً مطابق اسلات‌های چیدمان (برای طراح: نسبت نهایی همین است) */
+function adSvg(w: number, h: number, glyph: GlyphKey, variant: 1 | 2 | 3): string {
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = Math.min(w, h) * 0.32;
+  const defs = lg("bg", IVORY, MIST, variant === 1 ? 120 : variant === 2 ? 240 : 300);
+  const glyphScale = (Math.min(w, h) / 800) * 1.6;
+  const art =
+    ring(cx, cy, r, 2, 0.4) +
+    arc(cx, cy, r * 1.35, -30, 80, 1.5, 0.22) +
+    arc(cx, cy, r * 1.35, 150, 260, 1.5, 0.22) +
+    place(GLYPHS[glyph], cx, cy, glyphScale, variant === 2 ? 4 : -3, PINE, 3.2) +
+    dot(w * 0.1, h * 0.12, Math.min(w, h) * 0.012 + 3, 0.65) +
+    plus(w * 0.9, h * 0.86, Math.min(w, h) * 0.02 + 6, 2.5, 0.5) +
+    dot(w * 0.88, h * 0.14, Math.min(w, h) * 0.009 + 2, 0.45);
+  const body = `<rect width="${w}" height="${h}" fill="url(#bg)"/>` + art;
+  return svgDoc(w, h, defs, body);
 }
 
 /* ══════════ تصویر مقاله ۱۲۰۰×۸۰۰ — گلیف بزرگ کم‌رنگ ══════════ */
 function articleSvg(glyph: GlyphKey, num: 1 | 2 | 3): string {
   const angle = num === 1 ? 135 : num === 2 ? 100 : 240;
   const rot = num === 1 ? -5 : num === 2 ? 4 : -3;
-  const defs = lg("bg", IVORY, MIST, angle) + starPattern("stars", 120, 18, 1.1, 0.03);
+  const defs = lg("bg", IVORY, MIST, angle);
   const body =
     `<rect width="1200" height="800" fill="url(#bg)"/>` +
-    `<rect width="1200" height="800" fill="url(#stars)"/>` +
-    goldRing(600, 400, 300, 1.5, 0.3) +
-    place(GLYPHS[glyph], 600, 400, 2.35, rot, PINE, 2.6, 0.13) +
-    diamond(96, 96, 14, 0.9) +
-    diamond(1104, 704, 9, 0.6);
+    ring(600, 400, 300, 1.5, 0.32) +
+    arc(600, 400, 380, -60, 40, 1.5, 0.18) +
+    place(GLYPHS[glyph], 600, 400, 2.35, rot, PINE, 2.6, 0.14) +
+    dot(96, 96, 7, 0.8) +
+    plus(1104, 704, 14, 2.5, 0.5);
   return svgDoc(1200, 800, defs, body);
 }
 
-/* ══════════ OG پیش‌فرض ۱۲۰۰×۶۳۰ — متالیک + حلقه + درخت سرو ══════════ */
+/* ══════════ OG پیش‌فرض ۱۲۰۰×۶۳۰ — سبز عمیق + حلقه + درخت سرو ══════════ */
 function ogSvg(): string {
-  const defs =
-    lg("bg", PINE, PINE_LIGHT, 135) +
-    starPattern("stars", 128, 19, 1.2, 0.05) +
-    glowDef("glow");
+  const defs = lg("bg", PINE, PINE_LIGHT, 135) + glowDef("glow");
   const body =
     `<rect width="1200" height="630" fill="url(#bg)"/>` +
-    `<rect width="1200" height="630" fill="url(#stars)"/>` +
     glowCircle("glow", 600, 315, 520) +
-    goldRing(600, 315, 300, 1.5, 0.16) +
-    goldRing(600, 315, 235, 2.5, 0.6) +
+    ring(600, 315, 300, 1.5, 0.18) +
+    ring(600, 315, 235, 2.5, 0.6) +
     cedarTree(600, 480, 310, 2.2, 0.8) +
-    diamond(170, 120, 12, 0.8) +
-    diamond(1030, 520, 10, 0.7);
+    dot(170, 120, 7, 0.7) +
+    plus(1030, 520, 13, 2.5, 0.55);
   return svgDoc(1200, 630, defs, body);
 }
 
@@ -322,13 +325,28 @@ PRODUCT_GLYPHS.forEach((g, i) => {
   files.push([`product-${i + 1}-b.svg`, productSvg(g, "b")]);
 });
 files.push(["slide-1.svg", slideSvg(1)], ["slide-2.svg", slideSvg(2)], ["slide-3.svg", slideSvg(3)]);
-files.push(["banner-1.svg", bannerSvg("mask", 1)], ["banner-2.svg", bannerSvg("orthopedic", 2)]);
+
+/* کاشی‌های تبلیغ — بنتو: مربع بزرگ + مستطیل عریض + ۲ مربع کوچک */
+files.push(["ad-big-1.svg", adSvg(1440, 1440, "bp", 1)]);
+files.push(["ad-wide-1.svg", adSvg(1440, 720, "mask", 2)]);
+files.push(["ad-square-1.svg", adSvg(720, 720, "respiratory", 3)]);
+files.push(["ad-square-2.svg", adSvg(720, 720, "bed", 1)]);
+/* کاشی‌های جایگزین برای قالب‌های duo و trio */
+files.push(["ad-duo-1.svg", adSvg(1680, 700, "glucose", 2)]);
+files.push(["ad-duo-2.svg", adSvg(1680, 700, "scale", 1)]);
+files.push(["ad-trio-1.svg", adSvg(1000, 1000, "orthopedic", 3)]);
+files.push(["ad-trio-2.svg", adSvg(1000, 1000, "thermometer", 1)]);
+files.push(["ad-trio-3.svg", adSvg(1000, 1000, "wheelchair", 2)]);
+
 files.push(
   ["article-1.svg", articleSvg("bp", 1)],
   ["article-2.svg", articleSvg("glucose", 2)],
   ["article-3.svg", articleSvg("thermometer", 3)],
 );
 files.push(["og-default.svg", ogSvg()]);
+/* بنرهای قدیمی حفظ می‌شوند تا لینک‌ها نشکنند — با زبان بصری جدید */
+files.push(["banner-1.svg", adSvg(960, 400, "mask", 1)]);
+files.push(["banner-2.svg", adSvg(960, 400, "orthopedic", 2)]);
 
 for (const [name, svg] of files) {
   writeFileSync(join(OUT_DIR, name), svg + "\n", "utf8");

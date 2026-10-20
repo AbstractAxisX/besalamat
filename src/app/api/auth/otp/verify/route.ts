@@ -94,7 +94,10 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    await createSession(user.id, {
+    await createSession({
+      userId: user.id,
+      phone: user.phone,
+      fullName: user.fullName,
       isAdmin: user.role === 'ADMIN',
       userAgent: request.headers.get('user-agent') ?? undefined,
       ip: clientIp(request.headers),

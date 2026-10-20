@@ -94,6 +94,10 @@ export function getAdminPhoneWhitelist(): string[] {
  * صدور کد یک‌بارمصرف برای phone+purpose.
  * شکست ارسال پیامک به خروجی بازتاب نمی‌یابد (تا سفارش اصلی گم نشود)؛
  * فقط console.error می‌شود و در حالت dev، devCode برگردانده می‌شود تا فلو تست شود.
+ *
+ * در حالت دمو، نوشتن در DB هم «به‌افسانه» است: اگر نوشتن شکست بخورد
+ * (مثلاً فایل‌سیستم فقط‌خواندنی) باز هم پاسخ موفق با devCode برمی‌گردد،
+ * چون تأییدِ حالت دمو بدون رکورد DB هم انجام می‌شود (verifyOtp را ببینید).
  */
 export async function requestOtp(
   phone: string,
@@ -134,14 +138,6 @@ export async function requestOtp(
   const now = new Date()
   const ttlSecondsBase = getTtlSeconds()
 
-  // پاکسازی فرصت‌طلبانهٔ کدهای منقضی‌شده
-  await db.otpCode.deleteMany({ where: { expiresAt: { lt: now } } })
-
-  // باطل‌سازی کدهای مصرف‌نشدهٔ قبلی همان شماره و هدف — فقط یک کد فعال
-  await db.otpCode.deleteMany({
-    where: { phone, purpose, consumedAt: null },
-  })
-
   // کد دموی ثابت یا کد تصادفی واقعی
   const demoCode = getDemoOtpCode()
   const code = demoCode ?? randomInt(10000, 100000).toString() // ۵ رقم: 10000..99999
@@ -150,9 +146,28 @@ export async function requestOtp(
     demoCode !== null ? Math.max(ttlSecondsBase, 300) : ttlSecondsBase
   const expiresAt = new Date(now.getTime() + ttlSeconds * 1000)
 
-  await db.otpCode.create({
-    data: { phone, codeHash: hashCode(phone, code), purpose, expiresAt },
-  })
+  // نوشتن رکورد در DB — در حالت دمو «به‌افسانه»؛ در حالت واقعی خطا\میدهد چون
+  // بدون رکورد، تأیید ممکن نیست. (روی ورسل هر لامبدا /tmp خودش را دارد و
+  // رکورد در لامبدای «تأیید» پیدا نیست — برای همین تأییدِ دمو stateless است.)
+  try {
+    // پاکسازی فرصت‌طلبانهٔ کدهای منقضی‌شده
+    await db.otpCode.deleteMany({ where: { expiresAt: { lt: now } } })
+
+    // باطل‌سازی کدهای مصرف‌نشدهٔ قبلی همان شماره و هدف — فقط یک کد فعال
+    await db.otpCode.deleteMany({
+      where: { phone, purpose, consumedAt: null },
+    })
+
+    await db.otpCode.create({
+      data: { phone, codeHash: hashCode(phone, code), purpose, expiresAt },
+    })
+  } catch (error) {
+    if (demoCode === null) throw error
+    console.warn(
+      '[otp] نوشتن کد دمو در DB ناموفق بود (نادیده گرفته می‌شود؛ تأیید دمو stateless است):',
+      error,
+    )
+  }
 
   // ارسال با درایور SMS — شکستِ ارسال یعنی کد در DB می‌ماند ولی کاربر خبر ندارد؛
   // کد مصرف‌شده/mark نمی‌شود تا اگر پیامک واقعاً رسیده بود، قابل تأیید بماند.
@@ -177,14 +192,39 @@ export async function requestOtp(
 }
 
 /**
- * تأیید کد یک‌بارمصرف. «مصرف کد» فقط در دو حالت رخ می‌دهد:
- * تأیید موفق، یا قفل شدن به‌خاطر تلاش‌های ناموفق زیاد (≥۵).
+ * تأیید کد یک‌بارمصرف.
+ *
+ * حالت دمو (کد ثابت، فاز تست): کد دمو بدون رکورد DB هم پذیرفته می‌شود.
+ * دلیل: روی ورسل هر Route Handler یک لامبدای جدا با /tmp جدا است؛ کدی که
+ * لامبدای «درخواست» ذخیره کرده در لامبدای «تأیید» هرگز دیده نمی‌شود و
+ * کاربر خطای «کدی ثبت نشده» می‌گرفت (باگ گزارش‌شده). کد دمو از پیش معلوم
+ * است، پس نیازی به state مشترک ندارد. با OTP_DEMO_MODE=false کاملاً غیرفعال
+ * می‌شود و مسیر امنِ رکورد-محور برمی‌گردد.
+ *
+ * حالت واقعی: «مصرف کد» فقط در دو حالت رخ می‌دهد: تأیید موفق، یا قفل شدن
+ * به‌خاطر تلاش‌های ناموفق زیاد (≥۵).
  */
 export async function verifyOtp(
   phone: string,
   code: string,
   purpose: OtpPurpose,
 ): Promise<OtpVerifyResult> {
+  // ── شورت‌کات دمو ──
+  const demoCode = getDemoOtpCode()
+  if (demoCode !== null && code === demoCode) {
+    // اگر رکورد فعالی موجود بود (همان لامبدا/نود)، مصرفش می‌کنیم تا تمیز بماند
+    try {
+      await db.otpCode.updateMany({
+        where: { phone, purpose, consumedAt: null },
+        data: { consumedAt: new Date() },
+      })
+    } catch {
+      // نبود رکورد یا DB در دسترس نیست — در حالت دمو اشکالی ندارد
+    }
+    console.info(`[otp] ورود با کد دمو برای ${phone} (${purpose}) تأیید شد.`)
+    return { ok: true }
+  }
+
   const record = await db.otpCode.findFirst({
     where: { phone, purpose, consumedAt: null },
     orderBy: { createdAt: 'desc' },

@@ -919,7 +919,7 @@ function CatalogListCard({ product }: { product: ProductSummary }) {
           fill
           sizes="112px"
           className={cn(
-            "object-contain p-1.5 transition-transform duration-500 group-hover:scale-[1.04]",
+            "object-cover",
             !product.inStock && "opacity-40 grayscale",
           )}
         />

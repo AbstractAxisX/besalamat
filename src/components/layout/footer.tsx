@@ -15,7 +15,8 @@ import {
 import { Logo, Watermark } from "@/components/shared/brand-assets";
 import { brand, SOCIAL_LABELS, type SocialConfig } from "@/config/brand";
 import { formatPhoneFa, toFa } from "@/lib/format";
-import { PREVIEW_CATEGORIES } from "@/lib/preview-data";
+import type { CategoryNode } from "@/types/shop";
+import type { StoreSettings } from "@/server/shop-data";
 
 const FOOTER_LINK_CLASS =
   "block text-[13px] leading-8 text-on-metallic-muted transition-colors hover:text-fresh";
@@ -58,8 +59,15 @@ function SocialIcon({ social }: { social: SocialConfig }) {
   }
 }
 
-export function Footer() {
-  const activeSocials = brand.socials.filter(
+interface FooterProps {
+  /** تنظیمات فروشگاه — overlay روی brand.ts (store.*) */
+  store: StoreSettings;
+  /** درخت دسته‌ها — از سرویس DB-first */
+  categories: CategoryNode[];
+}
+
+export async function Footer({ store, categories }: FooterProps) {
+  const activeSocials = store.socials.filter(
     (social) => social.defaultHref !== "",
   );
   /* سال شمسی برای حق نشر */
@@ -85,14 +93,14 @@ export function Footer() {
                 aria-hidden="true"
               />
             </span>
-            قبل از خرید، با کارشناس {brand.name} مشورت کنید
+            قبل از خرید، با کارشناس {store.name} مشورت کنید
           </p>
           <a
-            href={`tel:${brand.contact.phone}`}
+            href={`tel:${store.phone}`}
             className="inline-flex h-11 items-center gap-2 rounded-full bg-fresh-strong px-6 text-sm font-black text-primary-foreground transition-all duration-300 hover:brightness-110"
           >
             <IconPhone className="size-4" stroke={1.75} aria-hidden="true" />
-            <span dir="ltr">{formatPhoneFa(brand.contact.phone)}</span>
+            <span dir="ltr">{formatPhoneFa(store.phone)}</span>
           </a>
         </div>
       </div>
@@ -103,7 +111,7 @@ export function Footer() {
         <div className="space-y-5">
           <Logo light />
           <p className="max-w-xs text-[13px] leading-7 text-on-metallic-muted">
-            {brand.tagline} — {brand.description}
+            {store.tagline} — {store.aboutShort !== "" ? store.aboutShort : brand.description}
           </p>
           <div className="flex items-center gap-2.5">
             {activeSocials.map((social) => (
@@ -160,7 +168,7 @@ export function Footer() {
         <nav aria-label="دسته‌های پرطرفدار">
           <h3 className={COLUMN_TITLE_CLASS}>دسته‌های پرطرفدار</h3>
           <ul className="mt-4">
-            {PREVIEW_CATEGORIES.slice(0, 6).map((category) => (
+            {categories.slice(0, 6).map((category) => (
               <li key={category.id}>
                 <Link
                   href={`/products?category=${category.slug}`}
@@ -175,7 +183,7 @@ export function Footer() {
 
         {/* تماس */}
         <div>
-          <h3 className={COLUMN_TITLE_CLASS}>تماس با {brand.name}</h3>
+          <h3 className={COLUMN_TITLE_CLASS}>تماس با {store.name}</h3>
           <ul className="mt-4 space-y-1">
             <li className="flex items-start gap-3">
               <IconMapPin
@@ -184,7 +192,7 @@ export function Footer() {
                 aria-hidden="true"
               />
               <span className="text-[13px] leading-7 text-on-metallic-muted">
-                {brand.contact.address}
+                {store.address}
               </span>
             </li>
             <li className="flex items-start gap-3">
@@ -195,18 +203,18 @@ export function Footer() {
               />
               <span className="block">
                 <a
-                  href={`tel:${brand.contact.phone}`}
+                  href={`tel:${store.phone}`}
                   dir="ltr"
                   className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
                 >
-                  {formatPhoneFa(brand.contact.phone)}
+                  {formatPhoneFa(store.phone)}
                 </a>
                 <a
-                  href={`tel:${brand.contact.phoneAlt}`}
+                  href={`tel:${store.phoneAlt}`}
                   dir="ltr"
                   className="block text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
                 >
-                  {formatPhoneFa(brand.contact.phoneAlt)}
+                  {formatPhoneFa(store.phoneAlt)}
                 </a>
               </span>
             </li>
@@ -217,13 +225,13 @@ export function Footer() {
                 aria-hidden="true"
               />
               <a
-                href={`mailto:${brand.contact.email}`}
+                href={`mailto:${store.email}`}
                 className="text-[13px] leading-7 text-on-metallic-muted transition-colors hover:text-fresh"
               >
-                {brand.contact.email}
+                {store.email}
               </a>
             </li>
-            {brand.contact.hours.map((entry) => (
+            {store.hours.map((entry) => (
               <li key={entry.days} className="flex items-start gap-3">
                 <IconClock
                   className="mt-2 size-4 shrink-0 text-fresh"
@@ -243,10 +251,10 @@ export function Footer() {
       <div className="relative border-t border-on-metallic/15">
         <div className="shell flex flex-col items-center justify-between gap-4 py-5 md:flex-row">
           <p className="text-[11px] text-on-metallic-muted">
-            © {year} {brand.name} — تمامی حقوق محفوظ است.
+            © {year} {store.name} — تمامی حقوق محفوظ است.
           </p>
           <p className="text-[11px] text-on-metallic-muted">
-            طراحی و توسعه — {brand.name}
+            طراحی و توسعه — {store.name}
           </p>
 
           {/* جوازها — placeholder تا فاز ۷ */}

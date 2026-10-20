@@ -1,15 +1,21 @@
 /**
  * نقشهٔ سایت — مسیرهای ایستا + محصولات + مقالات
  * ─────────────────────────────
- * فاز ۳: داده از دیتابیس تغذیه می‌شود (آخرین‌ها اول).
+ * داده از سرویس DB-first (shop-data) با fallback امن تغذیه می‌شود.
  */
 
 import type { MetadataRoute } from "next";
 
 import { brand } from "@/config/brand";
-import { PREVIEW_ARTICLES, PREVIEW_PRODUCTS } from "@/lib/preview-data";
+import { getArticles, getProductSummaries } from "@/server/shop-data";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [products, articles] = await Promise.all([
+    getProductSummaries(),
+    getArticles(),
+  ]);
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -21,14 +27,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${brand.domain}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  const productRoutes: MetadataRoute.Sitemap = PREVIEW_PRODUCTS.map((product) => ({
+  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${brand.domain}/products/${product.slug}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
-  const articleRoutes: MetadataRoute.Sitemap = PREVIEW_ARTICLES.map((article) => ({
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${brand.domain}/blog/${article.slug}`,
     lastModified: new Date(article.publishedAt),
     changeFrequency: "monthly",

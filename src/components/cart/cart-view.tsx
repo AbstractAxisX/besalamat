@@ -108,7 +108,7 @@ function CartLineRow({ line }: { line: CartLine }) {
           alt={line.title}
           fill
           sizes="96px"
-          className="object-contain p-1.5"
+          className="object-cover"
         />
       </Link>
 

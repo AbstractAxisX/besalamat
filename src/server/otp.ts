@@ -62,6 +62,21 @@ function isDevMode(): boolean {
 }
 
 /**
+ * کد OTP دموی ثابت (سفارش مشتری — فاز تست):
+ * تا زمان اتصال درایور پیامک واقعی، همهٔ کدها یک عدد ثابت هستند تا
+ * دمو و استقرار آزمایشی بدون پیامک قابل تست باشد.
+ * خاموش‌کردن: OTP_DEMO_MODE=false → کد تصادفی واقعی صادر می‌شود.
+ */
+function isDemoOtpMode(): boolean {
+  return process.env.OTP_DEMO_MODE !== 'false'
+}
+
+export function getDemoOtpCode(): string | null {
+  if (!isDemoOtpMode()) return null
+  return process.env.OTP_DEMO_CODE ?? '12345'
+}
+
+/**
  * شماره‌های مجاز ورود به پنل مدیریت — از env ADMIN_PHONES (جدا با کاما).
  * هر ورودی با normalizePhone نرمال می‌شود؛ ورودی نامعتبر حذف می‌شود.
  */
@@ -117,7 +132,7 @@ export async function requestOtp(
   }
 
   const now = new Date()
-  const ttlSeconds = getTtlSeconds()
+  const ttlSecondsBase = getTtlSeconds()
 
   // پاکسازی فرصت‌طلبانهٔ کدهای منقضی‌شده
   await db.otpCode.deleteMany({ where: { expiresAt: { lt: now } } })
@@ -127,7 +142,12 @@ export async function requestOtp(
     where: { phone, purpose, consumedAt: null },
   })
 
-  const code = randomInt(10000, 100000).toString() // ۵ رقم: 10000..99999
+  // کد دموی ثابت یا کد تصادفی واقعی
+  const demoCode = getDemoOtpCode()
+  const code = demoCode ?? randomInt(10000, 100000).toString() // ۵ رقم: 10000..99999
+  // در حالت دمو مهلت بیشتری برای راحتی تست
+  const ttlSeconds =
+    demoCode !== null ? Math.max(ttlSecondsBase, 300) : ttlSecondsBase
   const expiresAt = new Date(now.getTime() + ttlSeconds * 1000)
 
   await db.otpCode.create({
@@ -151,8 +171,8 @@ export async function requestOtp(
   return {
     ok: true,
     expiresInSeconds: ttlSeconds,
-    // در حالت توسعه، کد در خروجی هم برگردانده می‌شود تا فلو بدون پیامک واقعی تست شود
-    ...(isDevMode() ? { devCode: code } : {}),
+    // در حالت توسعه یا دمو، کد در خروجی هم برگردانده می‌شود تا فلو بدون پیامک واقعی تست شود
+    ...(isDevMode() || demoCode !== null ? { devCode: code } : {}),
   }
 }
 

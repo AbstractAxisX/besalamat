@@ -118,7 +118,7 @@ export function NeedsSection({
                     </span>
                   </span>
 
-                  {/* بندانگشتی محصولات — فقط دسکتاپ */}
+                  {/* بندانگشتی محصولات — دایره‌های روی‌هم‌افتاده، فقط دسکتاپ */}
                   {preview && preview.products.length > 0 ? (
                     <span
                       className="hidden shrink-0 items-center md:flex"
@@ -128,24 +128,24 @@ export function NeedsSection({
                         <span
                           key={product.id}
                           style={{ zIndex: 3 - i }}
-                          className="img-canvas relative size-11 -ms-3 overflow-hidden rounded-xl border-2 border-card shadow-soft first:ms-0"
+                          className="img-canvas relative size-11 -ms-3 overflow-hidden rounded-full border-2 border-card shadow-soft first:ms-0"
                         >
                           <Image
                             src={product.image}
                             alt=""
                             fill
                             sizes="44px"
-                            className="object-contain p-1"
+                            className="object-cover"
                           />
                         </span>
                       ))}
                     </span>
                   ) : null}
 
-                  {/* بندانگشتی موبایل — یک تصویر واقعی، داخل خود ردیف */}
+                  {/* بندانگشتی موبایل — دایرهٔ پرشده، داخل خود ردیف */}
                   {firstImage ? (
                     <span
-                      className="img-canvas relative block size-12 shrink-0 overflow-hidden rounded-xl shadow-soft md:hidden"
+                      className="img-canvas relative block size-12 shrink-0 overflow-hidden rounded-full shadow-soft md:hidden"
                       aria-hidden="true"
                     >
                       <Image
@@ -153,7 +153,7 @@ export function NeedsSection({
                         alt=""
                         fill
                         sizes="48px"
-                        className="object-contain p-1"
+                        className="object-cover"
                       />
                     </span>
                   ) : null}
@@ -231,7 +231,7 @@ export function NeedsSection({
                     {activeNeed.description}
                   </p>
 
-                  {/* کالاهای شاخص این نیاز */}
+                  {/* کالاهای شاخص این نیاز — دایره‌های پرشده */}
                   {activePreview && activePreview.products.length > 0 ? (
                     <div className="mt-6 flex flex-wrap items-center gap-3">
                       {activePreview.products.map((product) => (
@@ -239,14 +239,14 @@ export function NeedsSection({
                           key={product.id}
                           href={`/products/${product.slug}`}
                           aria-label={product.title}
-                          className="img-canvas relative size-16 overflow-hidden rounded-xl shadow-soft outline-none ring-white/30 transition-all duration-300 hover:-translate-y-1 hover:ring-2 focus-visible:ring-2 focus-visible:ring-ring"
+                          className="img-canvas relative size-16 overflow-hidden rounded-full shadow-soft outline-none ring-white/30 transition-all duration-300 hover:-translate-y-1 hover:ring-2 focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <Image
                             src={product.image}
                             alt=""
                             fill
                             sizes="64px"
-                            className="object-contain p-1.5"
+                            className="object-cover"
                           />
                         </Link>
                       ))}

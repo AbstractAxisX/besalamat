@@ -539,6 +539,14 @@
     backdrop-filter: blur(24px) saturate(150%);
   }
 
+  /* جلوگیری از درگِ بومیِ تصاویر/لینک‌ها داخل کاروسل‌ها —
+     درگِ ماوس باید به embla برسد، نه به drag-and-drop مرورگر */
+  [aria-roledescription="carousel"] img,
+  [aria-roledescription="carousel"] a {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
   /* اسکلت براق */
   .skeleton-shimmer {
     background: linear-gradient(

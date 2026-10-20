@@ -4,13 +4,14 @@
  * دیالوگ جستجوی سراسری — تجربهٔ جستجوی اصلی سایت
  * ─────────────────────────────
  *  - شورت‌کات: Ctrl+K / ⌘K و «/»
- *  - جستجوی لحظه‌ای در محصولات (عنوان + برند) با نرمال‌سازی فارسی
+ *  - جستجوی لحظه‌ای با API سرور (/api/search) — debounce ۲۵۰ms + AbortController؛
+ *    در خطای شبکه/پاسخ نامعتبر → fallback محلی روی دادهٔ پیش‌نمایش
  *  - جستجوهای پرطرفدار + جستجوهای اخیر (localStorage، قابل حذف تک‌تک)
  *  - Enter → صفحهٔ نتایج کامل /search?q=
- * مصرف: <SearchDialog /> یک‌بار (مثلاً داخل Header)؛ باز کردن با useSearchDialogStore.
+ * مصرف: <SearchDialog /> یک‌بار (مثلاً داخل layout)؛ باز کردن با useSearchDialogStore.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
@@ -25,6 +26,7 @@ import {
 import { formatTomanPlain } from "@/lib/format";
 import { PREVIEW_POPULAR_SEARCHES, PREVIEW_PRODUCTS } from "@/lib/preview-data";
 import { useSearchDialogStore } from "@/store/search";
+import type { ProductSummary } from "@/types/shop";
 import {
   IconArrowLeft,
   IconSearch,
@@ -36,6 +38,12 @@ import {
 const RECENT_KEY = "besalamat:recent-searches";
 const RECENT_MAX = 6;
 
+/** حداقل طول عبارت برای رفتن به سرور */
+const MIN_QUERY_LENGTH = 2;
+
+/** تأخیر debounce میلی‌ثانیه */
+const SEARCH_DEBOUNCE_MS = 250;
+
 /** نرمال‌سازی فارسی برای جستجو — ی/ک عربی، اعراب، ارقام */
 function normalizeFa(input: string): string {
   return input
@@ -46,6 +54,52 @@ function normalizeFa(input: string): string {
     .replace(/[\u0640]/g, "")
     .replace(/[\u064B-\u0652]/g, "")
     .replace(/[يﻱﻲ]/g, "ی");
+}
+
+/** فیلتر محلی روی دادهٔ پیش‌نمایش — fallback جستجوی سرور */
+function localPreviewFilter(q: string): ProductSummary[] {
+  const normalized = normalizeFa(q);
+  if (!normalized) return [];
+  return PREVIEW_PRODUCTS.filter((product) => {
+    const title = normalizeFa(product.title);
+    const brand = normalizeFa(product.brandTitle ?? "");
+    return title.includes(normalized) || brand.includes(normalized);
+  }).slice(0, 6);
+}
+
+/** اعتبارسنجی امن پاسخ /api/search → ProductSummary[] */
+function parseProducts(payload: unknown): ProductSummary[] | null {
+  if (typeof payload !== "object" || payload === null) return null;
+  const raw = (payload as Record<string, unknown>)["products"];
+  if (!Array.isArray(raw)) return null;
+  const products: ProductSummary[] = [];
+  for (const item of raw) {
+    if (typeof item !== "object" || item === null) continue;
+    const row = item as Record<string, unknown>;
+    if (
+      typeof row["id"] === "string" &&
+      typeof row["slug"] === "string" &&
+      typeof row["title"] === "string" &&
+      typeof row["image"] === "string" &&
+      typeof row["price"] === "number" &&
+      typeof row["inStock"] === "boolean"
+    ) {
+      products.push({
+        id: row["id"],
+        slug: row["slug"],
+        title: row["title"],
+        image: row["image"],
+        price: row["price"],
+        comparePrice: typeof row["comparePrice"] === "number" ? row["comparePrice"] : null,
+        inStock: row["inStock"],
+        brandTitle: typeof row["brandTitle"] === "string" ? row["brandTitle"] : null,
+        isNew: row["isNew"] === true,
+        isFeatured: row["isFeatured"] === true,
+        categorySlug: typeof row["categorySlug"] === "string" ? row["categorySlug"] : null,
+      });
+    }
+  }
+  return products;
 }
 
 function readRecent(): string[] {
@@ -73,6 +127,42 @@ export function SearchDialog() {
   const closeDialog = useSearchDialogStore((state) => state.closeDialog);
   const [query, setQuery] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
+  const [results, setResults] = useState<ProductSummary[]>([]);
+
+  /* جستجوی سرور — debounce ۲۵۰ms + AbortController؛ حداقل ۲ نویسه.
+     خطا یا پاسخ نامعتبر → fallback محلی روی دادهٔ پیش‌نمایش. */
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < MIN_QUERY_LENGTH) {
+      setResults([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      void (async () => {
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+            signal: controller.signal,
+          });
+          if (!res.ok) throw new Error("پاسخ نامعتبر");
+          const data: unknown = await res.json();
+          const products = parseProducts(data);
+          if (products === null) throw new Error("ساختار نامعتبر");
+          /* خالی هم fallback محلی می‌خورد (هم‌داده با سرور → معمولاً خالی می‌ماند) */
+          setResults(products.length > 0 ? products.slice(0, 6) : localPreviewFilter(q));
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          setResults(localPreviewFilter(q));
+        }
+      })();
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
 
   /* شورت‌کات صفحه‌کلید — Ctrl+K / ⌘K / «/» */
   useEffect(() => {
@@ -110,16 +200,6 @@ export function SearchDialog() {
     },
     [closeDialog, recent, router],
   );
-
-  const results = useMemo(() => {
-    const q = normalizeFa(query);
-    if (!q) return [];
-    return PREVIEW_PRODUCTS.filter((product) => {
-      const title = normalizeFa(product.title);
-      const brand = normalizeFa(product.brandTitle ?? "");
-      return title.includes(q) || brand.includes(q);
-    }).slice(0, 6);
-  }, [query]);
 
   const removeRecent = (term: string) => {
     const next = recent.filter((item) => item !== term);
@@ -177,7 +257,7 @@ export function SearchDialog() {
                 className="gap-3 rounded-xl py-2.5"
               >
                 <span className="img-canvas relative size-12 shrink-0 overflow-hidden rounded-lg border border-border/60">
-                  <Image src={product.image} alt={product.title} fill sizes="48px" className="object-contain" />
+                  <Image src={product.image} alt={product.title} fill sizes="48px" className="object-cover" />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-[13px] font-semibold text-foreground">{product.title}</span>

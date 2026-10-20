@@ -5,11 +5,13 @@
  * ─────────────────────────────
  *  - تب‌های سفارشی (پرفروش/جدید/تخفیف‌دار) با motion layoutId —
  *    پیل فعال با فنر به جای جدید می‌لغزد.
- *  - ریل اسکرول افقی snap با لبه‌های محو؛ فلش‌های دسکتاپ RTL-safe.
- *  - تعویض تب: fade کوتاه روی کل ریل.
+ *  - ریل embla — درگ با ماوس در دسکتاپ و لمس در موبایل؛
+ *    فلش‌های دسکتاپ RTL-safe + نوار پیشرفت ظریف.
+ *  - تعویض تب: fade کوتاه + remount ایمبرا.
  */
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 
@@ -17,9 +19,6 @@ import { ProductCard } from "@/components/product/product-card";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { cn } from "@/lib/utils";
 import type { ProductSummary } from "@/types/shop";
-
-/** گام اسکرول فلش‌ها (px) — حدود دو کارت دسکتاپ */
-const SCROLL_STEP = 560;
 
 export interface RailTab {
   key: string;
@@ -35,21 +34,42 @@ interface ProductRailProps {
 
 export function ProductRail({ title, subtitle, tabs }: ProductRailProps) {
   const [activeKey, setActiveKey] = useState(tabs[0]?.key ?? "");
-  const railRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
 
   const active = tabs.find((tab) => tab.key === activeKey) ?? tabs[0];
-  if (!active || active.products.length === 0) return null;
+  const products = active?.products ?? [];
 
-  /**
-   * در RTL اسکرول به جلو (چپ) یعنی scrollLeft منفی‌تر می‌شود؛
-   * جهت +۱ = عقب (راست)، جهت -۱ = جلو (چپ).
-   */
-  const scrollRail = (direction: 1 | -1) => {
-    railRef.current?.scrollBy({
-      left: direction * SCROLL_STEP,
-      behavior: "smooth",
-    });
-  };
+  /* ریل embla — درگ ماوس/لمس؛ direction RTL */
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    direction: "rtl",
+    containScroll: "trimSnaps",
+  });
+
+  const syncState = useCallback(() => {
+    if (!emblaApi) return;
+    setProgress(Math.min(100, Math.max(0, emblaApi.scrollProgress() * 100)));
+    setCanPrev(emblaApi.canScrollPrev());
+    setCanNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", syncState);
+    emblaApi.on("scroll", syncState);
+    emblaApi.on("reInit", syncState);
+    // همگام‌سازی اولیه — خارج از بدنهٔ effect تا قاعدهٔ set-state-in-effect نقض نشود
+    const raf = requestAnimationFrame(syncState);
+    return () => {
+      cancelAnimationFrame(raf);
+      emblaApi.off("select", syncState);
+      emblaApi.off("scroll", syncState);
+      emblaApi.off("reInit", syncState);
+    };
+  }, [emblaApi, syncState]);
+
+  if (!active || products.length === 0) return null;
 
   return (
     <section className="shell py-14 md:py-20" aria-label={title}>
@@ -64,17 +84,19 @@ export function ProductRail({ title, subtitle, tabs }: ProductRailProps) {
         <div className="hidden shrink-0 gap-2 md:flex">
           <button
             type="button"
-            onClick={() => scrollRail(1)}
+            onClick={() => emblaApi?.scrollPrev()}
+            disabled={!canPrev}
             aria-label="اسکرول به عقب"
-            className="flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-soft transition-colors duration-300 outline-none hover:border-fresh/60 hover:text-fresh-strong focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-soft transition-all duration-300 outline-none hover:border-fresh/60 hover:text-fresh-strong focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-35"
           >
             <IconArrowRight className="size-5" aria-hidden="true" />
           </button>
           <button
             type="button"
-            onClick={() => scrollRail(-1)}
+            onClick={() => emblaApi?.scrollNext()}
+            disabled={!canNext}
             aria-label="اسکرول به جلو"
-            className="flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-soft transition-colors duration-300 outline-none hover:border-fresh/60 hover:text-fresh-strong focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-soft transition-all duration-300 outline-none hover:border-fresh/60 hover:text-fresh-strong focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-35"
           >
             <IconArrowLeft className="size-5" aria-hidden="true" />
           </button>
@@ -121,7 +143,7 @@ export function ProductRail({ title, subtitle, tabs }: ProductRailProps) {
         })}
       </div>
 
-      {/* ریل — تعویض تب با fade کوتاه */}
+      {/* ریل — تعویض تب با fade کوتاه؛ درگ با ماوس/لمس */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={active.key}
@@ -131,19 +153,33 @@ export function ProductRail({ title, subtitle, tabs }: ProductRailProps) {
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
           <div
-            ref={railRef}
+            ref={emblaRef}
             role="region"
+            aria-roledescription="carousel"
             aria-label={active.label}
-            className="mask-fade-x scrollbar-none flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 md:gap-4"
+            className="mask-fade-x cursor-grab overflow-hidden select-none active:cursor-grabbing"
           >
-            {active.products.map((product) => (
-              <div
-                key={product.id}
-                className="w-[min(70vw,240px)] shrink-0 snap-start md:w-[min(40vw,260px)]"
-              >
-                <ProductCard product={product} className="h-full" />
-              </div>
-            ))}
+            <div className="flex gap-3 pb-2 md:gap-4">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="shrink-0 grow-0 basis-[66%] sm:basis-[44%] md:basis-[32%] lg:basis-[25.5%] xl:basis-[21%]"
+                >
+                  <ProductCard product={product} className="h-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* نوار پیشرفت — جایگزین اسکرول‌بار مخفی */}
+          <div
+            aria-hidden="true"
+            className="ms-1 mt-3 h-1 w-40 overflow-hidden rounded-full bg-border/70"
+          >
+            <div
+              className="h-full rounded-full bg-fresh transition-[width] duration-150 ease-out"
+              style={{ width: `${Math.max(12, progress)}%` }}
+            />
           </div>
         </motion.div>
       </AnimatePresence>

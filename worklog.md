@@ -527,3 +527,76 @@ Work Log:
 Stage Summary:
 - همهٔ ۱۳ نکتهٔ بازخورد مشتری پیاده و E2E-تأیید شد؛ آمادهٔ نمایش
 - بدهی فاز بعد همان پنل ادمین AdGrid (Task 5) باقی است؛ قراردادهای جدید در رکورد 6-b ثبت شد
+
+---
+Task ID: 8-a + 8-b
+Agent: main-orchestrator
+Task: اصلاحات بازخورد سوم مشتری (هیرو/دایره‌ها/درگ ریل/سرریز موبایل) + آماده‌سازی ورسل + OTP دموی ثابت
+
+Work Log:
+- هیرو (hero.tsx): پس‌زمینه سکشن سفید خالص شد (bg-white dark:bg-background، حذف گرادیان سبزفام و هاله‌های سطح-سکشن)؛ بج «همراهِ مطمئنِ سلامتی خانواده» (brand.tagline) کامل حذف شد؛ پشت کارت تصویر عمق گرافیکی بازگردانده و ارتقا یافت: ۲ هالهٔ glow راننده (animate-drift) + حلقهٔ تزئینی با نقطهٔ سبز + ۲ قاب هندسی چرخیده (rotate-3 و -rotate-2 با رنگ‌های fresh/15 و fresh/25)
+- دایره‌های «خرید بر اساس نیاز» (needs-section.tsx): استک ردیف‌ها، بندانگشتی موبایل و بندانگشتی‌های پنل پیش‌نمایش همگی rounded-full + object-cover شدند (تصویر کامل دایره/شکل را پر می‌کند)
+- پرشدن تصویر در کل سایت (object-cover، حذف padding): product-card، product-detail (تصویر اصلی p-8 حذف شد + بندانگشتی‌ها + نوار چسبان موبایل)، cart-view، checkout، account/orders، search-dialog، mega-menu، catalog-view (به‌علاوه حذف scale هاور طبق قاعدهٔ بوردر-فقط)
+- پلیس‌هولدرها (scripts/gen-placeholders.ts): مقیاس گلیف محصول 1.55→2.1 (نسخهٔ a) و 1.5→2.05 (b) — کالا مثل عکس واقعی قاب را پر می‌کند؛ ۴۸ SVG بازتولید شد
+- ریل «محبوب‌ترین‌ها» (product-rail.tsx بازنویسی): از اسکرول بومی به embla (direction rtl + containScroll trimSnaps) — درگ ماوس دسکتاپ فعال؛ نوار پیشرفت + فلش‌های disabled-aware؛ ریشهٔ واقعی خرابی درگ: درگ بومی مرورگر روی <a>/<img> جریان pointer را می‌بلعد → draggable={false} روی ProductCard + قاعدهٔ CSS در globals.css برای همهٔ کاروسل‌ها ([aria-roledescription=carousel] img,a { -webkit-user-drag:none }). نکتهٔ RTL: درگ به «راست» = جلو بردن است. E2E: درگ راست commits به اسنپ بعدی ✓، تب‌سوییچ + درگ بعد از آن ✓
+- سرریز افقی موبایل: ریشه‌یابی DOM-محور — (۱) باکس خرید PDP (استپر+دکمه) min-content ~373px در ویوپورت‌های <390 → بازطراحی flex-col-reverse sm:flex-row (موبایل: دکمهٔ تمام‌عرض بالا + استپر با برچسب «تعداد» پایین)؛ (۲) هدر در 320px (هامبرگر+لوگو+۳ دکمه) → gap-2 و size-9 موبایل برای دکمه‌ها. تأیید: همهٔ ۱۲ مسیر در 320/360/390 بدون سرریز
+- ورسل: db.ts بازنویسی — resolveDatabaseUrl: env غیر file: پاس مستقیم | روی ورسل (VERCEL=1) کپی یک‌بارهٔ db به /tmp (تنها مسیر نوشتنی) | لوکال pathToFileURL مطلق. next.config.ts: outputFileTracingIncludes برای ./db/** (رفع P1003). package.json: postinstall=prisma generate (رفع did-not-initialize)، build ساده برای ورسل + build:standalone جدا، نام پکیج besalamat
+- OTP دمو: otp.ts — getDemoOtpCode() (پیش‌فرض روشن، OTP_DEMO_CODE=12345، خاموش‌کردن با OTP_DEMO_MODE=false)؛ TTL دمو ۳۰۰s؛ devCode در پاسخ برمی‌گردد؛ login/page.tsx — purpose واقعی ADMIN در فلو ادمین (باگ: همیشه LOGIN بود). .env: DATABASE_URL نسبی file:../db/custom.db + ADMIN_PHONES=09120000000 + SMS_DEV_MODE/OTP_DEMO*. .env.example کامل. E2E API: request→devCode 12345 ✓ verify→user ADMIN ساخته شد ✓
+- گیت: .env از tracking خارج شد (.env.example جایگزین)، tool-results/.zscripts/tests/download/examples/agent-ctx/worklog از gitignore؛ README.md کامل با راهنمای استقرار ورسل + جدول خطاهای رایج دیتابیس
+
+Stage Summary:
+- فایل‌ها: hero.tsx، needs-section.tsx، product-rail.tsx (بازنویسی)، product-detail.tsx، cart-view.tsx، checkout/page.tsx، account/orders/[orderNumber]/page.tsx، search-dialog.tsx، mega-menu.tsx، catalog-view.tsx، product-card.tsx، header.tsx، theme-toggle.tsx، login/page.tsx، globals.css، lib/db.ts، server/otp.ts، next.config.ts، package.json، .env، .env.example، .gitignore، README.md، scripts/gen-placeholders.ts + ۴۸ SVG
+- برای ایجنت‌های بعدی: (۱) درگ کاروسل RTL = راست‌به‌جلو؛ درگ بومی <a>/<img> باید با draggable={false} + CSS خنثی شود (۲) سرور dev با .env جدید restart شده (۳) seed با env نسبی سالم (۴) کد OTP دمو = 12345 برای همهٔ purpose ها (۵) بدهی اصلی باقی‌مانده: پنل ادمین + لایهٔ دادهٔ DB-first صفحات عمومی (Taskهای 8-c و 8-d)
+
+---
+Task ID: 8-c
+Agent: full-stack-developer + main-orchestrator (رفع باگ نهایی)
+Task: لایهٔ دادهٔ DB-first + APIهای ادمین + اتصال صفحات عمومی + ثبت سفارش واقعی + جستجوی سرور
+
+Work Log:
+- مدل NeedCard به schema اضافه + db:push؛ seed: نیازها (۶)، ادمین دمو (۰۹۱۲۰۰۰۰۰۰۰)، ۷ سفارش دمو با اقلام/لاگ وضعیت در ۱۴ روز اخیر — همه idempotent
+- src/server/shop-data.ts: گترهای DB-first با fallback به preview-data (هیچ‌وقت سایت نمی‌شکند): sections/slides/categories/brands/needs/ads/popular/products/tabs/detail/related/articles/faq/storeSettings با React cache()
+- اتصال صفحات عمومی به shop-data (خروجی بصری تغییر نکرده): home، products، product/[slug]، blog×۲، faq، search، layout/footer/contact/about با overlay تنظیمات store.*؛ همه dynamic="force-dynamic"
+- ۲۸ روت API ادمین (products/categories/brands/orders/users/home-sections/slides/banners/needs/popular-terms/articles/faqs/messages/settings/stats/upload — هرکدام GET/POST/PUT/DELETE + گارد getSessionUser role=ADMIN + zod فارسی + revalidatePath + invalidateSettingsCache)
+- /api/search عمومی (نرمال‌سازی متن جستجو، سقف ۸)؛ search-dialog کلاینت → fetch debounce 250ms با AbortController + fallback لوکال
+- POST /api/orders: تراکنش اتمیک (قیمت مرجع سرور، چک موجودی، snapshot اقلام، کسر موجودی، دنبالهٔ BS-۱۰۰۰۰x از Setting)؛ checkout → /api/auth/me → ۴۰۱→ ریدایرکت لاگین؛ account/orders از DB واقعی
+- POST /api/contact عمومی + فرم تماس وصل؛ admin-schemas.ts + api.ts (adminHandler + پاسخ‌های استاندارد {items:[...]})
+- رفع باگ توسط orchestrator: PreparedItem کلید کمکی decrement داشت که مستقیم به items.create پاس می‌شد → Prisma Unknown argument → map و حذف کلید؛ سفارش BS-100008 ثبت شد، موجودی ۸→۶ کسر شد
+
+Stage Summary:
+- گیت‌کیپ: lint exit 0، tsc صفر خطای پروژه، db:push/seed سالم، همهٔ مسیرهای عمومی 200، API ادمین تست‌شده با سشن (stats/orders/products/settings همه سالم)
+- قرارداد API ادمین برای UI (Task 8-d): لیست‌ها {items:[...]}؛ گارد 401 فارسی؛ اعداد قیمت به تومان (int)؛ آپلود POST /api/admin/upload multipart → {url}
+- بدهی باقی‌مانده: UI پنل ادمین (Taskهای 8-d-1 و 8-d-2)
+
+---
+Task ID: 8-d-1
+Agent: full-stack-developer + main-orchestrator (بازسازی ساختار و E2E)
+Task: پوستهٔ پنل ادمین + میزکار + محصولات + سفارش‌ها + کاربران
+
+Work Log:
+- بازسازی ساختار (orchestrator): صفحات عمومی به گروهٔ (shop) منتقل شدند با layout خودش (هدر/فوتر/داک/سرچ‌دیالوگ)؛ layout ریشه به html/body/تم/توست + سئوی غنی store-aware کاهش یافت — /admin حالا کروم تمام‌صفحهٔ خودش را دارد
+- src/components/admin/: admin-shell (سایدبار shadcn با ۴ گروه ناوبری فارسی + اینست با تاپ‌بار/کرمبل/تم‌تاگل/منوی کاربر/خروج)، api.ts (apiFetch/apiSend با خطاهای فارسی)، data-table (TanStack)، stat-card، status-badge (نقشهٔ رنگ OrderStatus بدون آبی/بنفش)، page-header، empty-state، dashboard-chart (recharts سبز برند)، product-editor، products-view، orders-view، order-detail، users-view، placeholder
+- صفحات: /admin (میزکار — ۴ کارت آمار + نمودار ۱۴روزه + سفارش‌های اخیر + کم‌موجود)، /admin/products + new + [id] (ادیتور کامل: عمومی/سئو/تصاویر با آپلود و مرتب‌سازی/تنوع‌ها/مشخصات + نوار ذخیرهٔ چسبان)، /admin/orders + [id] (فیلتر وضعیت، تایم‌لاین، تغییر وضعیت + کد رهگیری)، /admin/users (بلاک/نقش/جستجو) — و ۷ صفحهٔ placeholder برای 8-d-2
+- E2E مرورگر (orchestrator): /admin → ریدایرکت /login?admin=1 ✓ → ورود ۰۹۱۲۰۰۰۰۰۰۰/۱۲۳۴۵ ✓ → میزکار کامل (VLM ۹/۱۰) ✓ → ادیتور محصول: موجودی ۱۲→۱۵ ذخیره شد و در لیست منعکس ✓ → جزئیات BS-۱۰۰۰۰۸: وضعیت → پرداخت‌شده + یادداشت ✓ → کاربران ۳ ردیف ✓ → موبایل ۳۹۰ بدون سرریز (scrollW=390) ✓ → دارک‌مود سالم (VLM ۸/۱۰) ✓
+- گیت‌کیپ: lint exit 0، tsc صفر خطای src
+
+Stage Summary:
+- هستهٔ پنل ادمین کامل و E2E-تأییدشده؛ بدهی: ۷ صفحهٔ placeholder (home/categories/brands/articles/faqs/messages/settings) = Task 8-d-2
+- قراردادها: کامپوننت‌های مشترک در src/components/admin (PageHeader/DataTable/EmptyState/StatusBadge/apiSend)؛ لیست‌ها {items:[...]}؛ پلیس‌هولدرها با <Placeholder title=... description=.../> ساخته می‌شوند
+
+---
+Task ID: 8-d-2
+Agent: full-stack-developer + main-orchestrator (رفع کش + E2E)
+Task: ۷ صفحهٔ محتوای پنل ادمین — صفحهٔ اصلی، دسته‌ها، برندها، مقالات، سوالات، پیام‌ها، تنظیمات
+
+Work Log:
+- home/page.tsx + home-manager.tsx (۵ تب): بخش‌ها (جابه‌جایی بالا/پایین + سوییچ فعال‌بودن + ویرایش عنوان/زیرعنوان + ذخیرهٔ آرایه)، اسلایدها (دیالوگ کامل + آپلود + پیش‌نمایش ۴:۵)، بنرها (اسلات‌ها با توضیح فارسی از ad-grid)، نیازها، جستجوهای پرطرفدار
+- categories-view: درخت دو سطحی با باز/بسته + دیالوگ ساخت/ویرایش (والد/آیکون/سئو) + حذف با AlertDialog
+- brands-view، faqs-view (ردیف‌ها + جابه‌جایی)، articles (لیست + ادیتور صفحه‌ای new/[id] با منتشر/پیش‌نویس)، messages (لیست+جزئیات، نقطهٔ خوانده‌نشده، tel:)، settings-view (۴ بخش + نوار ذخیرهٔ چسبان + کارت راهنمای OTP دمو)
+- رفع باگ کش توسط orchestrator: TTL کش تنظیمات ۶۰s → ۳s (ذخیرهٔ ادمین باید فوراً در سایت دیده شود؛ دودوپلیکت با React cache در shop-data)
+- E2E (orchestrator): بخش «نیازها» خاموش شد → از هوم حذف ✓ → روشن → برگشت ✓ | تگ‌لاین تغییر → فوتر فوری نشان داد → revert سالم ✓ | پیام تماس از /api/contact → صندوق ورودی + خوانده‌شدن ✓ | دستهٔ تست ساخته/حذف شد و از هوم پاک ✓ | همهٔ ۷ صفحه بدون placeholder، موبایل ۳۹۰ بدون سرریز ✓
+- گیت‌کیپ: lint 0، tsc صفر خطای src
+
+Stage Summary:
+- پنل ادمین ۱۰۰٪ کامل: میزکار/محصولات/سفارش‌ها/کاربران/صفحهٔ اصلی/دسته‌ها/برندها/مقالات/سوالات/پیام‌ها/تنظیمات — همهٔ اپشن‌های سایت از پنل قابل مدیریت‌اند و تغییرات فوراً روی سایت اعمال می‌شوند
+- باقی‌مانده: راستی‌آزمایی نهایی کل سایت + گیت‌هاب/ورسل (Task 8-e)

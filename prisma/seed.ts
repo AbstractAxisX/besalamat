@@ -588,9 +588,14 @@ const PRODUCTS: ProductSeed[] = [
   },
 ];
 
-/* ══════════════════════════ اسلایدها (۳) ══════════════════════════ */
+/* ══════════════════════════ اسلایدهای هیرو (۳) — عین PREVIEW_SLIDES ══════════════════════════
+ *
+ * ⚠️ id ثابت (slide-1..3) قراردادی است — hero.tsx عبارت مارکرشدهٔ هر اسلاید را
+ * با کلید slide.id انتخاب می‌کند (SLIDE_HIGHLIGHT)؛ تغییر id ها مارکر را می‌شکند.
+ */
 
 const SLIDES: {
+  id: string;
   title: string;
   subtitle: string;
   imageUrl: string;
@@ -599,46 +604,76 @@ const SLIDES: {
   sortOrder: number;
 }[] = [
   {
-    title: "سلامتی خانواده، با خیال راحت",
-    subtitle: "تجهیزات پزشکی اورجینال با ضمانت اصالت کالا",
+    id: "slide-1",
+    title: "تجهیزات پزشکی اصل، با خیال راحت",
+    subtitle: "بیش از ۸۰ برند معتبر جهانی — اومرون، بویرون، مدیسانا و…",
     imageUrl: "/placeholders/slide-1.svg",
-    ctaLabel: "مشاهده محصولات",
+    ctaLabel: "دیدن محصولات",
     ctaHref: "/products",
     sortOrder: 0,
   },
   {
-    title: "برندهای معتبر جهانی",
-    subtitle: "اومرون، بویرون، مدیسانا و…",
+    id: "slide-2",
+    title: "برای هر خانه، یک دستگاه سلامت",
+    subtitle: "از فشارسنج و قندسنج تا بخور و ترازوی هوشمند",
     imageUrl: "/placeholders/slide-2.svg",
-    ctaLabel: "مشاهدهٔ فروشگاه",
+    ctaLabel: "خرید بر اساس نیاز",
     ctaHref: "/products",
     sortOrder: 1,
   },
   {
-    title: "مشاورهٔ تخصصی رایگان",
-    subtitle: "کارشناسان ما در انتخاب همراه شما هستند",
+    id: "slide-3",
+    title: "قبل از خرید، با کارشناس مشورت کنید",
+    subtitle: "مشاورهٔ تخصصی رایگان — انتخاب درست، هزینهٔ کمتر",
     imageUrl: "/placeholders/slide-3.svg",
-    ctaLabel: "تماس با ما",
+    ctaLabel: "تماس با کارشناس",
     ctaHref: "/contact",
     sortOrder: 2,
   },
 ];
 
-/* ══════════════════════════ بنرها (۲) ══════════════════════════ */
+/* ══════════════════════════ بنرهای گرید تبلیغات (۴ کاشی قالب بنتو) ══════════════════════════
+ *
+ * قرارداد ذخیره: عنوان و زیرعنوان هر کاشی با «\n» در ستون title کنار هم می‌نشینند
+ * (مدل Banner ستون subtitle ندارد) — سرویس shop-data هنگام خواندن تفکیک می‌کند.
+ * slot = جایگاه کاشی در گرید (۰ مبنا؛ عین AdTileDTO.slotIndex).
+ */
 
 const BANNERS: { title: string; imageUrl: string; href: string; slot: number }[] = [
-  { title: "اقلام مصرفی بهداشتی", imageUrl: "/placeholders/banner-1.svg", href: "/products?category=masks", slot: 1 },
-  { title: "حمایت و ارتوپدی", imageUrl: "/placeholders/banner-2.svg", href: "/products?category=orthopedic", slot: 2 },
+  {
+    title: "فشارسنج‌های دیجیتال\nدقت بالینیک، دو سال گارانتی",
+    imageUrl: "/placeholders/ad-big-1.svg",
+    href: "/products?category=blood-pressure",
+    slot: 0,
+  },
+  {
+    title: "اقلام مصرفی اورجینال\nنوار قند، لانست و ماسک",
+    imageUrl: "/placeholders/ad-wide-1.svg",
+    href: "/products?category=masks",
+    slot: 1,
+  },
+  {
+    title: "بخور و نبولایزر",
+    imageUrl: "/placeholders/ad-square-1.svg",
+    href: "/products?category=nebulizer",
+    slot: 2,
+  },
+  {
+    title: "تشک ضدزخم",
+    imageUrl: "/placeholders/ad-square-2.svg",
+    href: "/products?category=anti-bedsore-mattress",
+    slot: 3,
+  },
 ];
 
-/* ══════════════════════════ بخش‌های صفحهٔ خانه (۸) ══════════════════════════ */
+/* ══════════════════════════ بخش‌های صفحهٔ خانه (۸) — عین PREVIEW_HOME_SECTIONS ══════════════════════════ */
 
 const HOME_SECTIONS: { key: string; sortOrder: number; title: string | null; subtitle: string | null }[] = [
   { key: "hero", sortOrder: 0, title: null, subtitle: null },
-  { key: "trust", sortOrder: 1, title: null, subtitle: null },
-  { key: "categories", sortOrder: 2, title: "دسته‌بندی محصولات", subtitle: null },
-  { key: "productTabs", sortOrder: 3, title: "انتخاب هوشمندانه", subtitle: "محبوب‌ترین‌ها، تازه‌ها و پیشنهادهای ویژه" },
-  { key: "banners", sortOrder: 4, title: null, subtitle: null },
+  { key: "needs", sortOrder: 1, title: "خرید بر اساس نیاز", subtitle: "به جای جست‌وجوی دسته‌ها، بگویید دغدغه‌تان چیست" },
+  { key: "ads", sortOrder: 2, title: null, subtitle: null },
+  { key: "productRail", sortOrder: 3, title: "محبوب‌ترین‌ها", subtitle: "انتخاب واقعی مشتریان، به‌روزرسانی هفتگی" },
+  { key: "expertPicks", sortOrder: 4, title: "منتخب کارشناس سلامت", subtitle: "تیم کارشناسی ما این قلم‌ها را با وسواس انتخاب کرده است" },
   { key: "brands", sortOrder: 5, title: "برندهای همراه ما", subtitle: null },
   { key: "articles", sortOrder: 6, title: "مجلهٔ سلامت", subtitle: "خواندنی‌های کاربردی برای سلامتی خانواده" },
   { key: "aboutStore", sortOrder: 7, title: "دربارهٔ بسلامت", subtitle: null },
@@ -722,45 +757,50 @@ const ARTICLES: {
   },
 ];
 
-/* ══════════════════════════ سوالات متداول (۶) ══════════════════════════ */
+/* ══════════════════════════ سوالات متداول (۶) — عین PREVIEW_FAQS ══════════════════════════ */
 
 const FAQS: { question: string; answer: string }[] = [
   {
     question: "هزینهٔ ارسال چقدر است؟",
     answer:
-      "ارسال با پست به سراسر کشور مبلغ ثابت ۴۵٬۰۰۰ تومان است؛ تحویل حضوری از فروشگاه رایگان است.",
+      "ارسال سفارش‌ها با پست به سراسر کشور انجام می‌شود و هزینهٔ آن ۴۵٬۰۰۰ تومان ثابت است. برای تحویل حضوری از فروشگاه هیچ هزینه‌ای دریافت نمی‌شود.",
   },
   {
-    question: "آیا تحویل حضوری دارید؟",
-    answer: "بله؛ در ساعات کاری می‌توانید سفارش خود را از آدرس فروشگاه تحویل بگیرید.",
-  },
-  {
-    question: "اصالت کالاها چطور تضمین می‌شود؟",
+    question: "امکان تحویل حضوری از فروشگاه وجود دارد؟",
     answer:
-      "همهٔ کالاها از نمایندگی‌های رسمی تأمین می‌شوند و همراه با گارانتی معتبر و فاکتور رسمی ارسال می‌گردند.",
+      "بله؛ در ساعات کاری می‌توانید سفارش خود را حضوری و بدون هزینهٔ اضافه از نشانی فروشگاه تحویل بگیرید.",
   },
   {
-    question: "سفارشم را چطور پیگیری کنم؟",
+    question: "اصالت کالاها چگونه تضمین می‌شود؟",
     answer:
-      "با شمارهٔ سفارش، از پنل کاربری یا تماس با پشتیبانی می‌توانید وضعیت سفارش خود را پیگیری کنید.",
+      "همهٔ محصولات را مستقیماً از نمایندگی‌های رسمی و شرکت‌های معتبر تأمین می‌کنیم و همراه هر سفارش، فاکتور معتبر و تضمین اصالت کالا ارائه می‌شود.",
   },
   {
-    question: "روش‌های پرداخت چیست؟",
-    answer: "پرداخت آنلاین امن از طریق درگاه بانکی انجام می‌شود.",
-  },
-  {
-    question: "آیا امکان بازگشت کالا وجود دارد؟",
+    question: "سفارشم را چگونه پیگیری کنم؟",
     answer:
-      "بله؛ تا ۷ روز پس از دریافت، در صورت پلمب بودن و رعایت شرایط بهداشتی، امکان بازگشت کالا وجود دارد.",
+      "وضعیت سفارش را می‌توانید از پنل کاربری خود ببینید یا با شمارهٔ سفارش، از طریق پشتیبانی پیگیری کنید.",
+  },
+  {
+    question: "روش پرداخت چیست؟",
+    answer:
+      "پرداخت همهٔ سفارش‌ها از طریق درگاه آنلاین امن انجام می‌شود و رسید تراکنش بلافاصله صادر می‌گردد.",
+  },
+  {
+    question: "شرایط بازگشت کالا چگونه است؟",
+    answer:
+      "تا ۷ روز پس از تحویل و با رعایت شرایط بهداشتی، امکان بازگشت کالا و عودت مبلغ وجود دارد.",
   },
 ];
 
 /* ══════════════════════════ تنظیمات (JSON در Setting.value) ══════════════════════════ */
 
 const SETTINGS: { key: string; value: unknown }[] = [
-  { key: "order.sequence", value: 10234 }, // اولین شمارهٔ سفارش: BS-10234
+  // آخرین شمارهٔ سفارش مصرف‌شده — سفارش‌های دمو BS-100001 تا BS-100007 را پوشش می‌دهد؛
+  // اولین سفارش واقعی: BS-100008 (فرمت BS- + ۶ رقم)
+  { key: "order.sequence", value: 100007 },
   { key: "shipping.cost", value: 45000 }, // هزینهٔ ثابت ارسال پستی (تومان)
   { key: "store.mapEmbedUrl", value: "https://maps.google.com/maps?q=Tehran%20Valiasr&output=embed" }, // همان پیش‌فرض brand.ts
+  { key: "ads.layout", value: "bento" }, // قالب گرید تبلیغات صفحهٔ خانه: bento | duo | trio
 ];
 
 /* ══════════════════════════ واژه‌های پرجستجو (۶) ══════════════════════════ */
@@ -772,6 +812,206 @@ const POPULAR_SEARCH_TERMS: { term: string; weight: number }[] = [
   { term: "پالس اکسیمتر", weight: 55 },
   { term: "ترازو", weight: 45 },
   { term: "ویلچر", weight: 40 },
+];
+
+/* ══════════════════════════ کارت‌های «خرید بر اساس نیاز» (۶) — عین PREVIEW_NEEDS ══════════════════════════
+ *
+ * id ثابت (need-*) تا upsert idempotent بماند؛ iconKey ذخیره نمی‌شود و سرویس
+ * shop-data آن را از پارامتر category داخل href استخراج می‌کند.
+ */
+
+const NEED_CARDS: { id: string; title: string; description: string; href: string; sortOrder: number }[] = [
+  { id: "need-bp", title: "کنترل فشار خون", description: "فشارسنج‌های بازویی و مچی با دقت بالینیک", href: "/products?category=blood-pressure", sortOrder: 1 },
+  { id: "need-glucose", title: "مدیریت دیابت", description: "قندسنج، نوار و لانست برای پایش روزانه", href: "/products?category=glucose", sortOrder: 2 },
+  { id: "need-resp", title: "سلامت تنفس", description: "بخور، پالس‌اکسیمتر و ماسک اکسیژن", href: "/products?category=respiratory", sortOrder: 3 },
+  { id: "need-bed", title: "مراقبت از بیمار", description: "تخت برقی، تشک ضدزخم و لوازم بستری", href: "/products?category=beds", sortOrder: 4 },
+  { id: "need-ortho", title: "توان‌بخشی و ارتوپدی", description: "کمربند طبی، زانوبند و طوق گردنی", href: "/products?category=orthopedic", sortOrder: 5 },
+  { id: "need-mask", title: "بهداشت و مصرفی", description: "ماسک، دستکش و اقلام ضدعفونی", href: "/products?category=masks", sortOrder: 6 },
+];
+
+/* ══════════════════════════ کاربر ادمین دمو ══════════════════════════ */
+
+const ADMIN_PHONE = "09120000000"; // باید عین ADMIN_PHONES در .env باشد
+
+/* ══════════════════════════ سفارش‌های دمو (۷) — برای داشبورد ادمین و حساب کاربری ══════════════════════════
+ *
+ * شماره‌ها BS-100001..BS-100007؛ همه متعلق به کاربر ادمین دمو؛
+ * قیمت/عنوان/تصویر اقلام به‌صورت snapshot از محصولات seed ذخیره می‌شود.
+ */
+
+/** لاگ وضعیت — plusDays نسبت به ثبت سفارش */
+interface DemoLogSeed {
+  plusDays: number;
+  hour: number;
+  status: "PAID" | "PROCESSING" | "SHIPPED" | "DELIVERED";
+  note: string | null;
+}
+
+interface DemoOrderItemSeed {
+  productSlug: string;
+  variantTitle?: string;
+  qty: number;
+}
+
+interface DemoOrderSeed {
+  orderNumber: string;
+  status: "PENDING_PAYMENT" | "PAID" | "SHIPPED" | "DELIVERED";
+  shippingMethod: "POST" | "PICKUP";
+  daysAgo: number;
+  hour: number;
+  receiverName: string;
+  receiverPhone: string;
+  province: string;
+  city: string;
+  addressLine: string;
+  postalCode?: string;
+  note?: string;
+  postalTrackingCode?: string;
+  items: DemoOrderItemSeed[];
+  logs: DemoLogSeed[];
+}
+
+const DEMO_ORDERS: DemoOrderSeed[] = [
+  {
+    orderNumber: "BS-100001",
+    status: "DELIVERED",
+    shippingMethod: "POST",
+    daysAgo: 13,
+    hour: 10,
+    receiverName: "سارا محمدی",
+    receiverPhone: "09121234567",
+    province: "تهران",
+    city: "تهران",
+    addressLine: "خیابان ولیعصر، بالاتر از پارک ساعی، کوچهٔ بهار، پلاک ۱۲، واحد ۳",
+    postalCode: "1234567890",
+    postalTrackingCode: "24RA8931574",
+    items: [
+      { productSlug: "omron-m2-blood-pressure", qty: 1 },
+      { productSlug: "surgical-mask-50", qty: 2 },
+    ],
+    logs: [
+      { plusDays: 0, hour: 10, status: "PAID", note: "پرداخت آنلاین تأیید شد." },
+      { plusDays: 1, hour: 16, status: "PROCESSING", note: "سفارش برای بسته‌بندی به انبار ارجاع شد." },
+      { plusDays: 2, hour: 11, status: "SHIPPED", note: "بسته به پست پیشتاز سپرده شد." },
+      { plusDays: 4, hour: 17, status: "DELIVERED", note: "تحویل به گیرنده انجام شد؛ امیدواریم از خرید خود لذت ببرید." },
+    ],
+  },
+  {
+    orderNumber: "BS-100002",
+    status: "SHIPPED",
+    shippingMethod: "POST",
+    daysAgo: 9,
+    hour: 12,
+    receiverName: "رضا کریمی",
+    receiverPhone: "09127654321",
+    province: "اصفهان",
+    city: "اصفهان",
+    addressLine: "خیابان چهارباغ بالا، جنب پل فردوسی، ساختمان مریم، طبقهٔ ۲",
+    postalCode: "8158813456",
+    postalTrackingCode: "24RA8931581",
+    items: [
+      { productSlug: "beurer-gs27", qty: 1 },
+      { productSlug: "omron-mc245", qty: 2 },
+    ],
+    logs: [
+      { plusDays: 0, hour: 12, status: "PAID", note: "پرداخت آنلاین تأیید شد." },
+      { plusDays: 1, hour: 9, status: "PROCESSING", note: "سفارش برای بسته‌بندی به انبار ارجاع شد." },
+      { plusDays: 2, hour: 15, status: "SHIPPED", note: "بسته به پست پیشتاز سپرده شد." },
+    ],
+  },
+  {
+    orderNumber: "BS-100003",
+    status: "PAID",
+    shippingMethod: "POST",
+    daysAgo: 6,
+    hour: 18,
+    receiverName: "مریم احمدی",
+    receiverPhone: "09331112233",
+    province: "فارس",
+    city: "شیراز",
+    addressLine: "بلوار زند، نبش کوچهٔ ۱۲، مجتمع نگین، واحد ۸",
+    postalCode: "7134856721",
+    items: [{ productSlug: "rossmax-tg300", variantTitle: "همراه ۵۰ نوار", qty: 1 }],
+    logs: [
+      { plusDays: 0, hour: 18, status: "PAID", note: "پرداخت آنلاین تأیید شد؛ سفارش به‌زودی پردازش می‌شود." },
+    ],
+  },
+  {
+    orderNumber: "BS-100004",
+    status: "DELIVERED",
+    shippingMethod: "PICKUP",
+    daysAgo: 5,
+    hour: 11,
+    receiverName: "مدیر فروشگاه",
+    receiverPhone: "09120000000",
+    province: "تهران",
+    city: "تهران",
+    addressLine: "تحویل حضوری از فروشگاه",
+    items: [
+      { productSlug: "medisana-uhw", qty: 1 },
+      { productSlug: "tri-ball-spirometer", qty: 1 },
+    ],
+    logs: [
+      { plusDays: 0, hour: 11, status: "PAID", note: "پرداخت آنلاین تأیید شد." },
+      { plusDays: 0, hour: 14, status: "PROCESSING", note: "سفارش برای تحویل حضوری آماده شد." },
+      { plusDays: 1, hour: 17, status: "DELIVERED", note: "تحویل حضوری از فروشگاه انجام شد." },
+    ],
+  },
+  {
+    orderNumber: "BS-100005",
+    status: "PENDING_PAYMENT",
+    shippingMethod: "POST",
+    daysAgo: 2,
+    hour: 21,
+    receiverName: "حسین رضایی",
+    receiverPhone: "09155556666",
+    province: "خراسان رضوی",
+    city: "مشهد",
+    addressLine: "خیابان احمدآباد، نبش گلستان ۵، پلاک ۴۸",
+    postalCode: "9177948963",
+    note: "لطفاً پیش از ارسال، هماهنگی تلفنی انجام شود.",
+    items: [{ productSlug: "electric-hospital-bed", qty: 1 }],
+    logs: [],
+  },
+  {
+    orderNumber: "BS-100006",
+    status: "PAID",
+    shippingMethod: "POST",
+    daysAgo: 1,
+    hour: 9,
+    receiverName: "سارا محمدی",
+    receiverPhone: "09121234567",
+    province: "تهران",
+    city: "تهران",
+    addressLine: "خیابان ولیعصر، بالاتر از پارک ساعی، کوچهٔ بهار، پلاک ۱۲، واحد ۳",
+    postalCode: "1234567890",
+    items: [{ productSlug: "medisana-bs430", qty: 1 }],
+    logs: [
+      { plusDays: 0, hour: 9, status: "PAID", note: "پرداخت آنلاین تأیید شد؛ سفارش به‌زودی پردازش می‌شود." },
+    ],
+  },
+  {
+    orderNumber: "BS-100007",
+    status: "SHIPPED",
+    shippingMethod: "POST",
+    daysAgo: 0,
+    hour: 8,
+    receiverName: "نگار موسوی",
+    receiverPhone: "09199998888",
+    province: "گیلان",
+    city: "رشت",
+    addressLine: "خیابان مطهری، کوچهٔ شکوفه، پلاک ۹، واحد ۲",
+    postalCode: "4153895421",
+    postalTrackingCode: "24RA8931602",
+    items: [
+      { productSlug: "lumbar-support-belt", variantTitle: "M", qty: 1 },
+      { productSlug: "beurer-gl50-strips", qty: 3 },
+    ],
+    logs: [
+      { plusDays: 0, hour: 8, status: "PAID", note: "پرداخت آنلاین تأیید شد." },
+      { plusDays: 0, hour: 13, status: "SHIPPED", note: "بسته به پست پیشتاز سپرده شد." },
+    ],
+  },
 ];
 
 /* ══════════════════════════ توابع seed ══════════════════════════ */
@@ -913,14 +1153,25 @@ async function seedHomeContent(): Promise<void> {
 
   await prisma.banner.deleteMany({});
   for (const b of BANNERS) {
-    await prisma.banner.create({ data: b });
+    await prisma.banner.create({ data: { ...b, isActive: true } });
   }
 
+  /* بخش‌های خانه: بازسازی کامل تا کلیدهای قدیمی (نسخه‌های قبل) هم پاک شوند */
+  await prisma.homePageSection.deleteMany({});
   for (const sec of HOME_SECTIONS) {
-    await prisma.homePageSection.upsert({
-      where: { key: sec.key },
-      create: { key: sec.key, sortOrder: sec.sortOrder, title: sec.title, subtitle: sec.subtitle, isActive: true },
-      update: { sortOrder: sec.sortOrder, title: sec.title, subtitle: sec.subtitle, isActive: true },
+    await prisma.homePageSection.create({
+      data: { key: sec.key, sortOrder: sec.sortOrder, title: sec.title, subtitle: sec.subtitle, isActive: true },
+    });
+  }
+}
+
+async function seedNeedCards(): Promise<void> {
+  /* id ثابت → upsert idempotent */
+  for (const need of NEED_CARDS) {
+    await prisma.needCard.upsert({
+      where: { id: need.id },
+      create: { ...need, isActive: true },
+      update: { title: need.title, description: need.description, href: need.href, sortOrder: need.sortOrder, isActive: true },
     });
   }
 }
@@ -998,6 +1249,153 @@ async function seedPopularSearchTerms(): Promise<void> {
   }
 }
 
+/** کاربر ادمین دمو — phone در ADMIN_PHONES.env است تا ورود با OTP دمو ممکن باشد */
+async function seedAdminUser(): Promise<{ id: string }> {
+  const row = await prisma.user.upsert({
+    where: { phone: ADMIN_PHONE },
+    create: { phone: ADMIN_PHONE, fullName: "مدیر فروشگاه", role: "ADMIN", isBlocked: false },
+    update: { fullName: "مدیر فروشگاه", role: "ADMIN", isBlocked: false },
+  });
+  return { id: row.id };
+}
+
+/** سفارش‌های دمو — قیمت/عنوان/تصویر از محصولات seed به‌صورت snapshot */
+async function seedDemoOrders(adminUserId: string): Promise<void> {
+  for (const order of DEMO_ORDERS) {
+    const createdAt = new Date(now - order.daysAgo * DAY_MS);
+    createdAt.setHours(order.hour, 12, 0, 0);
+
+    /* اقلام — قیمت/تصویر از DB (مرجع قطعی) */
+    const items: {
+      productId: string;
+      variantId: string | null;
+      titleSnapshot: string;
+      variantSnapshot: string | null;
+      imageSnapshot: string | null;
+      unitPrice: number;
+      comparePriceSnapshot: number | null;
+      quantity: number;
+      lineTotal: number;
+    }[] = [];
+
+    for (const item of order.items) {
+      const product = await prisma.product.findUnique({
+        where: { slug: item.productSlug },
+        include: {
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          variants: true,
+        },
+      });
+      if (product === null) {
+        throw new Error(`محصول seed برای سفارش دمو «${order.orderNumber}» پیدا نشد: ${item.productSlug}`);
+      }
+
+      const variant =
+        item.variantTitle !== undefined
+          ? product.variants.find((row) => row.title === item.variantTitle)
+          : undefined;
+      if (item.variantTitle !== undefined && variant === undefined) {
+        throw new Error(`تنوع «${item.variantTitle}» برای «${item.productSlug}» در seed پیدا نشد.`);
+      }
+
+      items.push({
+        productId: product.id,
+        variantId: variant?.id ?? null,
+        titleSnapshot: product.title,
+        variantSnapshot: variant?.title ?? null,
+        imageSnapshot: product.images[0]?.url ?? null,
+        unitPrice: variant?.price ?? product.price,
+        comparePriceSnapshot: variant?.comparePrice ?? product.comparePrice,
+        quantity: item.qty,
+        lineTotal: (variant?.price ?? product.price) * item.qty,
+      });
+    }
+
+    const subtotal = items.reduce((total, item) => total + item.lineTotal, 0);
+    const shippingCost = order.shippingMethod === "POST" ? 45000 : 0;
+    const total = subtotal + shippingCost;
+
+    /* لاگ‌ها: ثبت سفارش (خودکار) + لاگ‌های دمو؛ paidAt از نخستین PAID */
+    const statusLogs = [
+      {
+        fromStatus: null,
+        toStatus: "PENDING_PAYMENT" as const,
+        note: "سفارش شما ثبت شد و در انتظار پرداخت است.",
+        actor: "system",
+        createdAt,
+      },
+      ...order.logs.map((log) => ({
+        fromStatus: null,
+        toStatus: log.status,
+        note: log.note,
+        actor: "system",
+        createdAt: (() => {
+          const at = new Date(createdAt.getTime() + log.plusDays * DAY_MS);
+          at.setHours(log.hour, 5, 0, 0);
+          return at;
+        })(),
+      })),
+    ];
+
+    const paidLog = order.logs.find((log) => log.status === "PAID");
+    const paidAt =
+      paidLog !== undefined
+        ? (() => {
+            const at = new Date(createdAt.getTime() + paidLog.plusDays * DAY_MS);
+            at.setHours(paidLog.hour, 5, 0, 0);
+            return at;
+          })()
+        : null;
+
+    await prisma.order.upsert({
+      where: { orderNumber: order.orderNumber },
+      create: {
+        orderNumber: order.orderNumber,
+        userId: adminUserId,
+        status: order.status,
+        shippingMethod: order.shippingMethod,
+        shippingCost,
+        subtotal,
+        discountTotal: 0,
+        total,
+        receiverName: order.receiverName,
+        receiverPhone: order.receiverPhone,
+        province: order.province,
+        city: order.city,
+        addressLine: order.addressLine,
+        postalCode: order.postalCode ?? null,
+        note: order.note ?? null,
+        postalTrackingCode: order.postalTrackingCode ?? null,
+        paidAt,
+        createdAt,
+        items: { create: items },
+        statusLogs: { create: statusLogs },
+      },
+      update: {
+        userId: adminUserId,
+        status: order.status,
+        shippingMethod: order.shippingMethod,
+        shippingCost,
+        subtotal,
+        discountTotal: 0,
+        total,
+        receiverName: order.receiverName,
+        receiverPhone: order.receiverPhone,
+        province: order.province,
+        city: order.city,
+        addressLine: order.addressLine,
+        postalCode: order.postalCode ?? null,
+        note: order.note ?? null,
+        postalTrackingCode: order.postalTrackingCode ?? null,
+        paidAt,
+        createdAt,
+        items: { deleteMany: {}, create: items },
+        statusLogs: { deleteMany: {}, create: statusLogs },
+      },
+    });
+  }
+}
+
 /* ══════════════════════════ شمارش نهایی ══════════════════════════ */
 
 async function logCounts(): Promise<void> {
@@ -1027,6 +1425,7 @@ async function logCounts(): Promise<void> {
     outbox,
     settings,
     popularTerms,
+    needCards,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.otpCode.count(),
@@ -1053,13 +1452,14 @@ async function logCounts(): Promise<void> {
     prisma.messageOutbox.count(),
     prisma.setting.count(),
     prisma.popularSearchTerm.count(),
+    prisma.needCard.count(),
   ]);
 
   console.log("📊 شمارش رکوردها پس از seed:");
   console.log(`   کاربران: ${users} | OTP: ${otpCodes} | نشست‌ها: ${sessions}`);
   console.log(`   دسته‌ها: ${categories} | برندها: ${brands}`);
   console.log(`   محصولات: ${products} | تنوع‌ها: ${variants} | تصاویر: ${images} | مشخصات: ${specs}`);
-  console.log(`   اسلایدها: ${slides} | بنرها: ${banners} | بخش‌های خانه: ${sections}`);
+  console.log(`   اسلایدها: ${slides} | بنرها: ${banners} | بخش‌های خانه: ${sections} | کارت نیازها: ${needCards}`);
   console.log(`   دسته‌های مقاله: ${articleCats} | مقاله‌ها: ${articles} | سوالات متداول: ${faqs}`);
   console.log(`   تنظیمات: ${settings} | واژه‌های پرجستجو: ${popularTerms}`);
   console.log(
@@ -1079,10 +1479,13 @@ async function main(): Promise<void> {
   const brandMap = await seedBrands();
   await seedProducts(categoryMap, brandMap);
   await seedHomeContent();
+  await seedNeedCards();
   await seedArticles();
   await seedFaqs();
   await seedSettings();
   await seedPopularSearchTerms();
+  const admin = await seedAdminUser();
+  await seedDemoOrders(admin.id);
   await logCounts();
 
   console.log("✅ seed کامل شد.");

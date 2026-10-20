@@ -416,3 +416,15 @@ model PopularSearchTerm {
   weight   Int     @default(0)
   isActive Boolean @default(true)
 }
+
+/* ── کارت «خرید بر اساس نیاز» (صفحهٔ خانه) ──
+ * iconKey در DTO از پارامتر category داخل href استخراج می‌شود (نیاز به ستون ندارد). */
+model NeedCard {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  /** مقصد کلیک — معمولاً فیلتر دستهٔ مرتبط، مثل /products?category=blood-pressure */
+  href        String
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+}

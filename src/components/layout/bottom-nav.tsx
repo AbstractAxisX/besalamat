@@ -18,6 +18,7 @@ import { toFa } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useSearchDialogStore } from "@/store/search";
 import { cartCount, useCartStore } from "@/store/cart";
+import type { CategoryNode } from "@/types/shop";
 
 interface BottomNavItem {
   label: string;
@@ -48,7 +49,12 @@ function useMounted(): boolean {
  * (glass-strong) که محتوا از زیرش رد می‌شود و لبه‌هایش دیده می‌شود.
  * حالت فعال: پیل سبزفامِ لغزان (layoutId) پشت آیکون + متن سبز تازه.
  */
-export function BottomNav() {
+interface BottomNavProps {
+  /** درخت دسته‌ها — از سرویس DB-first (layout می‌رساند؛ مصرف منوی موبایل) */
+  categories: CategoryNode[];
+}
+
+export function BottomNav({ categories }: BottomNavProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const openDialog = useSearchDialogStore((state) => state.openDialog);
@@ -188,7 +194,11 @@ export function BottomNav() {
         </nav>
       </div>
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        categories={categories}
+      />
     </>
   );
 }

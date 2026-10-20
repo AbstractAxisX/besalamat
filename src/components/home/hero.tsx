@@ -134,18 +134,8 @@ export function Hero({
   return (
     <section
       aria-label="معرفی فروشگاه"
-      className="relative overflow-hidden bg-gradient-to-b from-secondary/60 via-background to-background"
+      className="relative overflow-hidden bg-white dark:bg-background"
     >
-      {/* هاله‌های نرم راننده — عمق زنده بدون پترن */}
-      <div
-        aria-hidden="true"
-        className="glow animate-drift size-[36rem] start-[-8rem] -top-40 hidden bg-fresh/10 sm:block"
-      />
-      <div
-        aria-hidden="true"
-        className="glow animate-drift-slow size-[32rem] end-[-10rem] -bottom-48 hidden bg-primary/10 sm:block"
-      />
-
       <div className="shell relative grid items-center gap-12 py-10 md:py-16 lg:grid-cols-[1.05fr_0.95fr]">
         {/* ══ ستون متن — راست در RTL ══ */}
         <div className="order-1">
@@ -159,19 +149,8 @@ export function Hero({
             initial="hidden"
             animate="show"
           >
-            {/* چشم‌بند برند */}
-            <motion.div variants={staggerChild}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-fresh/40 bg-fresh/5 px-4 py-1.5 text-xs font-bold text-fresh-strong dark:text-fresh">
-                <span
-                  className="size-1.5 animate-pulse-soft rounded-full bg-fresh"
-                  aria-hidden="true"
-                />
-                {brand.tagline}
-              </span>
-            </motion.div>
-
             {/* تیتر و زیرعنوان اسلاید — تعویض نرم */}
-            <motion.div variants={staggerChild} className="mt-5">
+            <motion.div variants={staggerChild}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={slide.id}
@@ -338,7 +317,41 @@ export function Hero({
           transition={{ type: "spring", stiffness: 110, damping: 18, delay: 0.25 }}
         >
           <div className="relative mx-auto w-full max-w-[480px]">
-            {/* کارت اصلی — کاروسل تصویر؛ بدون قاب تزئینی، تمیز و ادیتوریال */}
+            {/* ══ عمق گرافیکی پشت کارت — هاله‌ها، حلقه‌ها و قاب‌های هندسی چرخیده ══ */}
+
+            {/* هاله‌های سبز نرمِ راننده — نفس‌کشیدن پس‌زمینهٔ تصویر */}
+            <div
+              aria-hidden="true"
+              className="glow animate-drift -start-16 -top-14 size-72 bg-fresh/25"
+            />
+            <div
+              aria-hidden="true"
+              className="glow animate-drift-slow -bottom-20 -end-16 size-80 bg-primary/20"
+            />
+
+            {/* حلقهٔ تزئینی — پشت گوشهٔ بالا-چپ کارت، با نقطهٔ سبز کوچک */}
+            <span
+              aria-hidden="true"
+              className="absolute -top-10 end-[-1.75rem] size-44 rounded-full border border-fresh/30"
+            />
+            <span
+              aria-hidden="true"
+              className="absolute top-5 end-[-0.5rem] size-2.5 rounded-full bg-fresh/70"
+            />
+
+            {/* قاب هندسی چرخیدهٔ دوم — چرخش معکوس برای عمق لایه‌ای */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-4 -rotate-2 rounded-[2.5rem] border border-fresh/15"
+            />
+
+            {/* قاب هندسی اصلی — چرخیده با پرشدگی سبز بسیار ظریف */}
+            <div
+              aria-hidden="true"
+              className="absolute -inset-4 rotate-3 rounded-[2.25rem] border border-fresh/25 bg-fresh/[0.04]"
+            />
+
+            {/* کارت اصلی — کاروسل تصویر */}
             <div
               ref={emblaRef}
               className="relative aspect-[4/5] touch-pan-y select-none overflow-hidden rounded-[2rem] border border-border/60 shadow-lift"

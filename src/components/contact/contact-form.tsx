@@ -3,7 +3,8 @@
 /**
  * فرم تماس — RHF + zod با پیام‌های خطای فارسی
  * ─────────────────────────────
- * فعلاً ثبت لوکال موفق است؛ اتصال به API در فاز ۵ انجام می‌شود.
+ * ارسال به POST /api/contact (ثبت در ContactMessage)؛
+ * خطاهای سرور به‌صورت toast فارسی نمایش داده می‌شود.
  */
 
 import { Controller, useForm } from "react-hook-form";
@@ -85,11 +86,29 @@ export function ContactForm() {
     defaultValues: DEFAULT_VALUES,
   });
 
-  async function onSubmit() {
-    // TODO(فاز ۵): POST /api/contact + ثبت در ContactMessage + ایمیل تأیید
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    toast.success("پیام شما ثبت شد؛ کارشناسان ما به‌زودی پاسخ می‌دهند");
-    reset(DEFAULT_VALUES);
+  async function onSubmit(values: ContactFormValues): Promise<void> {
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (!res.ok) {
+        const data: unknown = await res.json().catch(() => null);
+        const message =
+          typeof data === "object" &&
+          data !== null &&
+          typeof (data as Record<string, unknown>)["message"] === "string"
+            ? ((data as Record<string, unknown>)["message"] as string)
+            : "ارسال پیام ناموفق بود؛ لطفاً دوباره تلاش کنید.";
+        toast.error(message);
+        return;
+      }
+      toast.success("پیام شما ثبت شد؛ کارشناسان ما به‌زودی پاسخ می‌دهند");
+      reset(DEFAULT_VALUES);
+    } catch {
+      toast.error("ارتباط با سرور برقرار نشد؛ دوباره تلاش کنید");
+    }
   }
 
   return (

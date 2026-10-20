@@ -212,9 +212,10 @@ function productSvg(glyph: GlyphKey, variant: "a" | "b"): string {
   const isA = variant === "a";
   const defs = lg("bg", IVORY, MIST, isA ? 135 : 315);
   const r = isA ? ring(400, 400, 250, 2, 0.4) : ring(400, 400, 258, 1.5, 0.34);
+  /* مقیاس بزرگ‌تر: کالا مثل عکس واقعی، قاب را پر می‌کند (برش دایره‌ای سالم) */
   const g = isA
-    ? place(GLYPHS[glyph], 400, 401, 1.55, -3, PINE, 3)
-    : place(GLYPHS[glyph], 397, 396, 1.5, 5, PINE, 3);
+    ? place(GLYPHS[glyph], 400, 401, 2.1, -3, PINE, 3)
+    : place(GLYPHS[glyph], 397, 396, 2.05, 5, PINE, 3);
   const accents = isA
     ? dot(72, 728, 7, 0.75) + plus(728, 72, 14, 2.5, 0.5)
     : dot(728, 72, 6, 0.7) + plus(72, 728, 12, 2.5, 0.45);

@@ -13,7 +13,6 @@ import {
 
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { formatTomanPlain, toFa } from "@/lib/format";
-import { PREVIEW_CATEGORIES, PREVIEW_PRODUCTS } from "@/lib/preview-data";
 import { cn } from "@/lib/utils";
 import type { CategoryNode, ProductSummary } from "@/types/shop";
 
@@ -21,18 +20,23 @@ interface MegaMenuProps {
   /** باز/بسته — کنترل کامل با هدر (باز شدن فقط با هاور/فوکوس/کلیکِ دکمهٔ دسته‌ها) */
   open: boolean;
   onClose: () => void;
+  /** درخت دسته‌ها — از سرویس DB-first (هدر می‌رساند) */
+  categories: CategoryNode[];
+  /** خلاصهٔ محصولات برای پیشنهادهای هر دسته */
+  products: ProductSummary[];
 }
 
-const FIRST_CATEGORY_SLUG = PREVIEW_CATEGORIES[0]?.slug ?? "";
-
 /** پیشنهادهای دستهٔ فعال — خودِ دسته یا هر یک از زیردسته‌ها؛ حداکثر ۳ قلم */
-function pickSuggestions(category: CategoryNode | undefined): ProductSummary[] {
+function pickSuggestions(
+  category: CategoryNode | undefined,
+  products: ProductSummary[],
+): ProductSummary[] {
   if (!category) return [];
   const slugs = new Set<string>([
     category.slug,
     ...category.children.map((child) => child.slug),
   ]);
-  return PREVIEW_PRODUCTS.filter(
+  return products.filter(
     (product) => product.categorySlug != null && slugs.has(product.categorySlug),
   ).slice(0, 3);
 }
@@ -50,8 +54,9 @@ function pickSuggestions(category: CategoryNode | undefined): ProductSummary[] {
  * پردهٔ محو با پورتال به body رندر می‌شود تا از زمینهٔ stacking هدر (backdrop-blur)
  * بیرون بماند؛ چون pointer-events ندارد، کلیک بیرون با شنوندهٔ document بسته می‌شود.
  */
-export function MegaMenu({ open, onClose }: MegaMenuProps) {
-  const [activeSlug, setActiveSlug] = useState<string>(FIRST_CATEGORY_SLUG);
+export function MegaMenu({ open, onClose, categories, products }: MegaMenuProps) {
+  const firstCategorySlug = categories[0]?.slug ?? "";
+  const [activeSlug, setActiveSlug] = useState<string>(firstCategorySlug);
   const panelRef = useRef<HTMLDivElement>(null);
 
   /* با هر باز شدن، دستهٔ فعال به نخستین دسته برمی‌گردد (تنظیم در رندر،
@@ -59,7 +64,7 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
   const [prevOpen, setPrevOpen] = useState(open);
   if (prevOpen !== open) {
     setPrevOpen(open);
-    if (open) setActiveSlug(FIRST_CATEGORY_SLUG);
+    if (open) setActiveSlug(firstCategorySlug);
   }
 
   /* کلیک بیرون از پنل می‌بندد (پرده فقط نمایشی است).
@@ -88,21 +93,21 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
   }, [open, onClose]);
 
   const activeCategory =
-    PREVIEW_CATEGORIES.find((category) => category.slug === activeSlug) ??
-    PREVIEW_CATEGORIES[0];
+    categories.find((category) => category.slug === activeSlug) ??
+    categories[0];
 
   const suggestions = useMemo(
-    () => pickSuggestions(activeCategory),
-    [activeCategory],
+    () => pickSuggestions(activeCategory, products),
+    [activeCategory, products],
   );
 
   const subCategoryCount = useMemo(
     () =>
-      PREVIEW_CATEGORIES.reduce(
+      categories.reduce(
         (total, category) => total + category.children.length,
         0,
       ),
-    [],
+    [categories],
   );
 
   return (
@@ -143,7 +148,7 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
                   {/* ستون الف — فهرست دسته‌های اصلی */}
                   <nav aria-label="دسته‌های اصلی" className="min-w-0">
                     <ul className="max-h-[26rem] space-y-1 overflow-y-auto pe-1">
-                      {PREVIEW_CATEGORIES.map((category) => {
+                      {categories.map((category) => {
                         const isActive =
                           activeCategory != null &&
                           category.slug === activeCategory.slug;
@@ -263,7 +268,7 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
                                   alt={product.title}
                                   fill
                                   sizes="56px"
-                                  className="object-contain"
+                                  className="object-cover"
                                 />
                               </span>
                               <span className="min-w-0">
@@ -303,7 +308,7 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
                     همهٔ دسته‌بندی‌ها
                   </Link>
                   <p className="text-[11px] text-muted-foreground">
-                    {toFa(PREVIEW_CATEGORIES.length)} دستهٔ اصلی و{" "}
+                    {toFa(categories.length)} دستهٔ اصلی و {" "}
                     {toFa(subCategoryCount)} زیردسته
                   </p>
                 </div>

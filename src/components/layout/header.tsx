@@ -31,6 +31,7 @@ import { formatPhoneFa, toFa } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useSearchDialogStore } from "@/store/search";
 import { cartCount, useCartStore } from "@/store/cart";
+import type { CategoryNode, ProductSummary } from "@/types/shop";
 
 const NAV_LINKS = [
   { href: "/products", label: "فروشگاه" },
@@ -70,7 +71,14 @@ function HeaderLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-export function Header() {
+interface HeaderProps {
+  /** درخت دسته‌ها — از سرویس DB-first (layout می‌رساند) */
+  categories: CategoryNode[];
+  /** خلاصهٔ محصولات برای پیشنهادهای مگامنو */
+  products: ProductSummary[];
+}
+
+export function Header({ categories, products }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -158,12 +166,12 @@ export function Header() {
       </div>
 
       {/* ── سطر ۲ — هویت، جستجو، اکشن‌ها ── */}
-      <div className="shell flex items-center gap-3 py-3 md:h-[76px] md:py-0">
+      <div className="shell flex items-center gap-2 py-3 md:h-[76px] md:gap-3 md:py-0">
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="size-11 md:hidden"
+          className="size-10 md:hidden"
           aria-label="باز کردن منو"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen(true)}
@@ -208,7 +216,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             asChild
-            className="size-10 rounded-full text-foreground hover:text-fresh"
+            className="size-9 rounded-full text-foreground hover:text-fresh md:size-10"
           >
             <Link href="/login" aria-label="حساب کاربری">
               <IconUserCircle
@@ -223,7 +231,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             asChild
-            className="relative size-10 rounded-full text-foreground hover:text-fresh"
+            className="relative size-9 rounded-full text-foreground hover:text-fresh md:size-10"
           >
             <Link href="/cart" aria-label="سبد خرید">
               <IconShoppingBag
@@ -288,7 +296,12 @@ export function Header() {
               />
             </button>
 
-            <MegaMenu open={megaOpen} onClose={closeMega} />
+            <MegaMenu
+              open={megaOpen}
+              onClose={closeMega}
+              categories={categories}
+              products={products}
+            />
           </div>
 
           <span className="h-5 w-px bg-border" aria-hidden="true" />
@@ -329,7 +342,11 @@ export function Header() {
         </button>
       </div>
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        categories={categories}
+      />
     </header>
   );
 }

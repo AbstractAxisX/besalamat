@@ -51,6 +51,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <Link
       href={`/products/${product.slug}`}
+      draggable={false}
       className={cn(
         "group relative flex h-full flex-col rounded-2xl border border-border/60 bg-card",
         "transition-[border-color,box-shadow] duration-300 hover:border-primary/35 hover:shadow-card",
@@ -65,9 +66,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
             src={product.image}
             alt={product.title}
             fill
+            draggable={false}
             sizes="(max-width:768px) 50vw, 25vw"
             className={cn(
-              "object-contain",
+              "object-cover",
               !product.inStock && "opacity-40 grayscale",
             )}
           />

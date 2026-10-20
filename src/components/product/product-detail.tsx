@@ -43,16 +43,19 @@ import { PREVIEW_BRANDS } from "@/lib/preview-data";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart";
 import type {
-  ProductDetail,
+  BrandSummary,
+  ProductDetail as ProductDetailDTO,
   ProductImageDTO,
   ProductSummary,
   ProductVariantDTO,
 } from "@/types/shop";
 
 interface ProductDetailProps {
-  product: ProductDetail;
+  product: ProductDetailDTO;
   /** محصولات مرتبط — این کامپوننت رندر نمی‌کند؛ صفحهٔ محصول رندر می‌کند */
   related?: ProductSummary[];
+  /** برندها — از سرویس DB-first؛ پیش‌فرض = دادهٔ پیش‌نمایش (fallback) */
+  brands?: BrandSummary[];
 }
 
 /** تنوع پیش‌فرض: isDefault وگرنه اولین تنوع موجود */
@@ -72,7 +75,7 @@ const TRUST_ROW = [
   { icon: RotateCcw, label: "۷ روز بازگشت" },
 ] as const;
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ product, brands }: ProductDetailProps) {
   /* فقط در رویدادها مصرف می‌شود — الگوی hydration-safe */
   const addLine = useCartStore((state) => state.addLine);
 
@@ -110,8 +113,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
       : null;
   const safeQty = inStock ? Math.min(qty, effectiveStock) : qty;
 
+  const brandList = brands ?? PREVIEW_BRANDS;
   const brandSlug =
-    PREVIEW_BRANDS.find((brand) => brand.title === product.brandTitle)?.slug ??
+    brandList.find((brand) => brand.title === product.brandTitle)?.slug ??
     null;
 
   const currentImage =
@@ -182,7 +186,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                         alt=""
                         fill
                         sizes="80px"
-                        className="object-contain p-2"
+                        className="object-cover"
                       />
                     </span>
                   </button>
@@ -206,7 +210,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 priority
                 style={{ transformOrigin: zoomOrigin }}
                 className={cn(
-                  "animate-in fade-in duration-300 object-contain p-8 md:p-12 transition-transform duration-200",
+                  "animate-in fade-in duration-300 object-cover transition-transform duration-200",
                   isZoomed && "scale-[1.7]",
                 )}
               />
@@ -367,49 +371,58 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           {/* باکس خرید */}
-          <div className="mt-6 rounded-2xl border border-gold/30 bg-gold-soft/15 p-5 dark:bg-gold-soft/[0.07]">
-            <div className="flex items-stretch gap-3">
+          <div className="mt-6 rounded-2xl border border-gold/30 bg-gold-soft/15 p-4 dark:bg-gold-soft/[0.07] md:p-5">
+            {/* موبایل: دکمهٔ تمام‌عرض بالا + استپر کامل پایین (بدون سرریز افقی) — دسکتاپ: یک ردیف */}
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
               <div
                 className={cn(
-                  "flex items-center rounded-xl border border-border bg-card",
+                  "flex w-full items-center justify-between rounded-xl border border-border bg-card sm:w-fit sm:justify-start",
                   !inStock && "pointer-events-none opacity-50",
                 )}
                 role="group"
                 aria-label="تعداد"
               >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-12 text-muted-foreground hover:text-foreground"
-                  disabled={safeQty <= 1}
-                  onClick={() => setQty((current) => Math.max(1, current - 1))}
-                  aria-label="کاهش تعداد"
-                >
-                  <Minus className="size-4" aria-hidden="true" />
-                </Button>
                 <span
-                  className="w-10 text-center text-base font-black tabular-nums"
-                  aria-live="polite"
+                  className="ps-4 text-xs font-bold text-muted-foreground sm:hidden"
+                  aria-hidden="true"
                 >
-                  {toFa(safeQty)}
+                  تعداد
                 </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-12 text-muted-foreground hover:text-foreground"
-                  disabled={!inStock || safeQty >= effectiveStock}
-                  onClick={() => setQty((current) => current + 1)}
-                  aria-label="افزایش تعداد"
-                >
-                  <Plus className="size-4" aria-hidden="true" />
-                </Button>
+                <div className="flex items-center">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-11 text-muted-foreground hover:text-foreground sm:size-12"
+                    disabled={safeQty <= 1}
+                    onClick={() => setQty((current) => Math.max(1, current - 1))}
+                    aria-label="کاهش تعداد"
+                  >
+                    <Minus className="size-4" aria-hidden="true" />
+                  </Button>
+                  <span
+                    className="w-10 text-center text-base font-black tabular-nums"
+                    aria-live="polite"
+                  >
+                    {toFa(safeQty)}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-11 text-muted-foreground hover:text-foreground sm:size-12"
+                    disabled={!inStock || safeQty >= effectiveStock}
+                    onClick={() => setQty((current) => current + 1)}
+                    aria-label="افزایش تعداد"
+                  >
+                    <Plus className="size-4" aria-hidden="true" />
+                  </Button>
+                </div>
               </div>
 
               <Button
                 type="button"
-                className="h-14 flex-1 rounded-xl text-base font-black gap-2"
+                className="h-13 w-full rounded-xl text-base font-black gap-2 sm:h-14 sm:w-auto sm:flex-1"
                 disabled={!inStock}
                 onClick={handleAddToCart}
               >
@@ -553,7 +566,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               alt=""
               fill
               sizes="48px"
-              className="object-contain p-1"
+              className="object-cover"
             />
           </span>
           <div className="min-w-0 flex-1">

@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/sheet";
 import { brand, SOCIAL_LABELS, type SocialConfig } from "@/config/brand";
 import { formatPhoneFa } from "@/lib/format";
-import { PREVIEW_CATEGORIES } from "@/lib/preview-data";
 import { useSearchDialogStore } from "@/store/search";
+import type { CategoryNode } from "@/types/shop";
 
 const MAIN_LINKS = [
   { href: "/", label: "صفحهٔ اصلی" },
@@ -90,9 +90,12 @@ function SocialIcon({ social }: { social: SocialConfig }) {
 export function MobileMenu({
   open,
   onClose,
+  categories,
 }: {
   open: boolean;
   onClose: () => void;
+  /** درخت دسته‌ها — از سرویس DB-first (هدر می‌رساند) */
+  categories: CategoryNode[];
 }) {
   const openDialog = useSearchDialogStore((state) => state.openDialog);
   const activeSocials = brand.socials.filter(
@@ -178,7 +181,7 @@ export function MobileMenu({
           <nav className="pt-5" aria-label="دسته‌بندی کالاها">
             <p className={SECTION_TITLE_CLASS}>دسته‌بندی کالاها</p>
             <Accordion type="single" collapsible className="mt-1">
-              {PREVIEW_CATEGORIES.map((category) =>
+              {categories.map((category) =>
                 category.children.length > 0 ? (
                   <AccordionItem
                     key={category.id}

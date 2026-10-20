@@ -3,86 +3,81 @@ import "./globals.css";
 
 import { ThemeProvider } from "next-themes";
 
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
 import { JsonLd } from "@/components/shared/json-ld";
-import { SearchDialog } from "@/components/shared/search-dialog";
 import { brand } from "@/config/brand";
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/jsonld";
+import { getStoreSettings } from "@/server/shop-data";
 
-/* ── سئوی سراسری ── */
-export const metadata: Metadata = {
-  metadataBase: new URL(brand.domain),
-  title: {
-    default: brand.meta.defaultTitle,
-    template: brand.meta.titleTemplate,
-  },
-  description: brand.meta.defaultDescription,
-  applicationName: brand.name,
-  keywords: [
-    "لوازم پزشکی",
-    "تجهیزات پزشکی",
-    "فروشگاه لوازم پزشکی",
-    "فشارسنج",
-    "قندسنج",
-    "بخور",
-    "ویلچر",
-    "تخت بیمار",
-    "اقلام مصرفی پزشکی",
-    brand.name,
-  ],
-  authors: [{ name: brand.name, url: brand.domain }],
-  creator: brand.name,
-  publisher: brand.name,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "fa_IR",
-    url: brand.domain,
-    siteName: brand.name,
-    title: brand.meta.defaultTitle,
-    description: brand.meta.defaultDescription,
-    images: [
-      {
-        url: brand.meta.ogImage,
-        width: 1200,
-        height: 630,
-        alt: brand.name,
-      },
+/* ── سئوی سراسری — آگاه از تنظیمات فروشگاه (store.*) ── */
+
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await getStoreSettings();
+  /* پیش‌فرض‌های ثابت brand.ts با نام فروشگاهِ تنظیمات بازنویسی می‌شوند */
+  const defaultTitle = brand.meta.defaultTitle.replace(brand.name, store.name);
+  const titleTemplate = brand.meta.titleTemplate.replace(brand.name, store.name);
+  const description = store.aboutShort || brand.meta.defaultDescription;
+
+  return {
+    metadataBase: new URL(brand.domain),
+    title: {
+      default: defaultTitle,
+      template: titleTemplate,
+    },
+    description,
+    applicationName: store.name,
+    keywords: [
+      "لوازم پزشکی",
+      "تجهیزات پزشکی",
+      "فروشگاه لوازم پزشکی",
+      "فشارسنج",
+      "قندسنج",
+      "بخور",
+      "ویلچر",
+      "تخت بیمار",
+      "اقلام مصرفی پزشکی",
+      store.name,
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: brand.meta.defaultTitle,
-    description: brand.meta.defaultDescription,
-    images: [brand.meta.ogImage],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name: store.name, url: brand.domain }],
+    creator: store.name,
+    publisher: store.name,
+    alternates: {
+      canonical: "/",
+    },
+    openGraph: {
+      type: "website",
+      locale: "fa_IR",
+      url: brand.domain,
+      siteName: store.name,
+      title: defaultTitle,
+      description,
+      images: [
+        {
+          url: brand.meta.ogImage,
+          width: 1200,
+          height: 630,
+          alt: store.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description,
+      images: [brand.meta.ogImage],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: [
-      { url: "/logo.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: "/logo.svg",
-  },
-  category: "shopping",
-};
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -94,6 +89,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+/**
+ * Layout ریشه — فقط پوستهٔ html/body (تم، توست، سئو).
+ * کروم فروشگاه در (shop)/layout.tsx و کروم ادمین در admin/layout.tsx است.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -123,20 +122,7 @@ export default function RootLayout({
           >
             پرش به محتوای اصلی
           </a>
-          <div className="flex min-h-dvh flex-col">
-            <Header />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            {/* جاداده برای داک شناور موبایل — ارتفاع داک + حاشیه‌ها + ناحیهٔ امن */}
-            <div
-              className="h-[calc(5.75rem+env(safe-area-inset-bottom))] md:hidden"
-              aria-hidden="true"
-            />
-          </div>
-          <BottomNav />
-          <SearchDialog />
+          {children}
           <Toaster position="top-center" dir="rtl" richColors closeButton />
         </ThemeProvider>
         {/* سئوی ساختاریافته — سراسری */}

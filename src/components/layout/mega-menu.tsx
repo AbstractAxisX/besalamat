@@ -50,7 +50,8 @@ function pickSuggestions(
  * ⚠️ رپرِ تمام‌عرض عمداً pointer-events-none است و فقط کارت داخلی
  * pointer-events-auto — وگرنه خروج ماوس از چپ/راستِ کارتِ مرئی هنوز داخلِ
  * نوارِ نامرئیِ رپر محسوب می‌شد و منو باز می‌ماند (باگ گزارش‌شده).
- * پس‌زمینهٔ کارت شیشه‌ای (glass-strong) — بلور عمیق روی محتوای صفحه.
+ * پس‌زمینهٔ کارت کاملاً مات (bg-card) — شفاف نیست تا محتوای پشتِ منو
+ * از میان آن پیدا نباشد؛ عمقِ صحنه را پردهٔ محوِ پشتِ پنل می‌سازد.
  * پردهٔ محو با پورتال به body رندر می‌شود تا از زمینهٔ stacking هدر (backdrop-blur)
  * بیرون بماند؛ چون pointer-events ندارد، کلیک بیرون با شنوندهٔ document بسته می‌شود.
  */
@@ -141,7 +142,7 @@ export function MegaMenu({ open, onClose, categories, products }: MegaMenuProps)
           >
             <div
               ref={panelRef}
-              className="glass-strong pointer-events-auto mx-auto w-full max-w-[1440px] overflow-hidden rounded-b-3xl border-b border-border border-t-2 border-t-fresh/70 shadow-pop"
+              className="pointer-events-auto mx-auto w-full max-w-[1440px] overflow-hidden rounded-b-3xl border-b border-border border-t-2 border-t-fresh/70 bg-card shadow-pop"
             >
               <div className="shell py-6">
                 <div className="grid gap-8 md:grid-cols-[13rem_minmax(0,1fr)] lg:max-h-[min(30rem,70vh)] lg:grid-cols-[15rem_minmax(0,1fr)_18rem] lg:overflow-hidden">

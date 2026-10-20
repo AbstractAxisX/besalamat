@@ -62,3 +62,6 @@ server.log
 /agent-ctx/
 /worklog.md
 /mini-services/
+
+# گیت‌وی سندباکس
+Caddyfile

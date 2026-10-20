@@ -121,7 +121,7 @@ export function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/75 backdrop-blur-xl">
       {/* ── سطر ۱ — نوار اعلان (سبز کاجی، دسکتاپ) ── */}
       <div className="hidden bg-pine text-on-metallic md:block">
         <div className="shell flex h-9 items-center justify-between text-[11px]">

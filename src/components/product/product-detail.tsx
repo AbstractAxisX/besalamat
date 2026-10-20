@@ -545,7 +545,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
       </div>
 
       {/* ════════ نوار خرید چسبان — موبایل ════════ */}
-      <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-40 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur md:hidden">
         <div className="flex items-center gap-3">
           <span className="img-canvas relative size-12 shrink-0 overflow-hidden rounded-lg border border-border/60">
             <Image

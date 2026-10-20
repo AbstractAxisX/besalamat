@@ -133,7 +133,8 @@ export function SearchDialog() {
       onOpenChange={(next) => (next ? openDialog() : closeDialog())}
       title="جستجو در بسلامت"
       description="جستجوی محصولات، برندها و دسته‌بندی‌ها"
-      className="sm:max-w-xl"
+      showCloseButton={false}
+      className="border-border/70 bg-popover/90 shadow-pop backdrop-blur-2xl sm:max-w-xl"
     >
       {/* ورودی جستجو */}
       <div data-slot="command-input-wrapper" className="flex items-center gap-2 border-b border-border/70 px-4">
@@ -144,20 +145,15 @@ export function SearchDialog() {
           placeholder="دنبال چه محصولی هستید؟ مثلاً فشارسنج…"
           className="flex-1 bg-transparent py-4 text-sm outline-none placeholder:text-muted-foreground"
         />
-        {query ? (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            aria-label="پاک کردن جستجو"
-            className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <IconX className="size-4" aria-hidden="true" />
-          </button>
-        ) : (
-          <kbd className="hidden shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:block" dir="ltr">
-            /
-          </kbd>
-        )}
+        {/* راهنمای کلید — دکمهٔ ضربدر حذف شده به درخواست مشتری؛
+            بستن با Esc، کلیک بیرون یا انتخاب نتیجه */}
+        <kbd
+          dir="ltr"
+          className="shrink-0 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+          aria-hidden="true"
+        >
+          /
+        </kbd>
       </div>
 
       <CommandList className="max-h-[min(60vh,26rem)] overflow-y-auto p-2">

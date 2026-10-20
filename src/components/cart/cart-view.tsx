@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * نمای سبد خرید — لیست ظریف + پیشرفت ارسال رایگان + جمع‌بندی چسبان
+ * نمای سبد خرید — لیست ظریف + جمع‌بندی چسبان
  * ─────────────────────────────────────────────────
  * تا پیش از commit کلاینت، Skeleton نمایش داده می‌شود تا با HTML سرور
  * (store خالی) اختلاف نیفتد؛ پس از mount مقدار واقعی خوانده می‌شود.
@@ -13,7 +13,6 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle2,
   LockKeyhole,
   Minus,
   Plus,
@@ -36,10 +35,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { brand } from "@/config/brand";
 import { formatTomanPlain, toFa } from "@/lib/format";
 import type { CartLine } from "@/types/shop";
 import { cartCount, cartSubtotal, useCartStore } from "@/store/cart";
@@ -159,52 +156,6 @@ function CartLineRow({ line }: { line: CartLine }) {
   );
 }
 
-/* ── نوار پیشرفت ارسال رایگان ── */
-function FreeShippingProgress({ subtotal }: { subtotal: number }) {
-  const threshold = brand.shipping.freeThreshold;
-  const remaining = Math.max(0, threshold - subtotal);
-  const percent = Math.min(100, Math.round((subtotal / threshold) * 100));
-  const isFree = remaining === 0;
-
-  return (
-    <div className="card-luxe p-4 md:p-5">
-      <div className="flex items-center gap-2.5">
-        <span
-          className={
-            isFree
-              ? "flex size-9 items-center justify-center rounded-full bg-success/10 text-success"
-              : "flex size-9 items-center justify-center rounded-full bg-accent text-primary"
-          }
-        >
-          {isFree ? (
-            <CheckCircle2 className="size-4.5" aria-hidden="true" />
-          ) : (
-            <Truck className="size-4.5" aria-hidden="true" />
-          )}
-        </span>
-        {isFree ? (
-          <p className="text-sm font-bold text-success">
-            تبریک! ارسال این سفارش رایگان شد
-          </p>
-        ) : (
-          <p className="text-xs leading-6 text-muted-foreground md:text-sm">
-            تنها{" "}
-            <span className="font-black text-primary">
-              {formatTomanPlain(remaining)} تومان
-            </span>{" "}
-            تا ارسال رایگان مانده است
-          </p>
-        )}
-      </div>
-      <Progress
-        value={percent}
-        aria-label="پیشرفت تا ارسال رایگان"
-        className="mt-3 h-2 bg-muted [&>div]:bg-gold"
-      />
-    </div>
-  );
-}
-
 /* ── Skeleton لیست هنگام hydration ── */
 function CartSkeleton() {
   return (
@@ -298,8 +249,6 @@ export function CartView() {
             className="min-w-0 space-y-4"
             aria-label="اقلام سبد خرید"
           >
-            <FreeShippingProgress subtotal={subtotal} />
-
             <div className="card-luxe divide-y divide-border/60 overflow-hidden">
               {hydratedLines.map((line) => (
                 <CartLineRow
@@ -413,7 +362,7 @@ export function CartView() {
 
       {/* نوار جمع‌بندی چسبان — موبایل */}
       {mounted && !isEmpty ? (
-        <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+        <div className="fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-40 border-t border-border/70 bg-background/95 px-4 py-3 backdrop-blur md:hidden">
           <div className="flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-[10px] text-muted-foreground">

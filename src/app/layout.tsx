@@ -129,7 +129,11 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <div className="h-16 md:hidden" aria-hidden="true" />
+            {/* جاداده برای داک شناور موبایل — ارتفاع داک + حاشیه‌ها + ناحیهٔ امن */}
+            <div
+              className="h-[calc(5.75rem+env(safe-area-inset-bottom))] md:hidden"
+              aria-hidden="true"
+            />
           </div>
           <BottomNav />
           <SearchDialog />

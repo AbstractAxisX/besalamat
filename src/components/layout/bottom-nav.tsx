@@ -42,10 +42,11 @@ function useMounted(): boolean {
 }
 
 /**
- * ناوبری پایین موبایل — پنج اسلات
+ * داک شناور پایین موبایل — شیشهٔ لوکس
  * ─────────────────────────────
- * «دسته‌بندی‌ها» منوی موبایل را باز می‌کند و «جستجو» دیالوگ سراسری را؛
- * حالت فعال: متن سبز تازه + نقطهٔ کوچک زیر آیکون (انیمیشن layoutId).
+ * به‌جای نوار چسبیدهٔ تمام‌عرض، یک داک شناورِ گِرد با بلور عمیق
+ * (glass-strong) که محتوا از زیرش رد می‌شود و لبه‌هایش دیده می‌شود.
+ * حالت فعال: پیل سبزفامِ لغزان (layoutId) پشت آیکون + متن سبز تازه.
  */
 export function BottomNav() {
   const pathname = usePathname();
@@ -93,73 +94,97 @@ export function BottomNav() {
 
   return (
     <>
-      <div className="glass fixed inset-x-0 bottom-0 z-40 border-t border-border/70 pb-[env(safe-area-inset-bottom)] md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
         <nav
-          className="grid h-16 grid-cols-5 items-center"
           aria-label="ناوبری پایین"
+          className="glass-strong relative overflow-hidden rounded-[1.4rem] border border-border/60 shadow-lift"
         >
-          {items.map((item) => {
-            const Icon = item.icon;
+          {/* هایلایت داخلی — درخشش لبهٔ شیشه */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-l from-transparent via-white/60 to-transparent dark:via-white/10"
+          />
 
-            const content = (
-              <>
-                <span className="relative">
-                  <Icon
-                    className="size-5"
-                    stroke={1.75}
-                    aria-hidden="true"
-                  />
-                  {item.badge != null && item.badge > 0 ? (
-                    <span className="absolute -top-1.5 -end-1.5 flex size-[18px] items-center justify-center rounded-full bg-fresh text-[10px] font-bold text-primary-foreground">
-                      {toFa(item.badge)}
-                    </span>
+          <div className="grid h-16 grid-cols-5 items-center">
+            {items.map((item) => {
+              const Icon = item.icon;
+
+              const content = (
+                <>
+                  {/* پیل فعال — بین آیتم‌ها می‌لغزد */}
+                  {item.active ? (
+                    <motion.span
+                      layoutId="bottom-nav-pill"
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 34,
+                      }}
+                      className="absolute inset-x-1.5 top-1.5 h-9 rounded-full bg-secondary shadow-soft"
+                      aria-hidden="true"
+                    />
                   ) : null}
-                </span>
-                {item.active ? (
-                  <motion.span
-                    layoutId="bottom-nav-dot"
-                    transition={{ type: "spring", stiffness: 480, damping: 40 }}
-                    className="size-1 rounded-full bg-fresh"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <span className="size-1" aria-hidden="true" />
-                )}
-                <span className="text-[10px] font-medium leading-none">
-                  {item.label}
-                </span>
-              </>
-            );
 
-            const className = cn(
-              "relative flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg px-1 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50",
-              item.active
-                ? "text-fresh"
-                : "text-muted-foreground hover:text-foreground",
-            );
+                  <span className="relative flex size-9 items-center justify-center">
+                    <Icon
+                      className={cn(
+                        "size-5 transition-colors duration-300",
+                        item.active
+                          ? "text-primary"
+                          : "text-muted-foreground",
+                      )}
+                      stroke={1.75}
+                      aria-hidden="true"
+                    />
+                    {item.badge != null && item.badge > 0 ? (
+                      <span className="absolute -top-0.5 -end-1 flex size-[17px] items-center justify-center rounded-full bg-fresh text-[9px] font-bold text-primary-foreground ring-2 ring-card">
+                        {toFa(item.badge)}
+                      </span>
+                    ) : null}
+                  </span>
 
-            return item.href ? (
-              <Link
-                key={item.label}
-                href={item.href}
-                aria-current={item.active ? "page" : undefined}
-                className={className}
-              >
-                {content}
-              </Link>
-            ) : (
-              <button
-                key={item.label}
-                type="button"
-                onClick={item.onClick}
-                aria-label={item.label}
-                aria-expanded={item.label === "دسته‌بندی‌ها" ? menuOpen : undefined}
-                className={className}
-              >
-                {content}
-              </button>
-            );
-          })}
+                  <span
+                    className={cn(
+                      "relative mt-0.5 text-[10px] font-medium leading-none transition-colors duration-300",
+                      item.active
+                        ? "text-fresh-strong dark:text-fresh"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </>
+              );
+
+              const className = cn(
+                "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl px-1 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              );
+
+              return item.href ? (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  aria-current={item.active ? "page" : undefined}
+                  className={className}
+                >
+                  {content}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.onClick}
+                  aria-label={item.label}
+                  aria-expanded={
+                    item.label === "دسته‌بندی‌ها" ? menuOpen : undefined
+                  }
+                  className={className}
+                >
+                  {content}
+                </button>
+              );
+            })}
+          </div>
         </nav>
       </div>
 

@@ -15,6 +15,7 @@ import {
   PREVIEW_ADS,
   PREVIEW_ARTICLES,
   PREVIEW_BRANDS,
+  PREVIEW_CATEGORIES,
   PREVIEW_HOME_SECTIONS,
   PREVIEW_NEEDS,
   PREVIEW_POPULAR_SEARCHES,
@@ -23,7 +24,7 @@ import {
   PRODUCT_TABS,
   getPreviewProductsByTab,
 } from "@/lib/preview-data";
-import type { HomeSectionDTO } from "@/types/shop";
+import type { HomeSectionDTO, ProductSummary } from "@/types/shop";
 
 export const metadata: Metadata = {
   title: brand.meta.defaultTitle,
@@ -49,8 +50,29 @@ const FEATURED_PRODUCTS = PREVIEW_PRODUCTS.filter(
   (product) => product.isFeatured,
 );
 
-/** کارت محصول شناور هیرو */
-const SPOTLIGHT = PREVIEW_PRODUCTS[0];
+/** پیش‌نمایش نیازها — ۳ کالای شاخص + شمار کامل کالای مرتبط هر نیاز.
+ *  دستهٔ هر نیاز پدر است؛ کالاها روی دستهٔ فرزند تگ می‌خورند →
+ *  پدر + همهٔ فرزندانش جمع می‌شوند (همان قرارداد پیشنهادهای مگامنو). */
+const NEED_PREVIEWS: Record<
+  string,
+  { products: ProductSummary[]; count: number }
+> = Object.fromEntries(
+  PREVIEW_NEEDS.map((need) => {
+    const slug = need.href.split("category=")[1]?.split("&")[0] ?? "";
+    const category = PREVIEW_CATEGORIES.find(
+      (item) => item.slug === slug,
+    );
+    const slugs = new Set<string>([
+      slug,
+      ...(category?.children.map((child) => child.slug) ?? []),
+    ]);
+    const related = PREVIEW_PRODUCTS.filter(
+      (product) =>
+        product.categorySlug != null && slugs.has(product.categorySlug),
+    );
+    return [need.id, { products: related.slice(0, 3), count: related.length }];
+  }),
+);
 
 /**
  * صفحهٔ خانه — کامپوز ۸ بخشی از PREVIEW_HOME_SECTIONS (ترتیب و فعال‌بودن از داده).
@@ -68,7 +90,6 @@ export default function HomePage() {
           <Hero
             key={section.key}
             slides={PREVIEW_SLIDES}
-            spotlight={SPOTLIGHT}
             productCount={PREVIEW_PRODUCTS.length}
             popularSearches={PREVIEW_POPULAR_SEARCHES.slice(0, 3)}
           />
@@ -81,6 +102,7 @@ export default function HomePage() {
             title={section.title ?? "خرید بر اساس نیاز"}
             subtitle={section.subtitle ?? undefined}
             needs={PREVIEW_NEEDS}
+            previews={NEED_PREVIEWS}
           />
         );
 

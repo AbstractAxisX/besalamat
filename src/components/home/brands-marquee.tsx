@@ -34,13 +34,13 @@ export function BrandsMarquee({ title, brands }: BrandsMarqueeProps) {
           />
         </div>
 
-        <div className="mt-7 mask-fade-x md:mt-8">
+        <div className="mt-6 mask-fade-x md:mt-7">
           <Marquee duration={36}>
             {brands.map((brandItem) => (
               <Link
                 key={brandItem.id}
                 href={`/products?brand=${brandItem.slug}`}
-                className="mx-3 inline-flex h-16 items-center rounded-2xl border border-border/60 bg-card px-8 text-lg font-black text-muted-foreground transition-colors duration-300 outline-none hover:border-fresh/50 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+                className="mx-4 inline-flex h-11 items-center text-[15px] font-black tracking-tight text-muted-foreground/70 transition-colors duration-300 outline-none hover:text-primary md:mx-5 md:text-base focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 {brandItem.title}
               </Link>

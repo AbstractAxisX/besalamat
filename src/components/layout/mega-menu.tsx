@@ -43,6 +43,10 @@ function pickSuggestions(category: CategoryNode | undefined): ProductSummary[] {
  * پنل هم‌عرضِ ظرف سایت (نه تمام‌صفحه) است و داخل سطر ناوبریِ هدر لنگر می‌گیرد.
  * هاور روی خود پنل آن را باز نگه می‌دارد — مدیریت تایمرِ بسته‌شدن (۱۵۰ms) با هدر است
  * و رویدادهای ماوس از طریق همان والدِ مشترک به اینجا می‌رسند.
+ * ⚠️ رپرِ تمام‌عرض عمداً pointer-events-none است و فقط کارت داخلی
+ * pointer-events-auto — وگرنه خروج ماوس از چپ/راستِ کارتِ مرئی هنوز داخلِ
+ * نوارِ نامرئیِ رپر محسوب می‌شد و منو باز می‌ماند (باگ گزارش‌شده).
+ * پس‌زمینهٔ کارت شیشه‌ای (glass-strong) — بلور عمیق روی محتوای صفحه.
  * پردهٔ محو با پورتال به body رندر می‌شود تا از زمینهٔ stacking هدر (backdrop-blur)
  * بیرون بماند؛ چون pointer-events ندارد، کلیک بیرون با شنوندهٔ document بسته می‌شود.
  */
@@ -118,7 +122,9 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
             document.body,
           )}
 
-          {/* پنل — لنگر به سطر ناوبری هدر؛ کارتِ داخلی هم‌عرضِ ظرف سایت (نه تمام‌صفحه) */}
+          {/* پنل — لنگر به سطر ناوبری هدر؛ کارتِ داخلی هم‌عرضِ ظرف سایت (نه تمام‌صفحه).
+              رپر عمداً برای ماوس نامرئی است (pointer-events-none) تا خروج از هر چهار
+              جهتِ کارتِ مرئی — از جمله چپ و راست — بلافاصله منو را ببندد. */}
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -126,11 +132,11 @@ export function MegaMenu({ open, onClose }: MegaMenuProps) {
             transition={{ duration: 0.2, ease: "easeOut" }}
             role="region"
             aria-label="دسته‌بندی کالاها"
-            className="absolute inset-x-0 top-full z-50"
+            className="pointer-events-none absolute inset-x-0 top-full z-50"
           >
             <div
               ref={panelRef}
-              className="mx-auto w-full max-w-[1440px] overflow-hidden rounded-b-3xl border-b border-border border-t-2 border-t-fresh/70 bg-card shadow-pop"
+              className="glass-strong pointer-events-auto mx-auto w-full max-w-[1440px] overflow-hidden rounded-b-3xl border-b border-border border-t-2 border-t-fresh/70 shadow-pop"
             >
               <div className="shell py-6">
                 <div className="grid gap-8 md:grid-cols-[13rem_minmax(0,1fr)] lg:max-h-[min(30rem,70vh)] lg:grid-cols-[15rem_minmax(0,1fr)_18rem] lg:overflow-hidden">

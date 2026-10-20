@@ -20,17 +20,15 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconPhone,
-  IconPointFilled,
   IconSearch,
 } from "@tabler/icons-react";
 
-import { CategoryIcon } from "@/components/shared/category-icon";
 import { CountUp } from "@/components/shared/motion";
 import { brand } from "@/config/brand";
-import { formatTomanPlain, toFa } from "@/lib/format";
+import { toFa } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useSearchDialogStore } from "@/store/search";
-import type { HomeSlideDTO, ProductSummary } from "@/types/shop";
+import type { HomeSlideDTO } from "@/types/shop";
 
 const AUTOPLAY_DELAY_MS = 6_000;
 
@@ -76,8 +74,6 @@ function splitByHighlight(title: string, phrase: string | undefined) {
 
 interface HeroProps {
   slides: HomeSlideDTO[];
-  /** کارت محصول شناور روی قاب (اولین/شاخص‌ترین محصول) */
-  spotlight?: ProductSummary;
   /** تعداد کالا — برای متن جستجو */
   productCount: number;
   /** واژه‌های پیشنهادی زیر جستجو */
@@ -86,7 +82,6 @@ interface HeroProps {
 
 export function Hero({
   slides,
-  spotlight,
   productCount,
   popularSearches,
 }: HeroProps) {
@@ -141,14 +136,14 @@ export function Hero({
       aria-label="معرفی فروشگاه"
       className="relative overflow-hidden bg-gradient-to-b from-secondary/60 via-background to-background"
     >
-      {/* هاله‌های نرم — عمق بدون پترن */}
+      {/* هاله‌های نرم راننده — عمق زنده بدون پترن */}
       <div
         aria-hidden="true"
-        className="glow size-[36rem] start-[-8rem] -top-40 hidden bg-fresh/10 sm:block"
+        className="glow animate-drift size-[36rem] start-[-8rem] -top-40 hidden bg-fresh/10 sm:block"
       />
       <div
         aria-hidden="true"
-        className="glow size-[32rem] end-[-10rem] -bottom-48 hidden bg-primary/10 sm:block"
+        className="glow animate-drift-slow size-[32rem] end-[-10rem] -bottom-48 hidden bg-primary/10 sm:block"
       />
 
       <div className="shell relative grid items-center gap-12 py-10 md:py-16 lg:grid-cols-[1.05fr_0.95fr]">
@@ -342,14 +337,8 @@ export function Hero({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 110, damping: 18, delay: 0.25 }}
         >
-          <div className="relative mx-auto w-full max-w-[460px]">
-            {/* قاب هندسی چرخیده — عمق گرافیکی */}
-            <div
-              aria-hidden="true"
-              className="absolute -inset-4 rotate-3 rounded-[2.25rem] border border-fresh/25 bg-fresh/5"
-            />
-
-            {/* کارت اصلی — کاروسل تصویر */}
+          <div className="relative mx-auto w-full max-w-[480px]">
+            {/* کارت اصلی — کاروسل تصویر؛ بدون قاب تزئینی، تمیز و ادیتوریال */}
             <div
               ref={emblaRef}
               className="relative aspect-[4/5] touch-pan-y select-none overflow-hidden rounded-[2rem] border border-border/60 shadow-lift"
@@ -398,53 +387,6 @@ export function Hero({
                 </>
               ) : null}
             </div>
-
-            {/* کارت محصول شناور — واقعی، از داده */}
-            {spotlight ? (
-              <Link
-                href={`/products/${spotlight.slug}`}
-                aria-label={spotlight.title}
-                className="absolute -start-3 bottom-6 z-10 flex w-44 animate-float items-center gap-2.5 rounded-2xl border border-border/70 bg-card p-3 shadow-lift outline-none transition-colors duration-300 hover:border-fresh/60 focus-visible:ring-2 focus-visible:ring-ring md:-start-8 md:bottom-8"
-              >
-                <span className="img-canvas relative size-14 shrink-0 overflow-hidden rounded-xl">
-                  <Image
-                    src={spotlight.image}
-                    alt=""
-                    fill
-                    sizes="56px"
-                    className="object-contain p-1.5"
-                  />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[11px] font-bold text-foreground">
-                    {spotlight.title}
-                  </span>
-                  <span className="mt-1 block text-xs font-black text-primary">
-                    {formatTomanPlain(spotlight.price)}{" "}
-                    <span className="text-[9px] font-normal text-muted-foreground">
-                      تومان
-                    </span>
-                  </span>
-                  <span className="mt-1 flex items-center gap-1 text-[10px] font-bold text-fresh">
-                    <IconPointFilled className="size-3" aria-hidden="true" />
-                    موجود
-                  </span>
-                </span>
-              </Link>
-            ) : null}
-
-            {/* چیپ دستهٔ شناور — شیشه‌ای */}
-            <Link
-              href="/products?sort=popular"
-              className="absolute -end-3 top-10 z-10 flex animate-float-slow items-center gap-2.5 rounded-2xl border border-border/60 glass px-4 py-3 shadow-soft outline-none transition-colors duration-300 hover:border-fresh/60 focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary">
-                <CategoryIcon iconKey="blood-pressure" className="size-5" />
-              </span>
-              <span className="text-xs font-bold text-foreground">
-                پرفروش‌ترین‌ها
-              </span>
-            </Link>
           </div>
         </motion.div>
       </div>

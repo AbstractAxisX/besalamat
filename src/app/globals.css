@@ -227,6 +227,8 @@
   --animate-float-slow: float 10s ease-in-out infinite;
   --animate-pulse-soft: pulse-soft 3.2s ease-in-out infinite;
   --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-drift: drift 18s ease-in-out infinite;
+  --animate-drift-slow: drift 26s ease-in-out infinite;
 
   @keyframes marquee {
     from {
@@ -264,6 +266,16 @@
       background-position: -200% 0;
     }
   }
+  /* رانش آرام هاله‌ها — نفس‌کشیدن پس‌زمینه */
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -4%, 0) scale(1.1);
+    }
+  }
 }
 
 @layer base {
@@ -279,6 +291,33 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* شستش گرادیانی ثابت پس‌زمینه — عمق سبز ظریف در کل سایت
+     (pseudo-element ثابت؛ از background-attachment:fixed پرهیز شده
+     چون در Safari موبایل مشکل‌ساز است) */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(
+        64rem 34rem at 88% -12%,
+        color-mix(in oklab, var(--fresh) 7%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        56rem 32rem at 4% 16%,
+        color-mix(in oklab, var(--primary) 6%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 30rem at 50% 118%,
+        color-mix(in oklab, var(--fresh) 5%, transparent),
+        transparent 62%
+      );
   }
 
   .dark {
@@ -467,11 +506,37 @@
     mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
   }
 
-  /* شیشه مات */
+  /* انتقال نرم باند‌های رنگی به پس‌زمینه — لبه‌های بالا/پایین محو می‌شوند */
+  .mask-fade-y {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 14%,
+      black 86%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 14%,
+      black 86%,
+      transparent
+    );
+  }
+
+  /* شیشه مات
+     ⚠️ فقط خاصیت استاندارد — نوشتنِ همزمانِ -webkit-backdrop-filter باعث
+     می‌شود Lightning CSS هر دو را به «فقط پیشونددار» ادغام کند که کروم
+     آن را نادیده می‌گیرد و بلور اصلاً رندر نمی‌شود (باگ مشاهده‌شده). */
   .glass {
     background-color: color-mix(in oklab, var(--card) 78%, transparent);
     backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* شیشه لوکس — بلور عمیق‌تر با اشباع رنگ؛ مگامنو، داک موبایل */
+  .glass-strong {
+    background-color: color-mix(in oklab, var(--card) 62%, transparent);
+    backdrop-filter: blur(24px) saturate(150%);
   }
 
   /* اسکلت براق */
@@ -486,8 +551,8 @@
     animation: var(--animate-shimmer);
   }
 
-  /* ارتفاع امن برای ناوبری پایین موبایل */
+  /* ارتفاع امن برای داک شناور ناوبری پایین موبایل */
   .pb-safe-nav {
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }
 }

@@ -20,7 +20,10 @@ export function ExpertPicks({ title, subtitle, products }: ExpertPicksProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-surface-alt py-14 md:py-20" aria-label={title}>
+    <section
+      className="mask-fade-y bg-surface-alt py-16 md:py-24"
+      aria-label={title}
+    >
       <div className="shell">
         <SectionHeading
           eyebrow="انتخاب کارشناس"

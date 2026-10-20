@@ -5,6 +5,7 @@
  * ─────────────────────────────
  * GET /api/admin/products?q=&page= → {items,total,page,pageCount}؛
  * حذف با AlertDialog تأییدیه؛ ویرایش → /admin/products/[id].
+ * صفحه‌بندی UI از کامپوننت کتابخانه‌ای shadcn Pagination (RTL: قبلی راست، بعدی چپ).
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,7 +28,15 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { SearchInput } from "@/components/admin/search-input";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,32 +51,25 @@ import type { AdminProductListResponse, AdminProductRow } from "@/types/admin";
 
 const PAGE_SIZE = 20;
 
-/** بج‌های وضعیت — پیل‌های نرم یکدست */
-function StatusPills({ row }: { row: AdminProductRow }) {
-  return (
-    <span className="flex flex-wrap items-center gap-1">
-      <span
-        className={cn(
-          "rounded-full border px-2 py-0.5 text-[11px] font-semibold",
-          row.isActive
-            ? "border-success/20 bg-success/10 text-success"
-            : "border-border bg-muted text-muted-foreground",
-        )}
-      >
-        {row.isActive ? "فعال" : "غیرفعال"}
-      </span>
-      {row.isNew ? (
-        <span className="rounded-full border border-fresh/20 bg-fresh/10 px-2 py-0.5 text-[11px] font-semibold text-fresh">
-          جدید
-        </span>
-      ) : null}
-      {row.isFeatured ? (
-        <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
-          ویژه
-        </span>
-      ) : null}
-    </span>
-  );
+/** پنجرهٔ شماره‌های صفحه — ۱ … (حول صفحهٔ جاری) … آخرین */
+function pageWindow(current: number, total: number): Array<number | "ellipsis"> {
+  if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+  const pages: number[] = [];
+  const push = (candidate: number): void => {
+    if (candidate >= 1 && candidate <= total && !pages.includes(candidate)) pages.push(candidate);
+  };
+  push(1);
+  for (let candidate = current - 1; candidate <= current + 1; candidate += 1) push(candidate);
+  push(total);
+  pages.sort((a, b) => a - b);
+  const out: Array<number | "ellipsis"> = [];
+  let previous = 0;
+  for (const item of pages) {
+    if (previous !== 0 && item - previous > 1) out.push("ellipsis");
+    out.push(item);
+    previous = item;
+  }
+  return out;
 }
 
 export function ProductsView() {
@@ -215,7 +217,15 @@ export function ProductsView() {
       {
         id: "status",
         header: "وضعیت",
-        cell: ({ row }) => <StatusPills row={row.original} />,
+        cell: ({ row }) => (
+          <span className="flex flex-wrap items-center gap-1">
+            <Pill tone={row.original.isActive ? "success" : "muted"}>
+              {row.original.isActive ? "فعال" : "غیرفعال"}
+            </Pill>
+            {row.original.isNew ? <Pill tone="fresh">جدید</Pill> : null}
+            {row.original.isFeatured ? <Pill tone="warning">ویژه</Pill> : null}
+          </span>
+        ),
       },
       {
         id: "actions",
@@ -253,95 +263,146 @@ export function ProductsView() {
 
   const total = data?.total ?? 0;
   const pageCount = data?.pageCount ?? 1;
+  const pages = useMemo(() => pageWindow(page, pageCount), [page, pageCount]);
+
+  const goToPage = useCallback(
+    (next: number): void => {
+      setPage(Math.min(Math.max(1, next), pageCount));
+    },
+    [pageCount],
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="محصولات"
         description="مدیریت محصولات فروشگاه — افزودن، ویرایش و حذف"
-        actions={
-          <Button type="button" asChild className="gap-1.5 font-semibold">
-            <Link href="/admin/products/new">
-              <IconPlus className="size-4" stroke={1.75} aria-hidden="true" />
-              محصول جدید
-            </Link>
-          </Button>
-        }
       />
 
-      {/* نوار ابزار: جستجو + شمار */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <SearchInput
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="جستجو در عنوان یا اسلاگ…"
-          ariaLabel="جستجوی محصول"
-        />
-        <p className="text-xs text-muted-foreground">
-          {loading
-            ? "در حال بارگذاری…"
-            : `${toFa(total)} محصول${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
-        </p>
-      </div>
-
-      {error ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
-      <DataTable
-        columns={columns}
-        data={data?.items ?? []}
-        loading={loading || data === null}
-        emptyTitle="محصولی پیدا نشد"
-        emptyDescription={
-          debouncedQuery.length > 0
-            ? "عبارت دیگری را جستجو کنید یا محصول جدیدی بسازید."
-            : "هنوز محصولی ثبت نشده است؛ نخستین محصول را بسازید."
-        }
-        emptyAction={
-          <Button type="button" variant="outline" size="sm" asChild className="gap-1.5">
-            <Link href="/admin/products/new">
-              <IconPlus className="size-4" stroke={1.75} aria-hidden="true" />
-              محصول جدید
-            </Link>
-          </Button>
-        }
-        onRowClick={(row) => router.push(`/admin/products/${row.id}`)}
-      />
-
-      {/* صفحه‌بندی سروری */}
-      {data !== null && pageCount > 1 ? (
-        <nav className="flex items-center justify-between gap-2" aria-label="صفحه‌بندی">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
-            className="gap-1"
-          >
-            <IconChevronRight className="size-4" stroke={1.75} aria-hidden="true" />
-            قبلی
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            صفحهٔ <span className="font-semibold text-foreground">{toFa(page)}</span> از{" "}
-            <span className="font-semibold text-foreground">{toFa(pageCount)}</span>
+      {/* نوار ابزار + جدول + صفحه‌بندی (گروه یکدست) */}
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <SearchInput
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="جستجو در عنوان یا اسلاگ…"
+            ariaLabel="جستجوی محصول"
+          />
+          <p className="text-xs text-muted-foreground">
+            {loading
+              ? "در حال بارگذاری…"
+              : `${toFa(total)} محصول${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
           </p>
+          {/* اکشن اصلی — انتهای RTL */}
           <Button
             type="button"
-            variant="outline"
-            size="sm"
-            disabled={page >= pageCount || loading}
-            onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-            className="gap-1"
+            asChild
+            className="ms-auto gap-1.5 font-semibold"
           >
-            بعدی
-            <IconChevronLeft className="size-4" stroke={1.75} aria-hidden="true" />
+            <Link href="/admin/products/new">
+              <IconPlus className="size-4" stroke={1.75} aria-hidden="true" />
+              محصول جدید
+            </Link>
           </Button>
-        </nav>
-      ) : null}
+        </div>
+
+        {error ? (
+          <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+
+        <DataTable
+          columns={columns}
+          data={data?.items ?? []}
+          loading={loading || data === null}
+          emptyTitle="محصولی پیدا نشد"
+          emptyDescription={
+            debouncedQuery.length > 0
+              ? "عبارت دیگری را جستجو کنید یا محصول جدیدی بسازید."
+              : "هنوز محصولی ثبت نشده است؛ نخستین محصول را بسازید."
+          }
+          emptyAction={
+            <Button type="button" variant="outline" size="sm" asChild className="gap-1.5">
+              <Link href="/admin/products/new">
+                <IconPlus className="size-4" stroke={1.75} aria-hidden="true" />
+                محصول جدید
+              </Link>
+            </Button>
+          }
+          onRowClick={(row) => router.push(`/admin/products/${row.id}`)}
+        />
+
+        {/* صفحه‌بندی سروری — کامپوننت کتابخانه‌ای Pagination (RTL) */}
+        {data !== null && pageCount > 1 ? (
+          <Pagination aria-label="صفحه‌بندی محصولات" className="mx-0 justify-center">
+            <PaginationContent>
+              {/* قبلی — سمت راست در RTL، فلش رو به راست */}
+              <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  aria-label="صفحهٔ قبلی"
+                  aria-disabled={page <= 1 || loading}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (page > 1 && !loading) goToPage(page - 1);
+                  }}
+                  className={cn(
+                    "gap-1 px-2.5",
+                    (page <= 1 || loading) && "pointer-events-none opacity-50",
+                  )}
+                >
+                  <IconChevronRight className="size-4" stroke={1.75} aria-hidden="true" />
+                  قبلی
+                </PaginationLink>
+              </PaginationItem>
+
+              {pages.map((item, index) =>
+                typeof item === "number" ? (
+                  <PaginationItem key={`page-${item}`}>
+                    <PaginationLink
+                      href="#"
+                      isActive={item === page}
+                      aria-label={`صفحهٔ ${toFa(item)}`}
+                      aria-current={item === page ? "page" : undefined}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        goToPage(item);
+                      }}
+                    >
+                      {toFa(item)}
+                    </PaginationLink>
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={`${item}-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ),
+              )}
+
+              {/* بعدی — سمت چپ در RTL، فلش رو به چپ */}
+              <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  aria-label="صفحهٔ بعدی"
+                  aria-disabled={page >= pageCount || loading}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (page < pageCount && !loading) goToPage(page + 1);
+                  }}
+                  className={cn(
+                    "gap-1 px-2.5",
+                    (page >= pageCount || loading) && "pointer-events-none opacity-50",
+                  )}
+                >
+                  بعدی
+                  <IconChevronLeft className="size-4" stroke={1.75} aria-hidden="true" />
+                </PaginationLink>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        ) : null}
+      </div>
 
       {/* تأییدیهٔ حذف */}
       <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>

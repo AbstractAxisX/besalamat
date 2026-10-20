@@ -196,12 +196,13 @@ export function HomeNeedsTab() {
   }, [deleting, load]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
+    <div className="space-y-5">
+      {/* نوار ابزار — شمار + اکشن‌ها در انتهای RTL */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-muted-foreground">
           {loading ? "در حال بارگذاری…" : `${toFa(rows?.length ?? 0)} کارت نیاز در صفحهٔ اصلی`}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ms-auto">
           <Button type="button" variant="ghost" size="sm" onClick={load} disabled={loading} className="gap-1.5">
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
@@ -396,7 +397,7 @@ export function HomeNeedsTab() {
                 معمولاً /products?category=نامک-دسته — آیکون کارت از همین دسته انتخاب می‌شود.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="need-order" className="text-xs font-semibold">
                   ترتیب

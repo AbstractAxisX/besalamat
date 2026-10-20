@@ -18,6 +18,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { cn } from "@/lib/utils";
 import { toFa, formatTomanPlain } from "@/lib/format";
 import type { AdminStatsChartPoint } from "@/server/admin-stats";
 
@@ -84,13 +85,15 @@ function ChartTip({
 
 interface DashboardChartProps {
   data: AdminStatsChartPoint[];
+  /** کلاس ظرف بیرونی — مثل mt-4 برای فاصله از سربرگ کارت */
+  className?: string;
 }
 
-export function DashboardChart({ data }: DashboardChartProps) {
+export function DashboardChart({ data, className }: DashboardChartProps) {
   const colors = useTokenColors();
 
   return (
-    <div className="p-2">
+    <div className={cn("p-2", className)}>
       <div dir="ltr" className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 12, right: 4, left: 4, bottom: 0 }}>

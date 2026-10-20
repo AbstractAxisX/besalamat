@@ -6,7 +6,8 @@
  * ستون‌ها را با ColumnDef می‌گیرد؛ ردیف‌های اسکلت هنگام بارگذاری،
  * EmptyState فارسی وقتی داده‌ای نیست و کلیک‌پذیری ردیف (مثلاً رفتن به جزئیات).
  * ظاهر: کانتینر rounded-2xl با بوردر مویی، سرجدول آرام bg-muted/40،
- * ردیف‌ها text-[13px] با هاور ملایم و خطوط جداکنندهٔ کم‌رنگ.
+ * ردیف‌ها text-[13px] با هاور ملایم و خطوط جداکنندهٔ کم‌رنگ؛ ستون اول
+ * ps-5 و ستون آخر pe-5 برای تراز نوری داخل کارت گرد.
  */
 
 import {
@@ -73,10 +74,14 @@ export function DataTable<TData>({
               key={headerGroup.id}
               className="border-border/50 bg-muted/40 hover:bg-muted/40"
             >
-              {headerGroup.headers.map((header) => (
+              {headerGroup.headers.map((header, index) => (
                 <TableHead
                   key={header.id}
-                  className="h-9 px-4 text-start text-[11px] font-semibold text-muted-foreground"
+                  className={cn(
+                    "h-9 px-4 text-start text-[11px] font-semibold text-muted-foreground",
+                    index === 0 && "ps-5",
+                    index === headerGroup.headers.length - 1 && "pe-5",
+                  )}
                 >
                   {header.isPlaceholder
                     ? null
@@ -94,7 +99,11 @@ export function DataTable<TData>({
                 {Array.from({ length: columnCount }).map((_, cellIndex) => (
                   <TableCell
                     key={`skeleton-${rowIndex}-${cellIndex}`}
-                    className="px-4 py-3"
+                    className={cn(
+                      "px-4 py-3",
+                      cellIndex === 0 && "ps-5",
+                      cellIndex === columnCount - 1 && "pe-5",
+                    )}
                   >
                     <Skeleton className="h-5 w-full max-w-24" />
                   </TableCell>
@@ -122,8 +131,15 @@ export function DataTable<TData>({
                 )}
                 onClick={onRowClick !== undefined ? () => onRowClick(row.original) : undefined}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 py-2.5">
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(
+                      "px-4 py-2.5",
+                      index === 0 && "ps-5",
+                      index === row.getVisibleCells().length - 1 && "pe-5",
+                    )}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

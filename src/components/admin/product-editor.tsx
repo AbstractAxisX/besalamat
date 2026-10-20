@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatTomanPlain, toEnDigits } from "@/lib/format";
 import { apiFetch, apiSend, uploadImage } from "@/components/admin/api";
+import { Combobox } from "@/components/admin/combobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,13 +45,6 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -526,7 +520,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-2">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-2">
       {/* ورودی فایل مشترک آپلود تصویر */}
       <input
         ref={fileInputRef}
@@ -572,7 +566,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
         title="اطلاعات اصلی"
         description="عنوان، قیمت، موجودی و دسته‌بندی"
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field
             label="عنوان محصول"
             htmlFor="product-title"
@@ -608,48 +602,40 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
           <Field
             label="دسته‌بندی"
             htmlFor="product-category"
-            hint={categories.length === 0 ? "دسته‌ای ثبت نشده است" : undefined}
+            hint={categories.length === 0 ? "دسته‌ای ثبت نشده است" : "جستجو در دسته‌های والد و فرزند"}
           >
-            <Select
-              value={watch("categoryId") || "none"}
-              onValueChange={(value) => setValue("categoryId", value === "none" ? "" : value)}
-            >
-              <SelectTrigger id="product-category" className="w-full">
-                <SelectValue placeholder="انتخاب دسته…" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— بدون دسته —</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.label}
-                    {category.isActive ? "" : " (غیرفعال)"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              id="product-category"
+              options={categories.map((category) => ({
+                value: category.id,
+                label: category.isActive ? category.label : `${category.label} (غیرفعال)`,
+              }))}
+              value={watch("categoryId")}
+              onValueChange={(value) => setValue("categoryId", value)}
+              placeholder="انتخاب دسته…"
+              searchPlaceholder="جستجوی دسته…"
+              emptyText="دسته‌ای با این نام پیدا نشد."
+              clearLabel="بدون دسته"
+              ariaLabel="دسته‌بندی محصول"
+            />
           </Field>
 
           <Field
             label="برند"
             htmlFor="product-brand"
-            hint={brands.length === 0 ? "برندی ثبت نشده است" : undefined}
+            hint={brands.length === 0 ? "برندی ثبت نشده است" : "جستجو در برندهای ثبت‌شده"}
           >
-            <Select
-              value={watch("brandId") || "none"}
-              onValueChange={(value) => setValue("brandId", value === "none" ? "" : value)}
-            >
-              <SelectTrigger id="product-brand" className="w-full">
-                <SelectValue placeholder="انتخاب برند…" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">— بدون برند —</SelectItem>
-                {brands.map((brand) => (
-                  <SelectItem key={brand.id} value={brand.id}>
-                    {brand.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              id="product-brand"
+              options={brands.map((brand) => ({ value: brand.id, label: brand.title }))}
+              value={watch("brandId")}
+              onValueChange={(value) => setValue("brandId", value)}
+              placeholder="انتخاب برند…"
+              searchPlaceholder="جستجوی برند…"
+              emptyText="برندی با این نام پیدا نشد."
+              clearLabel="بدون برند"
+              ariaLabel="برند محصول"
+            />
           </Field>
 
           <Field
@@ -1126,7 +1112,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
       </Section>
 
       {/* ── نوار ذخیرهٔ چسبان ── */}
-      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-4 backdrop-blur md:-mx-8 md:px-8">
+      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur-sm md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {mode === "edit" ? (
             <AlertDialog>

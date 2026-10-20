@@ -25,6 +25,7 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { PageHeader } from "@/components/admin/page-header";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { AdminArticleRow } from "@/types/admin";
@@ -108,9 +109,7 @@ export function ArticlesView() {
         header: "دسته",
         cell: ({ row }) =>
           row.original.categoryTitle ? (
-            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-              {row.original.categoryTitle}
-            </span>
+            <Pill tone="muted">{row.original.categoryTitle}</Pill>
           ) : (
             <span className="text-xs text-muted-foreground">—</span>
           ),
@@ -120,13 +119,9 @@ export function ArticlesView() {
         header: "وضعیت",
         cell: ({ row }) =>
           row.original.isPublished ? (
-            <span className="rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
-              منتشرشده
-            </span>
+            <Pill tone="success">منتشرشده</Pill>
           ) : (
-            <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
-              پیش‌نویس
-            </span>
+            <Pill tone="warning">پیش‌نویس</Pill>
           ),
       },
       {
@@ -169,7 +164,7 @@ export function ArticlesView() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="مقالات"
         description={
@@ -193,38 +188,40 @@ export function ArticlesView() {
         }
       />
 
-      {/* فیلتر وضعیت */}
-      <Tabs value={filter} onValueChange={(value) => setFilter(value as ArticleFilter)} dir="rtl">
-        <TabsList className="h-auto rounded-xl p-1">
-          <TabsTrigger value="all" className="px-3 py-1.5">
-            همه ({toFa(rows.length)})
-          </TabsTrigger>
-          <TabsTrigger value="published" className="px-3 py-1.5">
-            منتشرشده
-          </TabsTrigger>
-          <TabsTrigger value="draft" className="px-3 py-1.5">
-            پیش‌نویس
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* فیلتر وضعیت + جدول (گروه یکدست) */}
+      <div className="space-y-5">
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as ArticleFilter)} dir="rtl">
+          <TabsList className="h-auto rounded-xl p-1">
+            <TabsTrigger value="all" className="px-3 py-1.5">
+              همه ({toFa(rows.length)})
+            </TabsTrigger>
+            <TabsTrigger value="published" className="px-3 py-1.5">
+              منتشرشده
+            </TabsTrigger>
+            <TabsTrigger value="draft" className="px-3 py-1.5">
+              پیش‌نویس
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-      {error ? (
-        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+        {error ? (
+          <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        loading={loading}
-        emptyTitle="مقاله‌ای پیدا نشد"
-        emptyDescription={
-          filter === "all"
-            ? "اولین مقالهٔ مجلهٔ سلامت را بنویسید."
-            : "در این وضعیت مقاله‌ای نیست."
-        }
-      />
+        <DataTable
+          columns={columns}
+          data={filtered}
+          loading={loading}
+          emptyTitle="مقاله‌ای پیدا نشد"
+          emptyDescription={
+            filter === "all"
+              ? "اولین مقالهٔ مجلهٔ سلامت را بنویسید."
+              : "در این وضعیت مقاله‌ای نیست."
+          }
+        />
+      </div>
 
       <DeleteConfirm
         open={deleting !== null}

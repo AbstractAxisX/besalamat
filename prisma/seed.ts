@@ -607,7 +607,7 @@ const SLIDES: {
     id: "slide-1",
     title: "تجهیزات پزشکی اصل، با خیال راحت",
     subtitle: "بیش از ۸۰ برند معتبر جهانی — اومرون، بویرون، مدیسانا و…",
-    imageUrl: "/placeholders/slide-1.svg",
+    imageUrl: "/media/hero-1.png",
     ctaLabel: "دیدن محصولات",
     ctaHref: "/products",
     sortOrder: 0,
@@ -616,7 +616,7 @@ const SLIDES: {
     id: "slide-2",
     title: "برای هر خانه، یک دستگاه سلامت",
     subtitle: "از فشارسنج و قندسنج تا بخور و ترازوی هوشمند",
-    imageUrl: "/placeholders/slide-2.svg",
+    imageUrl: "/media/hero-2.png",
     ctaLabel: "خرید بر اساس نیاز",
     ctaHref: "/products",
     sortOrder: 1,
@@ -625,7 +625,7 @@ const SLIDES: {
     id: "slide-3",
     title: "قبل از خرید، با کارشناس مشورت کنید",
     subtitle: "مشاورهٔ تخصصی رایگان — انتخاب درست، هزینهٔ کمتر",
-    imageUrl: "/placeholders/slide-3.svg",
+    imageUrl: "/media/hero-3-doctor.jpg",
     ctaLabel: "تماس با کارشناس",
     ctaHref: "/contact",
     sortOrder: 2,
@@ -642,25 +642,25 @@ const SLIDES: {
 const BANNERS: { title: string; imageUrl: string; href: string; slot: number }[] = [
   {
     title: "فشارسنج‌های دیجیتال\nدقت بالینیک، دو سال گارانتی",
-    imageUrl: "/placeholders/ad-big-1.svg",
+    imageUrl: "/media/banner-big.jpg",
     href: "/products?category=blood-pressure",
     slot: 0,
   },
   {
     title: "اقلام مصرفی اورجینال\nنوار قند، لانست و ماسک",
-    imageUrl: "/placeholders/ad-wide-1.svg",
+    imageUrl: "/media/banner-wide.jpg",
     href: "/products?category=masks",
     slot: 1,
   },
   {
     title: "بخور و نبولایزر",
-    imageUrl: "/placeholders/ad-square-1.svg",
+    imageUrl: "/media/banner-sq-nebulizer.jpg",
     href: "/products?category=nebulizer",
     slot: 2,
   },
   {
     title: "تشک ضدزخم",
-    imageUrl: "/placeholders/ad-square-2.svg",
+    imageUrl: "/media/banner-sq-mattress.jpg",
     href: "/products?category=anti-bedsore-mattress",
     slot: 3,
   },
@@ -699,7 +699,7 @@ const ARTICLES: {
     title: "راهنمای انتخاب فشارسنج خانگی؛ بازویی یا مچی؟",
     slug: "choosing-home-blood-pressure-monitor",
     categorySlug: "buying-guide",
-    coverUrl: "/placeholders/article-1.svg",
+    coverUrl: "/media/article-bp.png",
     excerpt: "تفاوت‌های فشارسنج بازویی و مچی و نکاتی که پیش از خرید باید بدانید.",
     contentHtml:
       "<p>پایش منظم فشار خون در خانه، بخشی مهم از مدیریت سلامت است؛ اما پیش از خرید فشارسنج باید بدانید کدام نوع به نیاز شما نزدیک‌تر است.</p>" +
@@ -719,7 +719,7 @@ const ARTICLES: {
     title: "۷ نکتهٔ مهم در نگهداری قندسنج",
     slug: "glucometer-care-tips",
     categorySlug: "buying-guide",
-    coverUrl: "/placeholders/article-2.svg",
+    coverUrl: "/media/article-glucose.png",
     excerpt: "با این هفت نکتهٔ ساده، قندسنج شما دقیق‌تر کار می‌کند و عمر دستگاه طولانی‌تر می‌شود.",
     contentHtml:
       "<p>قندسنج از آن دسته دستگاه‌هایی است که با کمی مراقبت، سال‌ها همراه شما می‌ماند و نتایج قابل اتکایی می‌دهد؛ این هفت نکته را جدی بگیرید.</p>" +
@@ -740,7 +740,7 @@ const ARTICLES: {
     title: "استفادهٔ درست از دماسنج بدون‌تماس",
     slug: "contactless-thermometer-guide",
     categorySlug: "home-health",
-    coverUrl: "/placeholders/article-3.svg",
+    coverUrl: "/media/article-thermometer.png",
     excerpt: "فاصلهٔ درست، پیشانی تمیز و چند اندازه‌گیری مقایسه‌ای؛ کلید گرفتن عدد قابل اعتماد از دماسنج بدون‌تماس.",
     contentHtml:
       "<p>دماسنج بدون‌تماس وقتی درست استفاده شود، یکی از راحت‌ترین ابزارهای پایش دما در خانه است؛ اما چند اشتباه رایج، اعداد را چند درجه جابه‌جا می‌کند.</p>" +
@@ -756,6 +756,26 @@ const ARTICLES: {
     publishedDaysAgo: 5,
   },
 ];
+
+/* ══════════════════════════ تصاویر واقعی محصولات — نگاشت اسلاگ → [اصلی، گالری] ══════════════════════════ */
+
+const PRODUCT_MEDIA: Record<string, [string] | [string, string]> = {
+  "omron-m2-blood-pressure": ["/media/p-01-omron-m2-1.jpg", "/media/p-01-omron-m2-2.jpg"],
+  "beurer-bm19": ["/media/p-02-beurer-bm19-1.jpg", "/media/p-02-beurer-bm19-2.jpg"],
+  "rossmax-tg300": ["/media/p-03-rossmax-tg300-1.jpg", "/media/p-03-rossmax-tg300-2.jpg"],
+  "beurer-gl50-strips": ["/media/p-04-gl50-strips-1.jpg", "/media/p-04-gl50-strips-2.jpg"],
+  "beurer-ft90": ["/media/p-05-beurer-ft90-1.jpg"],
+  "omron-mc245": ["/media/p-06-omron-mc245-1.jpg", "/media/p-06-omron-mc245-2.jpg"],
+  "rossmax-sb210": ["/media/p-07-rossmax-sb210-1.jpg", "/media/p-07-rossmax-sb210-2.jpg"],
+  "medisana-uhw": ["/media/p-08-medisana-uhw-1.jpg", "/media/p-08-medisana-uhw-2.jpg"],
+  "tri-ball-spirometer": ["/media/p-09-tri-ball-1.jpg", "/media/p-09-tri-ball-2.jpg"],
+  "salamat-folding-wheelchair": ["/media/p-10-wheelchair-1.jpg", "/media/p-10-wheelchair-2.jpg"],
+  "electric-hospital-bed": ["/media/p-11-hospital-bed-1.jpg", "/media/p-11-hospital-bed-2.jpg"],
+  "lumbar-support-belt": ["/media/p-12-lumbar-belt-1.jpg", "/media/p-12-lumbar-belt-2.jpg"],
+  "surgical-mask-50": ["/media/p-13-surgical-mask-1.webp", "/media/p-13-surgical-mask-2.jpg"],
+  "beurer-gs27": ["/media/p-14-beurer-gs27-1.png"],
+  "medisana-bs430": ["/media/p-15-medisana-bs430-1.webp", "/media/p-15-medisana-bs430-2.png"],
+};
 
 /* ══════════════════════════ سوالات متداول (۶) — عین PREVIEW_FAQS ══════════════════════════ */
 
@@ -1095,9 +1115,13 @@ async function seedProducts(
 
     const searchText = normalizeSearchText(`${p.title} ${brand.title}`);
     const createdAt = productCreatedAt(index);
+    /* تصاویر واقعی محصول (وب/تولیدی) — نگاشت بر اساس اسلاگ؛ پیش‌فرض: نخستین تصویر */
+    const media = PRODUCT_MEDIA[p.slug];
     const images = [
-      { url: `/placeholders/product-${index + 1}-a.svg`, alt: p.title, sortOrder: 0 },
-      { url: `/placeholders/product-${index + 1}-b.svg`, alt: p.title, sortOrder: 1 },
+      { url: media?.[0] ?? "/media/p-01-omron-m2-1.jpg", alt: p.title, sortOrder: 0 },
+      ...(media?.[1] !== undefined
+        ? [{ url: media[1], alt: p.title, sortOrder: 1 }]
+        : []),
     ];
     const specs = p.specs.map((s, i) => ({ key: s.key, value: s.value, sortOrder: i }));
 

@@ -24,9 +24,11 @@ import { cn } from "@/lib/utils";
 import { toFa } from "@/lib/format";
 import { CategoryIcon } from "@/components/shared/category-icon";
 import { apiFetch, apiSend } from "@/components/admin/api";
+import { Combobox } from "@/components/admin/combobox";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { EmptyState } from "@/components/admin/empty-state";
 import { PageHeader } from "@/components/admin/page-header";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,13 +40,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -265,7 +260,7 @@ export function CategoriesView() {
     <li key={node.id} className={cn(!isChild && "border-b last:border-b-0", isChild && "border-b last:border-b-0")}>
       <div
         className={cn(
-          "flex flex-wrap items-center gap-x-3 gap-y-2 p-3.5",
+          "flex flex-wrap items-center gap-x-3 gap-y-2 p-4",
           isChild && "bg-muted/20 ps-4 sm:ps-6",
           !node.isActive && "opacity-60",
         )}
@@ -303,12 +298,9 @@ export function CategoriesView() {
         </div>
 
         {/* شمار محصول + ترتیب */}
-        <span
-          className="shrink-0 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground"
-          title="شمار محصولات این دسته"
-        >
+        <Pill tone="muted" className="shrink-0" title="شمار محصولات این دسته">
           {toFa(node.productCount)} کالا
-        </span>
+        </Pill>
         <span className="shrink-0 text-xs text-muted-foreground" title="ترتیب نمایش">
           ترتیب {toFa(node.sortOrder)}
         </span>
@@ -371,7 +363,7 @@ export function CategoriesView() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="دسته‌بندی‌ها"
         description={
@@ -437,7 +429,7 @@ export function CategoriesView() {
           </DialogHeader>
 
           <div className="space-y-4 py-1">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="cat-title" className="text-xs font-semibold">
                   عنوان *
@@ -464,30 +456,24 @@ export function CategoriesView() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">دستهٔ والد</Label>
-                <Select
-                  value={form.parentId}
-                  onValueChange={(value) => setForm((f) => ({ ...f, parentId: value }))}
+                <Combobox
+                  options={parents.map((parent) => ({
+                    value: parent.id,
+                    label: parent.title,
+                    disabled: editing !== null && editing.id === parent.id,
+                  }))}
+                  value={form.parentId === "none" ? "" : form.parentId}
+                  onValueChange={(value) => setForm((f) => ({ ...f, parentId: value === "" ? "none" : value }))}
                   disabled={editing !== null && editing.children.length > 0}
-                >
-                  <SelectTrigger className="w-full" aria-label="دستهٔ والد">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">بدون والد (سطح اصلی)</SelectItem>
-                    {parents.map((parent) => (
-                      <SelectItem
-                        key={parent.id}
-                        value={parent.id}
-                        disabled={editing !== null && editing.id === parent.id}
-                      >
-                        {parent.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="انتخاب والد…"
+                  searchPlaceholder="جستجوی دستهٔ والد…"
+                  emptyText="دسته‌ای با این نام پیدا نشد."
+                  clearLabel="بدون والد (سطح اصلی)"
+                  ariaLabel="دستهٔ والد"
+                />
                 {editing !== null && editing.children.length > 0 ? (
                   <p className="text-xs text-muted-foreground">
                     این دسته زیردسته دارد و والدش قابل تغییر نیست.
@@ -496,23 +482,20 @@ export function CategoriesView() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">آیکون</Label>
-                <Select value={form.iconKey} onValueChange={(value) => setForm((f) => ({ ...f, iconKey: value }))}>
-                  <SelectTrigger className="w-full" aria-label="آیکون دسته">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">بدون آیکون (عمومی)</SelectItem>
-                    {ICON_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  options={ICON_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                  value={form.iconKey === "none" ? "" : form.iconKey}
+                  onValueChange={(value) => setForm((f) => ({ ...f, iconKey: value === "" ? "none" : value }))}
+                  placeholder="انتخاب آیکون…"
+                  searchPlaceholder="جستجوی آیکون…"
+                  emptyText="آیکونی با این نام پیدا نشد."
+                  clearLabel="بدون آیکون (عمومی)"
+                  ariaLabel="آیکون دسته"
+                />
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="cat-order" className="text-xs font-semibold">
                   ترتیب

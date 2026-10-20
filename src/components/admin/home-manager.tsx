@@ -199,7 +199,7 @@ function SectionsTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* فهرست بخش‌ها */}
       <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
         {rows.map((row, index) => {
@@ -298,10 +298,10 @@ function SectionsTab() {
         })}
       </ul>
 
-      {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
+      {/* نوار ذخیرهٔ چسبان — هم‌سان با ویرایشگرها */}
+      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur-sm md:-mx-8 md:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
+          <p className="text-xs leading-5 text-muted-foreground">
             {dirty
               ? "تغییرات ذخیره نشده است."
               : "تغییرات بلافاصله پس از ذخیره در صفحهٔ اصلی فروشگاه اعمال می‌شود."}
@@ -310,6 +310,7 @@ function SectionsTab() {
             <Button
               type="button"
               variant="outline"
+              size="sm"
               disabled={!dirty || saving}
               onClick={() => {
                 const restored = JSON.parse(original) as AdminHomeSectionRow[];
@@ -318,7 +319,7 @@ function SectionsTab() {
             >
               بازنشانی
             </Button>
-            <Button type="button" className="font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
+            <Button type="button" size="sm" className="font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
               {saving ? "در حال ذخیره…" : "ذخیرهٔ چیدمان"}
             </Button>
           </div>
@@ -332,7 +333,7 @@ function SectionsTab() {
 
 export function HomeManager() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="صفحهٔ اصلی فروشگاه"
         description="چیدمان بخش‌ها، اسلایدها، بنرها، کارت‌های نیاز و جستجوهای پرطرفدار — ریز به ریز"
@@ -370,19 +371,19 @@ export function HomeManager() {
           </TabsList>
         </div>
 
-        <TabsContent value="sections" className="mt-4">
+        <TabsContent value="sections" className="mt-5">
           <SectionsTab />
         </TabsContent>
-        <TabsContent value="slides" className="mt-4">
+        <TabsContent value="slides" className="mt-5">
           <HomeSlidesTab />
         </TabsContent>
-        <TabsContent value="banners" className="mt-4">
+        <TabsContent value="banners" className="mt-5">
           <HomeBannersTab />
         </TabsContent>
-        <TabsContent value="needs" className="mt-4">
+        <TabsContent value="needs" className="mt-5">
           <HomeNeedsTab />
         </TabsContent>
-        <TabsContent value="popular" className="mt-4">
+        <TabsContent value="popular" className="mt-5">
           <HomePopularTab />
         </TabsContent>
       </Tabs>

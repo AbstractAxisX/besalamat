@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="میزکار"
         description="نمای کلی فروشگاه در یک نگاه"
@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
       />
 
       {/* ── کارت‌های آمار ── */}
-      <section aria-label="آمار کلی" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="آمار کلی" className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="سفارش‌ها"
           value={toFa(stats.ordersTotal)}
@@ -111,11 +111,11 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
         </header>
-        <DashboardChart data={stats.chart} />
+        <DashboardChart data={stats.chart} className="mt-4" />
       </section>
 
       {/* ── سفارش‌های اخیر + کم‌موجودی‌ها ── */}
-      <section className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+      <section className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
         {/* سفارش‌های اخیر — ستون راست (۲ ستون) */}
         <div className="space-y-3 lg:col-span-2">
           <div className="flex items-center justify-between gap-2 px-1">

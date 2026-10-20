@@ -16,6 +16,7 @@ import { toFa } from "@/lib/format";
 import { apiFetch, apiSend } from "@/components/admin/api";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { EmptyState } from "@/components/admin/empty-state";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -126,14 +127,15 @@ export function HomePopularTab() {
   }, [deleting, load]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
+    <div className="space-y-5">
+      {/* نوار ابزار — شمار + اکشن‌ها در انتهای RTL */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-muted-foreground">
           {loading
             ? "در حال بارگذاری…"
             : `${toFa(rows?.length ?? 0)} واژه — ${toFa(rows?.filter((row) => row.isActive).length ?? 0)} فعال (سایت: ۶ واژهٔ پر‌وزن)`}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ms-auto">
           <Button type="button" variant="ghost" size="sm" onClick={load} disabled={loading} className="gap-1.5">
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
@@ -173,12 +175,9 @@ export function HomePopularTab() {
               <span className={cn("min-w-0 flex-1 truncate", term.isActive ? "font-bold" : "text-muted-foreground")}>
                 {term.term}
               </span>
-              <span
-                className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
-                title="وزن — ترتیب نمایش در سایت"
-              >
+              <Pill tone="primary" className="shrink-0" title="وزن — ترتیب نمایش در سایت">
                 وزن {toFa(term.weight)}
-              </span>
+              </Pill>
               <label className="flex shrink-0 cursor-pointer items-center gap-1.5">
                 <Switch
                   checked={term.isActive}

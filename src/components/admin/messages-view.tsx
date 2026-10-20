@@ -25,6 +25,7 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { EmptyState } from "@/components/admin/empty-state";
 import { PageHeader } from "@/components/admin/page-header";
 import { SearchInput } from "@/components/admin/search-input";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -75,9 +76,7 @@ function MessageBody({ message }: { message: AdminMessageRow }) {
 
       {/* موضوع و متن */}
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
-        <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-          {message.subject}
-        </span>
+        <Pill tone="primary">{message.subject}</Pill>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-8">{message.body}</p>
       </div>
 
@@ -152,7 +151,7 @@ export function MessagesView() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="پیام‌ها"
         description="پیام‌های فرم «تماس با ما»"
@@ -164,22 +163,23 @@ export function MessagesView() {
         }
       />
 
-      {/* نوار ابزار: جستجو + شمار */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <SearchInput
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="جستجو در نام، موضوع یا متن…"
-          ariaLabel="جستجوی پیام"
-        />
-        <p className="text-xs text-muted-foreground">
-          {loading
-            ? "در حال بارگذاری…"
-            : rows === null || rows.length === 0
-              ? "صندوق پیام خالی است"
-              : `${toFa(filtered?.length ?? 0)} پیام${unreadCount > 0 ? ` — ${toFa(unreadCount)} خوانده‌نشده` : " — همه خوانده‌شده"}`}
-        </p>
-      </div>
+      {/* نوار ابزار + صندوق دوپنلی (گروه یکدست) */}
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <SearchInput
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="جستجو در نام، موضوع یا متن…"
+            ariaLabel="جستجوی پیام"
+          />
+          <p className="text-xs text-muted-foreground">
+            {loading
+              ? "در حال بارگذاری…"
+              : rows === null || rows.length === 0
+                ? "صندوق پیام خالی است"
+                : `${toFa(filtered?.length ?? 0)} پیام${unreadCount > 0 ? ` — ${toFa(unreadCount)} خوانده‌نشده` : " — همه خوانده‌شده"}`}
+          </p>
+        </div>
 
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_1fr]">
@@ -270,6 +270,7 @@ export function MessagesView() {
           </div>
         </div>
       )}
+      </div>
 
       {/* دیالوگ موبایل */}
       <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -282,9 +283,7 @@ export function MessagesView() {
           </DialogHeader>
           {selected !== null ? (
             <div className="max-h-[62vh] overflow-y-auto px-4 py-3">
-              <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                {selected.subject}
-              </span>
+              <Pill tone="primary">{selected.subject}</Pill>
               <p className="mt-3 whitespace-pre-wrap text-sm leading-8">{selected.body}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button type="button" variant="outline" size="sm" asChild className="gap-1.5">

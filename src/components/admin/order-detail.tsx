@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { formatPhoneFa, toFa, formatTomanPlain } from "@/lib/format";
 import { faDateShort, faDateTime } from "@/lib/jalali";
 import { apiFetch, apiSend } from "@/components/admin/api";
+import { Combobox } from "@/components/admin/combobox";
 import { DataTable } from "@/components/admin/data-table";
 import { ADMIN_ORDER_STATUSES, StatusBadge } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { AdminOrderDetail, AdminOrderItem } from "@/types/admin";
 import { ORDER_STATUS_LABELS, type OrderStatusDTO } from "@/types/shop";
 
@@ -285,7 +279,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* سربرگ */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -307,7 +301,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
         {/* ── ستون راست: اقلام + جمع‌بندی ── */}
         <div className="space-y-6 lg:col-span-2">
           <section className="space-y-3">
@@ -369,18 +363,19 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 <Label htmlFor="order-status" className="text-xs font-semibold">
                   تغییر وضعیت به
                 </Label>
-                <Select value={nextStatus} onValueChange={(value) => setNextStatus(value as OrderStatusDTO)}>
-                  <SelectTrigger id="order-status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ADMIN_ORDER_STATUSES.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {ORDER_STATUS_LABELS[item]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  id="order-status"
+                  options={ADMIN_ORDER_STATUSES.map((item) => ({
+                    value: item,
+                    label: ORDER_STATUS_LABELS[item],
+                  }))}
+                  value={nextStatus}
+                  onValueChange={(value) => setNextStatus(value as OrderStatusDTO)}
+                  placeholder="انتخاب وضعیت…"
+                  searchPlaceholder="جستجوی وضعیت…"
+                  emptyText="چنین وضعیتی نیست."
+                  ariaLabel="تغییر وضعیت سفارش"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="order-status-note" className="text-xs font-semibold">

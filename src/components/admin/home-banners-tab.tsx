@@ -25,6 +25,7 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { EmptyState } from "@/components/admin/empty-state";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
+import { Pill } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -246,9 +247,9 @@ export function HomeBannersTab() {
   }, [deleting, load]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* انتخاب قالب گرید */}
-      <section className="rounded-2xl border border-border/60 bg-card shadow-xs p-4">
+      <section className="rounded-2xl border border-border/60 bg-card shadow-xs p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="flex items-center gap-2 text-sm font-bold">
             <IconLayoutGrid className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
@@ -273,11 +274,7 @@ export function HomeBannersTab() {
             >
               <span className="flex items-center justify-between">
                 <span className="font-bold">{item.title}</span>
-                {layout === item.key ? (
-                  <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    فعال
-                  </span>
-                ) : null}
+                {layout === item.key ? <Pill tone="primary">فعال</Pill> : null}
               </span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">{item.description}</span>
             </button>
@@ -285,12 +282,12 @@ export function HomeBannersTab() {
         </div>
       </section>
 
-      {/* نوار ابزار */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
+      {/* نوار ابزار — شمار + اکشن‌ها در انتهای RTL */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-muted-foreground">
           {loading ? "در حال بارگذاری…" : `${toFa(rows?.length ?? 0)} بنر — قالب جاری: ${AD_LAYOUTS.find((l) => l.key === layout)?.title}`}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ms-auto">
           <Button type="button" variant="ghost" size="sm" onClick={load} disabled={loading} className="gap-1.5">
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
@@ -344,15 +341,9 @@ export function HomeBannersTab() {
                   {/* متن */}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                        جایگاه {toFa(banner.slot)}
-                      </span>
+                      <Pill tone="primary">جایگاه {toFa(banner.slot)}</Pill>
                       <span className="text-xs text-muted-foreground">{slotDescription(layout, banner.slot)}</span>
-                      {outOfLayout ? (
-                        <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
-                          خارج از قالب جاری
-                        </span>
-                      ) : null}
+                      {outOfLayout ? <Pill tone="warning">خارج از قالب جاری</Pill> : null}
                     </div>
                     {banner.title ? <p className="mt-1.5 truncate font-semibold">{banner.title}</p> : null}
                     {banner.subtitle ? (

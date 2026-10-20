@@ -72,6 +72,38 @@ const SOCIAL_LABELS: Record<string, string> = {
   rubika: "روبیکا",
 };
 
+/** قالب بخش‌های فرم — هم‌سان با ویرایشگرهای محصول/مقاله (سربرگ آیکون‌دار + توضیح) */
+function FormSection({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+      <header className="border-b border-border/50 bg-muted/40 px-5 py-3.5">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-sm font-bold">
+            <span className="text-muted-foreground" aria-hidden="true">
+              {icon}
+            </span>
+            {title}
+          </h2>
+          {description ? (
+            <p className="mt-0.5 ps-6.5 text-xs text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+      </header>
+      <div className="space-y-5 p-5">{children}</div>
+    </section>
+  );
+}
+
 export function SettingsView({ deploymentNotes }: SettingsViewProps) {
   const [form, setForm] = useState<SettingsForm | null>(null);
   const [original, setOriginal] = useState("");
@@ -218,11 +250,11 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-20 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-        <Skeleton className="h-52 w-full rounded-xl" />
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-52 w-full rounded-2xl" />
       </div>
     );
   }
@@ -239,7 +271,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="تنظیمات فروشگاه"
         description="این مقادیر بلافاصله پس از ذخیره در سراسر سایت (هدر، فوتر، تماس و سبد) اعمال می‌شوند"
@@ -281,12 +313,12 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* اطلاعات فروشگاه */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <IconBuildingStore className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
-          اطلاعات فروشگاه
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <FormSection
+        icon={<IconBuildingStore className="size-4.5" stroke={1.75} />}
+        title="اطلاعات فروشگاه"
+        description="نام، شعار و معرفی — در هدر، فوتر و تب‌های مرورگر"
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="store-name" className="text-xs font-semibold">
               نام فروشگاه
@@ -326,15 +358,15 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             خالی بماند = متن پیش‌فرض برند؛ در بخش «دربارهٔ فروشگاه» صفحهٔ اصلی و فوتر استفاده می‌شود
           </p>
         </div>
-      </section>
+      </FormSection>
 
       {/* اطلاعات تماس */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <IconPhone className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
-          اطلاعات تماس
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <FormSection
+        icon={<IconPhone className="size-4.5" stroke={1.75} />}
+        title="اطلاعات تماس"
+        description="تلفن، رایانامه، نشانی، ساعات کاری و نقشه"
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="store-phone" className="text-xs font-semibold">
               تلفن فروشگاه
@@ -404,19 +436,19 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             تماس نمایش داده می‌شود.
           </p>
         </div>
-      </section>
+      </FormSection>
 
       {/* شبکه‌های اجتماعی */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <IconShare className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
-          شبکه‌های اجتماعی
-        </h2>
+      <FormSection
+        icon={<IconShare className="size-4.5" stroke={1.75} />}
+        title="شبکه‌های اجتماعی"
+        description="نشانی کامل وارد کنید؛ مقدار خالی یعنی مخفی"
+      >
         <p className="text-xs leading-6 text-muted-foreground">
           نشانی کامل (مثل <span dir="ltr" className="font-mono">https://t.me/besalamat</span>) وارد کنید؛
           مقدار خالی یعنی آن شبکه در فوتر مخفی می‌شود.
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {SOCIAL_ORDER.map((key) => (
             <div key={key} className="space-y-1.5">
               <Label htmlFor={`social-${key}`} className="flex items-center gap-1.5 text-xs font-semibold">
@@ -440,14 +472,14 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             </div>
           ))}
         </div>
-      </section>
+      </FormSection>
 
       {/* سایر */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <IconSettings className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
-          سایر
-        </h2>
+      <FormSection
+        icon={<IconSettings className="size-4.5" stroke={1.75} />}
+        title="سایر"
+        description="یادداشت ارسال برای مشتری در سبد خرید"
+      >
         <div className="space-y-1.5">
           <Label htmlFor="store-shipping" className="text-xs font-semibold">
             یادداشت ارسال
@@ -463,12 +495,12 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             خالی بماند = متن پیش‌فرض؛ در فرایند سبد خرید و تسویه به مشتری نمایش داده می‌شود
           </p>
         </div>
-      </section>
+      </FormSection>
 
-      {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
+      {/* نوار ذخیرهٔ چسبان — هم‌سان با ویرایشگرها */}
+      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur-sm md:-mx-8 md:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
+          <p className="text-xs leading-5 text-muted-foreground">
             {dirty
               ? "تغییرات ذخیره نشده است."
               : "مقادیر خالی هر بخش به پیش‌فرض برند برمی‌گردند."}
@@ -477,6 +509,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             <Button
               type="button"
               variant="outline"
+              size="sm"
               disabled={!dirty || saving}
               onClick={() => {
                 const restored = JSON.parse(original) as SettingsForm;
@@ -485,7 +518,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             >
               بازنشانی
             </Button>
-            <Button type="button" className="gap-1.5 font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
+            <Button type="button" size="sm" className="gap-1.5 font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
               <IconDeviceFloppy className="size-4" stroke={1.75} aria-hidden="true" />
               {saving ? "در حال ذخیره…" : "ذخیرهٔ تنظیمات"}
             </Button>

@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * پرسش‌های متداول — ردیف‌های ساده + جابه‌جایی با فلش
+ * پرسش‌های متداول — آکاردئون کتابخانه‌ای (shadcn Accordion) + جابه‌جایی با فلش
  * ─────────────────────────────
  * ترتیب نمایش عمومی: sortOrder صعودی و فقط فعال‌ها؛
- * ویرایش در دیالوگ (پرسش/پاسخ/ترتیب) و حذف با تأیید.
+ * پاسخ کامل با باز کردن آیتم دیده می‌شود؛ ویرایش در دیالوگ
+ * (پرسش/پاسخ/ترتیب) و حذف با تأیید.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -25,6 +26,8 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { EmptyState } from "@/components/admin/empty-state";
 import { PageHeader } from "@/components/admin/page-header";
+import { Pill } from "@/components/admin/status-badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -183,7 +186,7 @@ export function FaqsView() {
   }, [deleting, load]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="پرسش‌های متداول"
         description={
@@ -221,99 +224,116 @@ export function FaqsView() {
           />
         </div>
       ) : (
-        <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+        <Accordion
+          type="single"
+          collapsible
+          className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs"
+        >
           {rows.map((faq, index) => (
-            <li
+            <AccordionItem
               key={faq.id}
-              className={cn("flex items-start gap-3 p-4", !faq.isActive && "bg-muted/30")}
+              value={faq.id}
+              className={cn("border-border/50", !faq.isActive && "bg-muted/30")}
             >
-              {/* فلش‌های جابه‌جایی */}
-              <div className="flex shrink-0 flex-col gap-0.5">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground"
-                  disabled={index === 0 || busyId !== null}
-                  onClick={() => void move(index, -1)}
-                  aria-label={`جابه‌جایی پرسش «${faq.question}» به بالا`}
-                  title="یک پله بالاتر"
-                >
-                  <IconArrowUp className="size-4" stroke={1.75} aria-hidden="true" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 text-muted-foreground"
-                  disabled={index === rows.length - 1 || busyId !== null}
-                  onClick={() => void move(index, 1)}
-                  aria-label={`جابه‌جایی پرسش «${faq.question}» به پایین`}
-                  title="یک پله پایین‌تر"
-                >
-                  <IconArrowDown className="size-4" stroke={1.75} aria-hidden="true" />
-                </Button>
+              <div className="flex items-start gap-3 p-4">
+                {/* فلش‌های جابه‌جایی */}
+                <div className="flex shrink-0 flex-col gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground"
+                    disabled={index === 0 || busyId !== null}
+                    onClick={() => void move(index, -1)}
+                    aria-label={`جابه‌جایی پرسش «${faq.question}» به بالا`}
+                    title="یک پله بالاتر"
+                  >
+                    <IconArrowUp className="size-4" stroke={1.75} aria-hidden="true" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground"
+                    disabled={index === rows.length - 1 || busyId !== null}
+                    onClick={() => void move(index, 1)}
+                    aria-label={`جابه‌جایی پرسش «${faq.question}» به پایین`}
+                    title="یک پله پایین‌تر"
+                  >
+                    <IconArrowDown className="size-4" stroke={1.75} aria-hidden="true" />
+                  </Button>
+                </div>
+
+                {/* پرسش — تریگر آکاردئون کتابخانه‌ای */}
+                <AccordionTrigger className="min-w-0 flex-1 justify-start gap-3 py-0 pe-2 text-start font-semibold leading-7 hover:no-underline [&>svg]:translate-y-0">
+                  <span
+                    className={cn(
+                      "min-w-0 flex-1 truncate",
+                      !faq.isActive && "text-muted-foreground",
+                    )}
+                  >
+                    {faq.question}
+                  </span>
+                </AccordionTrigger>
+
+                {/* اقدامات */}
+                <div className="flex shrink-0 items-center gap-1">
+                  {!faq.isActive ? <Pill tone="muted">مخفی</Pill> : null}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-primary"
+                    onClick={() => openEdit(faq)}
+                    aria-label={`ویرایش پرسش ${faq.question}`}
+                  >
+                    <IconPencil className="size-4" stroke={1.75} aria-hidden="true" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => setDeleting(faq)}
+                    aria-label={`حذف پرسش ${faq.question}`}
+                  >
+                    <IconTrash className="size-4" stroke={1.75} aria-hidden="true" />
+                  </Button>
+                  <label className="flex cursor-pointer items-center gap-1.5">
+                    <Switch
+                      checked={faq.isActive}
+                      disabled={busyId === faq.id}
+                      onCheckedChange={async (checked) => {
+                        setBusyId(faq.id);
+                        try {
+                          await apiSend(`/api/admin/faqs/${faq.id}`, "PUT", {
+                            question: faq.question,
+                            answer: faq.answer,
+                            sortOrder: faq.sortOrder,
+                            isActive: checked,
+                          });
+                          toast.success(checked ? "پرسش فعال شد" : "پرسش مخفی شد");
+                          load();
+                        } catch (error) {
+                          toast.error(error instanceof Error ? error.message : "تغییر وضعیت ناموفق بود");
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                      aria-label={`فعال بودن پرسش ${faq.question}`}
+                    />
+                    <span className="sr-only">فعال</span>
+                  </label>
+                </div>
               </div>
 
-              {/* متن */}
-              <div className="min-w-0 flex-1">
-                <p className={cn("font-semibold leading-7", !faq.isActive && "text-muted-foreground")}>
-                  {faq.question}
-                </p>
-                <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
-              </div>
-
-              {/* اقدامات */}
-              <div className="flex shrink-0 items-center gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-muted-foreground hover:text-primary"
-                  onClick={() => openEdit(faq)}
-                  aria-label={`ویرایش پرسش ${faq.question}`}
-                >
-                  <IconPencil className="size-4" stroke={1.75} aria-hidden="true" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-muted-foreground hover:text-destructive"
-                  onClick={() => setDeleting(faq)}
-                  aria-label={`حذف پرسش ${faq.question}`}
-                >
-                  <IconTrash className="size-4" stroke={1.75} aria-hidden="true" />
-                </Button>
-                <label className="flex cursor-pointer items-center gap-1.5">
-                  <Switch
-                    checked={faq.isActive}
-                    disabled={busyId === faq.id}
-                    onCheckedChange={async (checked) => {
-                      setBusyId(faq.id);
-                      try {
-                        await apiSend(`/api/admin/faqs/${faq.id}`, "PUT", {
-                          question: faq.question,
-                          answer: faq.answer,
-                          sortOrder: faq.sortOrder,
-                          isActive: checked,
-                        });
-                        toast.success(checked ? "پرسش فعال شد" : "پرسش مخفی شد");
-                        load();
-                      } catch (error) {
-                        toast.error(error instanceof Error ? error.message : "تغییر وضعیت ناموفق بود");
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                    aria-label={`فعال بودن پرسش ${faq.question}`}
-                  />
-                  <span className="sr-only">فعال</span>
-                </label>
-              </div>
-            </li>
+              {/* پاسخ کامل — محتوای آکاردئون */}
+              <AccordionContent className="ps-14 pe-4 text-start text-sm leading-7 text-muted-foreground">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </ul>
+        </Accordion>
       )}
 
       {/* دیالوگ ساخت/ویرایش پرسش */}
@@ -356,7 +376,7 @@ export function FaqsView() {
                 placeholder="پاسخ کامل و روشن برای مشتری…"
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="faq-order" className="text-xs font-semibold">
                   ترتیب

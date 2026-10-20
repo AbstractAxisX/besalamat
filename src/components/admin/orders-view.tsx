@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * فهرست سفارش‌های پنل — فیلتر وضعیت با Select + جدول TanStack
+ * فهرست سفارش‌های پنل — فیلتر وضعیت با کامبوباکس جستجودار + جدول TanStack
  * ─────────────────────────────
  * GET /api/admin/orders?status= (تا ۲۰۰ سفارش اخیر)؛ شمارش هر وضعیت از
  * پاسخ بدون‌فیلتر محاسبه می‌شود. کلیک ردیف → جزئیات سفارش.
@@ -14,17 +14,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatPhoneFa, toFa, formatTomanPlain } from "@/lib/format";
 import { faDateShort } from "@/lib/jalali";
 import { apiFetch } from "@/components/admin/api";
+import { Combobox } from "@/components/admin/combobox";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { ADMIN_ORDER_STATUSES, StatusBadge } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { AdminOrderRow } from "@/types/admin";
 import { ORDER_STATUS_LABELS, type OrderStatusDTO } from "@/types/shop";
 
@@ -157,63 +151,69 @@ export function OrdersView() {
   const filterLabel =
     status === "all" ? "همهٔ وضعیت‌ها" : ORDER_STATUS_LABELS[status as OrderStatusDTO];
 
+  /* گزینه‌های کامبوباکس — برچسب هر وضعیت با شمار آن، مثل «در انتظار پرداخت (۳)» */
+  const statusOptions = useMemo(
+    () =>
+      ADMIN_ORDER_STATUSES.map((item) => ({
+        value: item,
+        label:
+          counts[item] !== undefined
+            ? `${ORDER_STATUS_LABELS[item]} (${toFa(counts[item])})`
+            : ORDER_STATUS_LABELS[item],
+      })),
+    [counts],
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="سفارش‌ها"
         description="پیگیری و مدیریت سفارش‌های فروشگاه"
       />
 
-      {/* نوار ابزار: فیلتر وضعیت + شمار */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Select
-          value={status}
-          onValueChange={(value) => selectStatus(value as StatusFilter)}
-          dir="rtl"
-        >
-          <SelectTrigger className="h-9 w-44 rounded-lg" aria-label="فیلتر وضعیت سفارش">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              همه ({toFa(counts.all ?? 0)})
-            </SelectItem>
-            {ADMIN_ORDER_STATUSES.map((item) => (
-              <SelectItem key={item} value={item}>
-                {ORDER_STATUS_LABELS[item]}
-                {counts[item] !== undefined ? ` (${toFa(counts[item])})` : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          {loading
-            ? "در حال بارگذاری…"
-            : `${toFa(rows.length)} سفارش — ${filterLabel}${
-                activeCount !== undefined ? ` (${toFa(activeCount)})` : ""
-              }`}
-        </p>
+      {/* نوار ابزار + جدول (گروه یکدست) */}
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Combobox
+            options={statusOptions}
+            value={status === "all" ? "" : status}
+            onValueChange={(value) => selectStatus(value === "" ? "all" : (value as StatusFilter))}
+            clearLabel={`همهٔ وضعیت‌ها (${toFa(counts.all ?? 0)})`}
+            placeholder="فیلتر وضعیت…"
+            searchPlaceholder="جستجوی وضعیت…"
+            emptyText="چنین وضعیتی نیست."
+            ariaLabel="فیلتر وضعیت سفارش"
+            className="w-52"
+          />
+          <p className="text-xs text-muted-foreground">
+            {loading
+              ? "در حال بارگذاری…"
+              : `${toFa(rows.length)} سفارش — ${filterLabel}${
+                  activeCount !== undefined ? ` (${toFa(activeCount)})` : ""
+                }`}
+          </p>
+        </div>
+
+        {error ? (
+          <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+
+        <DataTable
+          columns={columns}
+          data={rows}
+          loading={loading}
+          emptyTitle="سفارشی با این فیلتر نیست"
+          emptyDescription="با تغییر فیلتر وضعیت، سفارش‌های دیگری را ببینید."
+          emptyAction={
+            <Button type="button" variant="outline" size="sm" onClick={() => selectStatus("all")}>
+              نمایش همهٔ سفارش‌ها
+            </Button>
+          }
+          onRowClick={(row) => router.push(`/admin/orders/${row.id}`)}
+        />
       </div>
-
-      {error ? (
-        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
-      <DataTable
-        columns={columns}
-        data={rows}
-        loading={loading}
-        emptyTitle="سفارشی با این فیلتر نیست"
-        emptyDescription="با تغییر فیلتر وضعیت، سفارش‌های دیگری را ببینید."
-        emptyAction={
-          <Button type="button" variant="outline" size="sm" onClick={() => selectStatus("all")}>
-            نمایش همهٔ سفارش‌ها
-          </Button>
-        }
-        onRowClick={(row) => router.push(`/admin/orders/${row.id}`)}
-      />
     </div>
   );
 }

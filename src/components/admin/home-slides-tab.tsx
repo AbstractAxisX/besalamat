@@ -202,15 +202,15 @@ export function HomeSlidesTab() {
   );
 
   return (
-    <div className="space-y-4">
-      {/* نوار ابزار */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
+    <div className="space-y-5">
+      {/* نوار ابزار — شمار + اکشن‌ها در انتهای RTL */}
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-xs text-muted-foreground">
           {loading
             ? "در حال بارگذاری…"
             : `${toFa(rows?.length ?? 0)} اسلاید — ${toFa(rows?.filter((row) => row.isActive).length ?? 0)} فعال`}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ms-auto">
           <Button type="button" variant="ghost" size="sm" onClick={load} disabled={loading} className="gap-1.5">
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری

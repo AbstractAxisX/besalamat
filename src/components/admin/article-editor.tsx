@@ -3,8 +3,9 @@
 /**
  * ادیتور مقاله — ساخت (/admin/articles/new) و ویرایش (/admin/articles/[id])
  * ─────────────────────────────
- * عنوان/نامک/چکیده/متن HTML/جلد/دسته/انتشار + سئوی جمع‌شونده؛
- * نوار ذخیرهٔ چسبان؛ تاریخ انتشار به‌صورت خودکار هنگام انتشار ثبت می‌شود.
+ * بخش‌های کارت‌دار (اطلاعات اصلی / متن و تصویر / انتشار) + سئوی جمع‌شونده؛
+ * دسته با کامبوباکس جستجودار؛ نوار ذخیرهٔ چسبان تمام‌عرض؛
+ * تاریخ انتشار به‌صورت خودکار هنگام انتشار ثبت می‌شود.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +17,9 @@ import {
   IconChevronDown,
   IconDeviceFloppy,
   IconExternalLink,
+  IconNews,
+  IconPhoto,
+  IconSend,
   IconSeo,
   IconTrash,
 } from "@tabler/icons-react";
@@ -23,18 +27,12 @@ import {
 import { toFa } from "@/lib/format";
 import { faDate } from "@/lib/jalali";
 import { apiFetch, apiSend } from "@/components/admin/api";
+import { Combobox } from "@/components/admin/combobox";
 import { DeleteConfirm } from "@/components/admin/delete-confirm";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,7 +71,7 @@ const EMPTY_FORM: ArticleForm = {
   excerpt: "",
   contentHtml: "",
   coverUrl: "",
-  categoryId: "none",
+  categoryId: "",
   isPublished: false,
   seoTitle: "",
   seoDescription: "",
@@ -88,6 +86,38 @@ function slugify(input: string): string {
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+/** قالب بخش‌های فرم — هم‌سان با ویرایشگر محصول (سربرگ آیکون‌دار + توضیح) */
+function Section({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+      <header className="border-b border-border/50 bg-muted/40 px-5 py-3.5">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-sm font-bold">
+            <span className="text-muted-foreground" aria-hidden="true">
+              {icon}
+            </span>
+            {title}
+          </h2>
+          {description ? (
+            <p className="mt-0.5 ps-6.5 text-xs text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+      </header>
+      <div className="space-y-5 p-5">{children}</div>
+    </section>
+  );
 }
 
 export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
@@ -121,7 +151,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             excerpt: detail.article.excerpt,
             contentHtml: detail.article.contentHtml,
             coverUrl: detail.article.coverUrl,
-            categoryId: detail.article.categoryId ?? "none",
+            categoryId: detail.article.categoryId ?? "",
             isPublished: detail.article.isPublished,
             seoTitle: detail.article.seoTitle ?? "",
             seoDescription: detail.article.seoDescription ?? "",
@@ -171,7 +201,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       coverUrl: form.coverUrl.trim(),
       excerpt: form.excerpt.trim(),
       contentHtml: form.contentHtml,
-      categoryId: form.categoryId === "none" ? null : form.categoryId,
+      categoryId: form.categoryId.length > 0 ? form.categoryId : null,
       seoTitle: form.seoTitle.trim().length > 0 ? form.seoTitle.trim() : null,
       seoDescription: form.seoDescription.trim().length > 0 ? form.seoDescription.trim() : null,
       isPublished: form.isPublished,
@@ -228,7 +258,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
   /* ── اسکلت ── */
   if (!loaded) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-40 w-full rounded-2xl" />
         <Skeleton className="h-64 w-full rounded-2xl" />
@@ -237,7 +267,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
   }
 
   return (
-    <div className="space-y-6 pb-2">
+    <div className="space-y-8 pb-2">
       {/* سربرگ */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -254,7 +284,11 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
               <p className="mt-0.5 text-xs text-muted-foreground">
                 انتشار: {faDate(publishedAt)}
               </p>
-            ) : null}
+            ) : (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                عنوان، متن HTML، جلد و انتشار در مجلهٔ سلامت
+              </p>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -282,9 +316,12 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </div>
 
       {/* اطلاعات اصلی */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="text-sm font-bold">اطلاعات اصلی</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Section
+        icon={<IconNews className="size-4.5" stroke={1.75} />}
+        title="اطلاعات اصلی"
+        description="عنوان و نامک یکتای مقاله در مجله"
+      >
+        <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="article-title" className="text-xs font-semibold">
               عنوان *
@@ -344,11 +381,14 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             placeholder="یک تا دو خط معرفی که در فهرست مجله و شبکه‌های اجتماعی نمایش داده می‌شود"
           />
         </div>
-      </section>
+      </Section>
 
       {/* متن و جلد */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="text-sm font-bold">متن و تصویر</h2>
+      <Section
+        icon={<IconPhoto className="size-4.5" stroke={1.75} />}
+        title="متن و تصویر"
+        description="جلد افقی ۸:۵ و متن کامل مقاله (HTML)"
+      >
         <ImageUploadField
           ratio="landscape"
           label="تصویر جلد *"
@@ -375,30 +415,33 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             راست‌به‌چپ نمایش داده می‌شود.
           </p>
         </div>
-      </section>
+      </Section>
 
       {/* انتشار و دسته */}
-      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
-        <h2 className="text-sm font-bold">انتشار</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Section
+        icon={<IconSend className="size-4.5" stroke={1.75} />}
+        title="انتشار"
+        description="دستهٔ موضوعی و وضعیت نمایش در مجلهٔ سلامت"
+      >
+        <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">دستهٔ مقاله</Label>
-            <Select
+            <Combobox
+              options={categories.map((category) => ({
+                value: category.id,
+                label: category.title,
+              }))}
               value={form.categoryId}
               onValueChange={(value) => setForm((f) => ({ ...f, categoryId: value }))}
-            >
-              <SelectTrigger className="w-full" aria-label="دستهٔ مقاله">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">بدون دسته</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="انتخاب دسته…"
+              searchPlaceholder="جستجوی دسته…"
+              emptyText="دسته‌ای با این نام پیدا نشد."
+              clearLabel="بدون دسته"
+              ariaLabel="دستهٔ مقاله"
+            />
+            <p className="text-xs text-muted-foreground">
+              {toFa(categories.length)} دسته فعال است — با تایپ نام، جستجو کنید.
+            </p>
           </div>
           <div className="space-y-2">
             <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
@@ -414,17 +457,17 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
                 ? publishedAt !== null
                   ? `منتشرشده از ${faDate(publishedAt)} — با هر ذخیره به‌روز می‌شود`
                   : "با اولین ذخیره، تاریخ انتشار امروز ثبت می‌شود"
-                : `پیش‌نویس — فقط در پنل دیده می‌شود (در حال حاضر ${toFa(categories.length)} دسته فعال است)`}
+                : "پیش‌نویس — فقط در پنل دیده می‌شود"}
             </p>
           </div>
         </div>
-      </section>
+      </Section>
 
       {/* سئو (جمع‌شونده) */}
-      <Collapsible className="rounded-2xl border border-border/60 bg-card shadow-xs">
-        <CollapsibleTrigger className="flex w-full items-center justify-between p-5">
-          <span className="flex items-center gap-2 text-sm font-bold">
-            <IconSeo className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
+      <Collapsible className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+        <CollapsibleTrigger className="flex w-full items-center justify-between border-b border-border/50 bg-muted/40 px-5 py-3.5 text-sm font-bold hover:bg-muted/60">
+          <span className="flex items-center gap-2">
+            <IconSeo className="size-4.5 text-muted-foreground" stroke={1.75} aria-hidden="true" />
             سئو (اختیاری)
           </span>
           <IconChevronDown
@@ -433,7 +476,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             aria-hidden="true"
           />
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 border-t border-border/50 px-5 py-5">
+        <CollapsibleContent className="space-y-5 px-5 py-5">
           <div className="space-y-1.5">
             <Label htmlFor="article-seo-title" className="text-xs font-semibold">
               عنوان سئو
@@ -460,14 +503,16 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
+      {/* نوار ذخیرهٔ چسبان — هم‌سان با ویرایشگر محصول */}
+      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur-sm md:-mx-8 md:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
-            {form.isPublished ? "این مقاله در مجلهٔ سلامت قابل مشاهده است." : "این مقاله پیش‌نویس است."}
+          <p className="text-xs leading-5 text-muted-foreground">
+            {form.isPublished
+              ? "این مقاله در مجلهٔ سلامت قابل مشاهده است."
+              : "این مقاله پیش‌نویس است و فقط در پنل دیده می‌شود."}
           </p>
           <div className="flex shrink-0 gap-2">
-            <Button type="button" variant="outline" asChild disabled={saving}>
+            <Button type="button" variant="ghost" asChild disabled={saving}>
               <Link href="/admin/articles">انصراف</Link>
             </Button>
             <Button type="button" className="gap-1.5 font-semibold" disabled={saving} onClick={() => void submit()}>

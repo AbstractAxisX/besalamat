@@ -21,7 +21,7 @@ interface SearchInputProps {
 
 export function SearchInput({ value, onChange, placeholder, ariaLabel, className }: SearchInputProps) {
   return (
-    <div className={cn("relative w-full max-w-xs", className)}>
+    <div className={cn("relative w-full max-w-sm grow", className)}>
       <IconSearch
         className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
         stroke={1.75}

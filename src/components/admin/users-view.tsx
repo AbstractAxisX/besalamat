@@ -19,6 +19,7 @@ import { apiFetch, apiSend } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { SearchInput } from "@/components/admin/search-input";
+import { Pill } from "@/components/admin/status-badge";
 import type { AdminUserMeResponse, AdminUserRow } from "@/types/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,13 +193,9 @@ export function UsersView() {
         header: "نقش",
         cell: ({ row }) =>
           row.original.role === "ADMIN" ? (
-            <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-              مدیر
-            </span>
+            <Pill tone="primary">مدیر</Pill>
           ) : (
-            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-              کاربر
-            </span>
+            <Pill tone="muted">کاربر</Pill>
           ),
       },
       {
@@ -206,13 +203,9 @@ export function UsersView() {
         header: "وضعیت",
         cell: ({ row }) =>
           row.original.isBlocked ? (
-            <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">
-              مسدود
-            </span>
+            <Pill tone="destructive">مسدود</Pill>
           ) : (
-            <span className="rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
-              فعال
-            </span>
+            <Pill tone="success">فعال</Pill>
           ),
       },
       {
@@ -269,37 +262,39 @@ export function UsersView() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader title="کاربران" description="مدیریت کاربران، نقش‌ها و مسدودسازی" />
 
-      {/* نوار ابزار: جستجو + شمار */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <SearchInput
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="جستجو در نام، موبایل یا رایانامه…"
-          ariaLabel="جستجوی کاربر"
+      {/* نوار ابزار + جدول (گروه یکدست) */}
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <SearchInput
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="جستجو در نام، موبایل یا رایانامه…"
+            ariaLabel="جستجوی کاربر"
+          />
+          <p className="text-xs text-muted-foreground">
+            {loading
+              ? "در حال بارگذاری…"
+              : `${toFa(rows.length)} کاربر${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
+          </p>
+        </div>
+
+        {error ? (
+          <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+
+        <DataTable
+          columns={columns}
+          data={rows}
+          loading={loading}
+          emptyTitle="کاربری پیدا نشد"
+          emptyDescription="عبارت دیگری را جستجو کنید."
         />
-        <p className="text-xs text-muted-foreground">
-          {loading
-            ? "در حال بارگذاری…"
-            : `${toFa(rows.length)} کاربر${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
-        </p>
       </div>
-
-      {error ? (
-        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
-      <DataTable
-        columns={columns}
-        data={rows}
-        loading={loading}
-        emptyTitle="کاربری پیدا نشد"
-        emptyDescription="عبارت دیگری را جستجو کنید."
-      />
 
       {/* دیالوگ ویرایش نام/نقش */}
       <Dialog open={editing !== null} onOpenChange={(open) => !open && setEditing(null)}>

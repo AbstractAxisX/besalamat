@@ -5,6 +5,7 @@
  * ─────────────────────────────
  * کلیک روی پیام آن را «خوانده‌شده» می‌کند (PUT) و در پنل نمایش
  * می‌دهد؛ در موبایل متن در Dialog باز می‌شود. دکمهٔ تماس با tel: لینک است.
+ * جستجوی سمت کلاینت روی نام/موضوع/متن (نوار ابزار مشابه سایر صفحات).
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,6 +24,7 @@ import { faDateTime, faRelative } from "@/lib/jalali";
 import { apiFetch, apiSend } from "@/components/admin/api";
 import { EmptyState } from "@/components/admin/empty-state";
 import { PageHeader } from "@/components/admin/page-header";
+import { SearchInput } from "@/components/admin/search-input";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,13 +45,13 @@ function MessageBody({ message }: { message: AdminMessageRow }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* سربرگ: فرستنده + راه‌های پاسخ */}
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/50 p-5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-black text-primary">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
             {message.name.trim().charAt(0) || "؟"}
           </span>
           <div className="min-w-0">
-            <p className="truncate font-bold">{message.name}</p>
+            <p className="truncate font-semibold">{message.name}</p>
             <p className="text-xs text-muted-foreground">{faDateTime(message.createdAt)}</p>
           </div>
         </div>
@@ -72,16 +74,16 @@ function MessageBody({ message }: { message: AdminMessageRow }) {
       </div>
 
       {/* موضوع و متن */}
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <span className="inline-flex rounded-full border border-primary/25 bg-primary/5 px-2.5 py-0.5 text-xs font-bold text-primary">
+      <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
           {message.subject}
         </span>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-8">{message.body}</p>
       </div>
 
       {/* پاصفحه: راهنمای پاسخ */}
-      <div className="border-t bg-muted/30 p-3 text-center text-xs leading-6 text-muted-foreground">
-        برای پاسخ، با شمارهٔ <span dir="ltr" className="font-bold">{formatPhoneFa(message.phone)}</span> تماس
+      <div className="border-t border-border/50 bg-muted/30 p-3 text-center text-xs leading-6 text-muted-foreground">
+        برای پاسخ، با شمارهٔ <span dir="ltr" className="font-semibold">{formatPhoneFa(message.phone)}</span> تماس
         بگیرید یا رایانامه بفرستید؛ پاسخ از داخل پنل ارسال نمی‌شود.
       </div>
     </div>
@@ -93,6 +95,7 @@ export function MessagesView() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = useCallback(async (): Promise<void> => {
     try {
@@ -110,6 +113,16 @@ export function MessagesView() {
   }, [load]);
 
   const unreadCount = useMemo(() => rows?.filter((row) => !row.isRead).length ?? 0, [rows]);
+  /* جستجوی سمت کلاینت — نام، موضوع یا متن */
+  const filtered = useMemo(() => {
+    if (rows === null) return null;
+    const query = search.trim();
+    if (query.length === 0) return rows;
+    return rows.filter(
+      (row) =>
+        row.name.includes(query) || row.subject.includes(query) || row.body.includes(query),
+    );
+  }, [rows, search]);
   const selected = useMemo(
     () => rows?.find((row) => row.id === selectedId) ?? null,
     [rows, selectedId],
@@ -142,13 +155,7 @@ export function MessagesView() {
     <div className="space-y-6">
       <PageHeader
         title="پیام‌ها"
-        description={
-          loading
-            ? "در حال بارگذاری…"
-            : rows === null || rows.length === 0
-              ? "صندوق پیام خالی است"
-              : `${toFa(rows.length)} پیام${unreadCount > 0 ? ` — ${toFa(unreadCount)} خوانده‌نشده` : " — همه خوانده‌شده"}`
-        }
+        description="پیام‌های فرم «تماس با ما»"
         actions={
           <Button type="button" variant="outline" size="sm" onClick={load} disabled={loading} className="gap-1.5">
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
@@ -157,37 +164,62 @@ export function MessagesView() {
         }
       />
 
+      {/* نوار ابزار: جستجو + شمار */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SearchInput
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="جستجو در نام، موضوع یا متن…"
+          ariaLabel="جستجوی پیام"
+        />
+        <p className="text-xs text-muted-foreground">
+          {loading
+            ? "در حال بارگذاری…"
+            : rows === null || rows.length === 0
+              ? "صندوق پیام خالی است"
+              : `${toFa(filtered?.length ?? 0)} پیام${unreadCount > 0 ? ` — ${toFa(unreadCount)} خوانده‌نشده` : " — همه خوانده‌شده"}`}
+        </p>
+      </div>
+
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_1fr]">
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-20 w-full rounded-xl" />
+              <Skeleton key={index} className="h-20 w-full rounded-2xl" />
             ))}
           </div>
-          <Skeleton className="hidden h-96 w-full rounded-xl lg:block" />
+          <Skeleton className="hidden h-96 w-full rounded-2xl lg:block" />
         </div>
-      ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+      ) : filtered === null || filtered.length === 0 ? (
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
-            icon={<IconInbox className="size-7" stroke={1.75} aria-hidden="true" />}
-            title="پیامی نرسیده است"
-            description="پیام‌های فرم «تماس با ما» اینجا نمایش داده می‌شوند."
+            icon={<IconInbox className="size-6" stroke={1.75} aria-hidden="true" />}
+            title={
+              rows !== null && rows.length > 0 && search.trim().length > 0
+                ? "پیامی با این جستجو پیدا نشد"
+                : "پیامی نرسیده است"
+            }
+            description={
+              rows !== null && rows.length > 0 && search.trim().length > 0
+                ? "عبارت دیگری را جستجو کنید."
+                : "پیام‌های فرم «تماس با ما» اینجا نمایش داده می‌شوند."
+            }
             className="py-16"
           />
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_1fr]">
           {/* فهرست پیام‌ها (راست) */}
-          <ul className="max-h-[70vh] divide-y overflow-y-auto rounded-xl border bg-card lg:max-h-[75vh]">
-            {rows.map((message) => (
+          <ul className="max-h-[70vh] divide-y divide-border/50 overflow-y-auto rounded-2xl border border-border/60 bg-card shadow-xs lg:max-h-[75vh]">
+            {filtered.map((message) => (
               <li key={message.id}>
                 <button
                   type="button"
                   onClick={() => select(message)}
                   aria-current={selectedId === message.id}
                   className={cn(
-                    "flex w-full items-start gap-3 p-4 text-start transition-colors hover:bg-muted/50",
-                    selectedId === message.id && "bg-muted",
+                    "flex w-full items-start gap-3 p-4 text-start transition-colors hover:bg-muted/40",
+                    selectedId === message.id && "bg-muted/60",
                     !message.isRead && "bg-primary/[0.04]",
                   )}
                 >
@@ -199,7 +231,7 @@ export function MessagesView() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
-                      <span className={cn("truncate text-sm", message.isRead ? "font-bold" : "font-black")}>
+                      <span className={cn("truncate text-sm", message.isRead ? "font-semibold" : "font-bold")}>
                         {message.name}
                       </span>
                       <span className="shrink-0 text-[11px] text-muted-foreground">
@@ -209,7 +241,7 @@ export function MessagesView() {
                     <span
                       className={cn(
                         "mt-0.5 block truncate text-xs",
-                        message.isRead ? "text-muted-foreground" : "font-bold text-foreground/80",
+                        message.isRead ? "text-muted-foreground" : "font-semibold text-foreground/80",
                       )}
                     >
                       {message.subject}
@@ -224,12 +256,12 @@ export function MessagesView() {
           </ul>
 
           {/* پنل متن (چپ — فقط دسکتاپ) */}
-          <div className="hidden min-h-[480px] overflow-hidden rounded-xl border bg-card lg:block">
+          <div className="hidden min-h-[480px] overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs lg:block">
             {selected !== null ? (
               <MessageBody message={selected} />
             ) : (
               <EmptyState
-                icon={<IconUser className="size-7" stroke={1.75} aria-hidden="true" />}
+                icon={<IconUser className="size-6" stroke={1.75} aria-hidden="true" />}
                 title="پیامی انتخاب نشده است"
                 description="از فهرست سمت راست یک پیام را انتخاب کنید تا متن کامل آن نمایش داده شود."
                 className="py-16"
@@ -242,7 +274,7 @@ export function MessagesView() {
       {/* دیالوگ موبایل */}
       <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
         <DialogContent dir="rtl" className="max-h-[85vh] overflow-hidden p-0 sm:max-w-lg">
-          <DialogHeader className="border-b p-4">
+          <DialogHeader className="border-b border-border/50 p-4">
             <DialogTitle className="text-base">متن پیام</DialogTitle>
             <DialogDescription>
               {selected !== null ? `${selected.name} — ${faDateTime(selected.createdAt)}` : ""}
@@ -250,7 +282,7 @@ export function MessagesView() {
           </DialogHeader>
           {selected !== null ? (
             <div className="max-h-[62vh] overflow-y-auto px-4 py-3">
-              <span className="inline-flex rounded-full border border-primary/25 bg-primary/5 px-2.5 py-0.5 text-xs font-bold text-primary">
+              <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
                 {selected.subject}
               </span>
               <p className="mt-3 whitespace-pre-wrap text-sm leading-8">{selected.body}</p>

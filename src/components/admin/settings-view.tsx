@@ -231,7 +231,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
     return (
       <div className="space-y-6">
         <PageHeader title="تنظیمات" description="تنظیمات فروشگاه" />
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {loadError ?? "تنظیمات در دسترس نیست."}
         </p>
       </div>
@@ -250,8 +250,8 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
         <div className="flex items-start gap-3">
           <IconInfoCircle className="mt-0.5 size-5 shrink-0 text-warning" stroke={1.75} aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold leading-6">
-              کد ورود دمو (OTP): <span className="font-mono font-black">۱۲۳۴۵</span>
+            <p className="text-sm font-semibold leading-6">
+              کد ورود دمو (OTP): <span className="font-mono font-bold">۱۲۳۴۵</span>
             </p>
             <p className="mt-0.5 text-xs leading-6 text-muted-foreground">
               تا زمان اتصال درگاه پیامک واقعی، همهٔ ورودها با همین کد انجام می‌شوند. مقدار کد با متغیر
@@ -281,14 +281,14 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* اطلاعات فروشگاه */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-black">
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
           <IconBuildingStore className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
           اطلاعات فروشگاه
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="store-name" className="text-sm font-bold">
+            <Label htmlFor="store-name" className="text-xs font-semibold">
               نام فروشگاه
             </Label>
             <Input
@@ -300,7 +300,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             <p className="text-xs text-muted-foreground">در هدر، فوتر و عنوان تب‌ها نمایش داده می‌شود</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="store-tagline" className="text-sm font-bold">
+            <Label htmlFor="store-tagline" className="text-xs font-semibold">
               شعار (تگ‌لاین)
             </Label>
             <Input
@@ -312,7 +312,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="store-about" className="text-sm font-bold">
+          <Label htmlFor="store-about" className="text-xs font-semibold">
             معرفی کوتاه
           </Label>
           <Textarea
@@ -329,14 +329,14 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* اطلاعات تماس */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-black">
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
           <IconPhone className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
           اطلاعات تماس
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="store-phone" className="text-sm font-bold">
+            <Label htmlFor="store-phone" className="text-xs font-semibold">
               تلفن فروشگاه
             </Label>
             <Input
@@ -350,7 +350,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             <p className="text-xs text-muted-foreground">در فوتر و صفحهٔ تماس نمایش داده می‌شود</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="store-email" className="text-sm font-bold">
+            <Label htmlFor="store-email" className="text-xs font-semibold">
               رایانامه
             </Label>
             <Input
@@ -364,7 +364,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="store-address" className="text-sm font-bold">
+          <Label htmlFor="store-address" className="text-xs font-semibold">
             نشانی
           </Label>
           <Textarea
@@ -378,7 +378,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
 
         {/* ساعت‌های کاری */}
         <div className="space-y-1.5">
-          <Label className="flex items-center gap-1.5 text-sm font-bold">
+          <Label className="flex items-center gap-1.5 text-xs font-semibold">
             <IconClock className="size-4 text-muted-foreground" stroke={1.75} aria-hidden="true" />
             ساعات کاری
           </Label>
@@ -386,7 +386,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="store-map" className="flex items-center gap-1.5 text-sm font-bold">
+          <Label htmlFor="store-map" className="flex items-center gap-1.5 text-xs font-semibold">
             <IconMapPin className="size-4 text-muted-foreground" stroke={1.75} aria-hidden="true" />
             نشانی iframe نقشه
           </Label>
@@ -407,8 +407,8 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* شبکه‌های اجتماعی */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-black">
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
           <IconShare className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
           شبکه‌های اجتماعی
         </h2>
@@ -419,7 +419,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
         <div className="grid gap-3 sm:grid-cols-2">
           {SOCIAL_ORDER.map((key) => (
             <div key={key} className="space-y-1.5">
-              <Label htmlFor={`social-${key}`} className="flex items-center gap-1.5 text-sm font-bold">
+              <Label htmlFor={`social-${key}`} className="flex items-center gap-1.5 text-xs font-semibold">
                 {key === "telegram" ? (
                   <IconBrandTelegram className="size-4 text-muted-foreground" stroke={1.75} aria-hidden="true" />
                 ) : (
@@ -443,13 +443,13 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* سایر */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="flex items-center gap-2 text-sm font-black">
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
           <IconSettings className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
           سایر
         </h2>
         <div className="space-y-1.5">
-          <Label htmlFor="store-shipping" className="text-sm font-bold">
+          <Label htmlFor="store-shipping" className="text-xs font-semibold">
             یادداشت ارسال
           </Label>
           <Textarea
@@ -466,7 +466,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
       </section>
 
       {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-xl border bg-card/95 p-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
             {dirty
@@ -485,7 +485,7 @@ export function SettingsView({ deploymentNotes }: SettingsViewProps) {
             >
               بازنشانی
             </Button>
-            <Button type="button" className="gap-1.5 font-bold" disabled={!dirty || saving} onClick={() => void save()}>
+            <Button type="button" className="gap-1.5 font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
               <IconDeviceFloppy className="size-4" stroke={1.75} aria-hidden="true" />
               {saving ? "در حال ذخیره…" : "ذخیرهٔ تنظیمات"}
             </Button>

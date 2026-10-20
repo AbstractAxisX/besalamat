@@ -179,7 +179,7 @@ function SectionsTab() {
     return (
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-24 w-full rounded-xl" />
+          <Skeleton key={index} className="h-24 w-full rounded-2xl" />
         ))}
       </div>
     );
@@ -187,7 +187,7 @@ function SectionsTab() {
 
   if (rows === null || rows.length === 0) {
     return (
-      <div className="rounded-xl border bg-card">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
         <EmptyState
           icon={<IconLayoutNavbar className="size-7" stroke={1.75} aria-hidden="true" />}
           title="بخشی پیدا نشد"
@@ -201,7 +201,7 @@ function SectionsTab() {
   return (
     <div className="space-y-4">
       {/* فهرست بخش‌ها */}
-      <ul className="divide-y overflow-hidden rounded-xl border bg-card">
+      <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
         {rows.map((row, index) => {
           const meta = sectionMeta(row.key);
           const hasTitle = meta.defaultTitle !== null;
@@ -249,7 +249,7 @@ function SectionsTab() {
                   <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground" dir="ltr">
                     {row.key}
                   </span>
-                  <span className="text-sm font-black">{meta.label}</span>
+                  <span className="text-sm font-bold">{meta.label}</span>
                   <span className="text-xs text-muted-foreground">— {meta.description}</span>
                 </div>
                 <div className="grid gap-2.5 sm:grid-cols-2">
@@ -289,7 +289,7 @@ function SectionsTab() {
                   onCheckedChange={(checked) => patch(row.key, { isActive: checked })}
                   aria-label={`فعال بودن بخش ${meta.label}`}
                 />
-                <span className="text-xs font-bold text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   {row.isActive ? "نمایش" : "مخفی"}
                 </span>
               </label>
@@ -299,7 +299,7 @@ function SectionsTab() {
       </ul>
 
       {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-xl border bg-card/95 p-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
             {dirty
@@ -318,7 +318,7 @@ function SectionsTab() {
             >
               بازنشانی
             </Button>
-            <Button type="button" className="font-bold" disabled={!dirty || saving} onClick={() => void save()}>
+            <Button type="button" className="font-semibold" disabled={!dirty || saving} onClick={() => void save()}>
               {saving ? "در حال ذخیره…" : "ذخیرهٔ چیدمان"}
             </Button>
           </div>

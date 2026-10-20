@@ -42,15 +42,17 @@ export function DeleteConfirm({
     <AlertDialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
       <AlertDialogContent dir="rtl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
+          <AlertDialogTitle className="flex items-center gap-2 text-sm">
             <IconAlertTriangle
-              className="size-5 text-destructive"
+              className="size-4.5 shrink-0 text-destructive"
               stroke={1.75}
               aria-hidden="true"
             />
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription className="text-xs leading-6">
+            {description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>انصراف</AlertDialogCancel>

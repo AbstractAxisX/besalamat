@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * جزئیات سفارش در پنل — اقلام + جمع‌بندی + وضعیت (تایم‌لاین و تغییر) + خریدار + نشانی
+ * جزئیات سفارش در پنل — اقلام (DataTable) + جمع‌بندی + وضعیت (تایم‌لاین و تغییر) + خریدار + نشانی
  * ─────────────────────────────
  * GET /api/admin/orders/[id] → {order} (با items و statusLogs و user)؛
  * PUT همان مسیر برای تغییر وضعیت / کد رهگیری پستی.
@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   IconArrowRight,
   IconDeviceFloppy,
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { formatPhoneFa, toFa, formatTomanPlain } from "@/lib/format";
 import { faDateShort, faDateTime } from "@/lib/jalali";
 import { apiFetch, apiSend } from "@/components/admin/api";
+import { DataTable } from "@/components/admin/data-table";
 import { ADMIN_ORDER_STATUSES, StatusBadge } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { AdminOrderDetail } from "@/types/admin";
+import type { AdminOrderDetail, AdminOrderItem } from "@/types/admin";
 import { ORDER_STATUS_LABELS, type OrderStatusDTO } from "@/types/shop";
 
 /* برچسب بازیگر لاگ — admin:0912… / system */
@@ -61,9 +63,9 @@ function SideCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border bg-card">
-      <header className="flex items-center justify-between gap-2 border-b bg-muted/50 px-4 py-3">
-        <h2 className="flex items-center gap-2 text-sm font-black">
+    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+      <header className="flex items-center justify-between gap-2 border-b border-border/50 px-5 py-3.5">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
           <span className="text-muted-foreground" aria-hidden="true">
             {icon}
           </span>
@@ -71,22 +73,100 @@ function SideCard({
         </h2>
         {action}
       </header>
-      <div className="p-4">{children}</div>
+      <div className="p-5">{children}</div>
     </section>
   );
 }
 
 function InfoRow({ label, value, ltr }: { label: string; value: React.ReactNode; ltr?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-1.5 text-sm">
+    <div className="flex items-start justify-between gap-3 py-1.5 text-[13px]">
       <span className="shrink-0 text-muted-foreground">{label}</span>
       <span
         dir={ltr ? "ltr" : undefined}
-        className={cn("text-end font-bold", ltr && "text-start")}
+        className={cn("text-end font-semibold", ltr && "text-start")}
       >
         {value}
       </span>
     </div>
+  );
+}
+
+/** ستون‌های جدول اقلام — تامبنیل + عنوان (لینک به محصول) + قیمت‌ها */
+function useItemColumns(): ColumnDef<AdminOrderItem, unknown>[] {
+  return useMemo(
+    () => [
+      {
+        id: "product",
+        header: "محصول",
+        cell: ({ row }) => {
+          const item = row.original;
+          const title = (
+            <p className="max-w-52 truncate font-semibold" title={item.titleSnapshot}>
+              {item.titleSnapshot}
+            </p>
+          );
+          return (
+            <div className="flex items-center gap-3">
+              {item.imageSnapshot ? (
+                <img
+                  src={item.imageSnapshot}
+                  alt={item.titleSnapshot}
+                  className="size-11 shrink-0 rounded-xl border border-border/60 object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <span
+                  className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-muted text-muted-foreground"
+                  aria-hidden="true"
+                >
+                  <IconPackage className="size-5" stroke={1.75} />
+                </span>
+              )}
+              <div className="min-w-0">
+                {item.productId !== null ? (
+                  <Link
+                    href={`/admin/products/${item.productId}`}
+                    className="font-semibold text-foreground hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    {title}
+                  </Link>
+                ) : (
+                  title
+                )}
+                {item.variantSnapshot ? (
+                  <p className="text-xs text-muted-foreground">تنوع: {item.variantSnapshot}</p>
+                ) : null}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "quantity",
+        header: "تعداد",
+        cell: ({ row }) => (
+          <span className="font-semibold tabular-nums">{toFa(row.original.quantity)}</span>
+        ),
+      },
+      {
+        accessorKey: "unitPrice",
+        header: "قیمت واحد",
+        cell: ({ row }) => (
+          <span className="tabular-nums text-muted-foreground">
+            {formatTomanPlain(row.original.unitPrice)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "lineTotal",
+        header: "جمع",
+        cell: ({ row }) => (
+          <span className="font-semibold tabular-nums">{formatTomanPlain(row.original.lineTotal)}</span>
+        ),
+      },
+    ],
+    [],
   );
 }
 
@@ -106,6 +186,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   /* کد رهگیری پستی */
   const [tracking, setTracking] = useState("");
   const [trackingBusy, setTrackingBusy] = useState(false);
+
+  const itemColumns = useItemColumns();
 
   const load = useCallback(() => {
     let active = true;
@@ -180,7 +262,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
             بازگشت به سفارش‌ها
           </Link>
         </Button>
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-2xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </p>
       </div>
@@ -193,10 +275,10 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         <Skeleton className="h-8 w-64" />
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Skeleton className="h-72 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-72 w-full rounded-2xl" />
+            <Skeleton className="h-40 w-full rounded-2xl" />
           </div>
-          <Skeleton className="h-96 w-full rounded-xl" />
+          <Skeleton className="h-96 w-full rounded-2xl" />
         </div>
       </div>
     );
@@ -213,7 +295,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
             </Link>
           </Button>
           <div>
-            <h1 className="flex flex-wrap items-center gap-2 text-xl font-black md:text-2xl">
+            <h1 className="flex flex-wrap items-center gap-2 text-lg font-bold">
               سفارش <span dir="ltr">{toFa(order.orderNumber)}</span>
               <StatusBadge status={order.status} />
             </h1>
@@ -228,74 +310,22 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         {/* ── ستون راست: اقلام + جمع‌بندی ── */}
         <div className="space-y-6 lg:col-span-2">
-          <section className="overflow-hidden rounded-xl border bg-card">
-            <header className="border-b bg-muted/50 px-4 py-3">
-              <h2 className="flex items-center gap-2 text-sm font-black">
-                <IconPackage className="size-4.5 text-muted-foreground" stroke={1.75} aria-hidden="true" />
-                اقلام سفارش ({toFa(order.items.length)} قلم)
-              </h2>
-            </header>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-muted-foreground">
-                    <th className="px-4 py-2.5 text-start font-medium">کالا</th>
-                    <th className="px-4 py-2.5 text-start font-medium">قیمت واحد</th>
-                    <th className="px-4 py-2.5 text-start font-medium">تعداد</th>
-                    <th className="px-4 py-2.5 text-start font-medium">جمع</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item) => (
-                    <tr key={item.id} className="border-t">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          {item.imageSnapshot ? (
-                            <img
-                              src={item.imageSnapshot}
-                              alt={item.titleSnapshot}
-                              className="size-12 shrink-0 rounded-lg border object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <span
-                              className="flex size-12 shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground"
-                              aria-hidden="true"
-                            >
-                              <IconPackage className="size-5" stroke={1.75} />
-                            </span>
-                          )}
-                          <div className="min-w-0">
-                            <p className="max-w-52 truncate font-bold" title={item.titleSnapshot}>
-                              {item.titleSnapshot}
-                            </p>
-                            {item.variantSnapshot ? (
-                              <p className="text-xs text-muted-foreground">
-                                تنوع: {item.variantSnapshot}
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 tabular-nums">
-                        {formatTomanPlain(item.unitPrice)}
-                      </td>
-                      <td className="px-4 py-3 font-black tabular-nums">
-                        {toFa(item.quantity)}
-                      </td>
-                      <td className="px-4 py-3 font-black tabular-nums">
-                        {formatTomanPlain(item.lineTotal)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <section className="space-y-3">
+            <h2 className="flex items-center gap-2 px-1 text-sm font-bold">
+              <IconPackage className="size-4.5 text-muted-foreground" stroke={1.75} aria-hidden="true" />
+              اقلام سفارش ({toFa(order.items.length)} قلم)
+            </h2>
+            <DataTable
+              columns={itemColumns}
+              data={order.items}
+              emptyTitle="قلمی در این سفارش نیست"
+              skeletonRows={3}
+            />
           </section>
 
           {/* جمع‌بندی */}
-          <section className="rounded-xl border bg-card p-4 md:p-6">
-            <h2 className="text-sm font-black">جمع‌بندی مبلغ</h2>
+          <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+            <h2 className="text-sm font-bold">جمع‌بندی مبلغ</h2>
             <div className="mt-3 space-y-1">
               <InfoRow
                 label="جمع اقلام"
@@ -317,8 +347,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               />
               <Separator className="my-2" />
               <div className="flex items-center justify-between">
-                <span className="font-bold">مبلغ نهایی</span>
-                <span className="text-lg font-black tabular-nums text-primary">
+                <span className="text-sm font-semibold">مبلغ نهایی</span>
+                <span className="text-lg font-bold tabular-nums text-primary">
                   {formatTomanPlain(order.total)} تومان
                 </span>
               </div>
@@ -334,9 +364,9 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
             title="وضعیت سفارش"
           >
             {/* فرم تغییر وضعیت */}
-            <div className="space-y-3 rounded-lg border bg-muted/40 p-3">
+            <div className="space-y-3 rounded-xl border border-border/60 bg-muted/30 p-3.5">
               <div className="space-y-1.5">
-                <Label htmlFor="order-status" className="text-xs font-bold">
+                <Label htmlFor="order-status" className="text-xs font-semibold">
                   تغییر وضعیت به
                 </Label>
                 <Select value={nextStatus} onValueChange={(value) => setNextStatus(value as OrderStatusDTO)}>
@@ -353,7 +383,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="order-status-note" className="text-xs font-bold">
+                <Label htmlFor="order-status-note" className="text-xs font-semibold">
                   یادداشت تغییر (اختیاری)
                 </Label>
                 <Input
@@ -366,7 +396,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               <Button
                 type="button"
                 size="sm"
-                className="w-full gap-1.5 font-bold"
+                className="w-full gap-1.5 font-semibold"
                 disabled={statusBusy}
                 onClick={() => void submitStatus()}
               >
@@ -381,7 +411,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
 
             {/* کد رهگیری پستی */}
             <div className="mt-4 space-y-1.5">
-              <Label htmlFor="order-tracking" className="text-xs font-bold">
+              <Label htmlFor="order-tracking" className="text-xs font-semibold">
                 کد رهگیری پستی
               </Label>
               <div className="flex gap-2">
@@ -414,7 +444,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
             <Separator className="my-4" />
 
             {/* تایم‌لاین لاگ وضعیت‌ها */}
-            <h3 className="mb-3 text-xs font-bold text-muted-foreground">روند وضعیت</h3>
+            <h3 className="mb-3 text-xs font-semibold text-muted-foreground">روند وضعیت</h3>
             {order.statusLogs.length === 0 ? (
               <p className="text-sm text-muted-foreground">لاگی ثبت نشده است.</p>
             ) : (
@@ -434,7 +464,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                         {isLast ? null : <span className="w-px flex-1 bg-primary/20" />}
                       </div>
                       <div className={cn("min-w-0 flex-1", !isLast && "pb-5")}>
-                        <p className={cn("text-sm", isCurrent ? "font-black text-primary" : "font-bold")}>
+                        <p className={cn("text-sm", isCurrent ? "font-bold text-primary" : "font-semibold")}>
                           {ORDER_STATUS_LABELS[log.toStatus]}
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">

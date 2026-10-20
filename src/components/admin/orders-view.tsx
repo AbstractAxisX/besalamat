@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * فهرست سفارش‌های پنل — چیپ‌های فیلتر وضعیت + جدول TanStack
+ * فهرست سفارش‌های پنل — فیلتر وضعیت با Select + جدول TanStack
  * ─────────────────────────────
  * GET /api/admin/orders?status= (تا ۲۰۰ سفارش اخیر)؛ شمارش هر وضعیت از
  * پاسخ بدون‌فیلتر محاسبه می‌شود. کلیک ردیف → جزئیات سفارش.
@@ -10,15 +10,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { IconShoppingBag } from "@tabler/icons-react";
 
-import { cn } from "@/lib/utils";
 import { formatPhoneFa, toFa, formatTomanPlain } from "@/lib/format";
 import { faDateShort } from "@/lib/jalali";
 import { apiFetch } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
 import { ADMIN_ORDER_STATUSES, StatusBadge } from "@/components/admin/status-badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { AdminOrderRow } from "@/types/admin";
 import { ORDER_STATUS_LABELS, type OrderStatusDTO } from "@/types/shop";
 
@@ -97,7 +103,7 @@ export function OrdersView() {
         accessorKey: "orderNumber",
         header: "شمارهٔ سفارش",
         cell: ({ row }) => (
-          <span dir="ltr" className="text-start font-black tracking-wide text-primary">
+          <span dir="ltr" className="text-start font-bold tracking-wide text-primary">
             {toFa(row.original.orderNumber)}
           </span>
         ),
@@ -107,7 +113,7 @@ export function OrdersView() {
         header: "خریدار",
         cell: ({ row }) => (
           <div className="min-w-28">
-            <p className="truncate font-bold">
+            <p className="truncate font-semibold">
               {row.original.userFullName ?? row.original.receiverName}
             </p>
             <p dir="ltr" className="text-start text-xs text-muted-foreground">
@@ -119,13 +125,13 @@ export function OrdersView() {
       {
         accessorKey: "itemsCount",
         header: "اقلام",
-        cell: ({ row }) => <span className="font-black tabular-nums">{toFa(row.original.itemsCount)}</span>,
+        cell: ({ row }) => <span className="font-semibold tabular-nums">{toFa(row.original.itemsCount)}</span>,
       },
       {
         accessorKey: "total",
         header: "مبلغ (تومان)",
         cell: ({ row }) => (
-          <span className="font-black tabular-nums">{formatTomanPlain(row.original.total)}</span>
+          <span className="font-semibold tabular-nums">{formatTomanPlain(row.original.total)}</span>
         ),
       },
       {
@@ -146,57 +152,51 @@ export function OrdersView() {
     [],
   );
 
-  const chips: { key: StatusFilter; label: string; count?: number }[] = [
-    { key: "all", label: "همه", count: counts.all },
-    ...ADMIN_ORDER_STATUSES.map((item) => ({
-      key: item,
-      label: ORDER_STATUS_LABELS[item],
-      count: counts[item],
-    })),
-  ];
+  /* برچسب فیلتر جاری + شمارش همان وضعیت */
+  const activeCount = status === "all" ? counts.all : counts[status];
+  const filterLabel =
+    status === "all" ? "همهٔ وضعیت‌ها" : ORDER_STATUS_LABELS[status as OrderStatusDTO];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="سفارش‌ها"
-        description={
-          loading ? "در حال بارگذاری…" : `${toFa(rows.length)} سفارش ${status === "all" ? "در هر وضعیت" : `با وضعیت «${ORDER_STATUS_LABELS[status]}»`}`
-        }
+        description="پیگیری و مدیریت سفارش‌های فروشگاه"
       />
 
-      {/* چیپ‌های فیلتر وضعیت */}
-      <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="فیلتر وضعیت سفارش">
-        {chips.map((chip) => (
-          <button
-            key={chip.key}
-            type="button"
-            role="tab"
-            aria-selected={status === chip.key}
-            onClick={() => selectStatus(chip.key)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
-              status === chip.key
-                ? "border-primary bg-primary text-primary-foreground"
-                : "bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            {chip.label}
-            {chip.count !== undefined ? (
-              <span
-                className={cn(
-                  "rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums",
-                  status === chip.key ? "bg-primary-foreground/20" : "bg-muted",
-                )}
-              >
-                {toFa(chip.count)}
-              </span>
-            ) : null}
-          </button>
-        ))}
+      {/* نوار ابزار: فیلتر وضعیت + شمار */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Select
+          value={status}
+          onValueChange={(value) => selectStatus(value as StatusFilter)}
+          dir="rtl"
+        >
+          <SelectTrigger className="h-9 w-44 rounded-lg" aria-label="فیلتر وضعیت سفارش">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              همه ({toFa(counts.all ?? 0)})
+            </SelectItem>
+            {ADMIN_ORDER_STATUSES.map((item) => (
+              <SelectItem key={item} value={item}>
+                {ORDER_STATUS_LABELS[item]}
+                {counts[item] !== undefined ? ` (${toFa(counts[item])})` : ""}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          {loading
+            ? "در حال بارگذاری…"
+            : `${toFa(rows.length)} سفارش — ${filterLabel}${
+                activeCount !== undefined ? ` (${toFa(activeCount)})` : ""
+              }`}
+        </p>
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -208,13 +208,9 @@ export function OrdersView() {
         emptyTitle="سفارشی با این فیلتر نیست"
         emptyDescription="با تغییر فیلتر وضعیت، سفارش‌های دیگری را ببینید."
         emptyAction={
-          <button
-            type="button"
-            className="text-sm font-bold text-primary hover:underline"
-            onClick={() => selectStatus("all")}
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => selectStatus("all")}>
             نمایش همهٔ سفارش‌ها
-          </button>
+          </Button>
         }
         onRowClick={(row) => router.push(`/admin/orders/${row.id}`)}
       />

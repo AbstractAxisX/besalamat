@@ -248,9 +248,9 @@ export function HomeBannersTab() {
   return (
     <div className="space-y-4">
       {/* انتخاب قالب گرید */}
-      <section className="rounded-xl border bg-card p-4">
+      <section className="rounded-2xl border border-border/60 bg-card shadow-xs p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-2 text-sm font-black">
+          <h3 className="flex items-center gap-2 text-sm font-bold">
             <IconLayoutGrid className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
             قالب گرید تبلیغات
           </h3>
@@ -274,7 +274,7 @@ export function HomeBannersTab() {
               <span className="flex items-center justify-between">
                 <span className="font-bold">{item.title}</span>
                 {layout === item.key ? (
-                  <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                  <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                     فعال
                   </span>
                 ) : null}
@@ -295,7 +295,7 @@ export function HomeBannersTab() {
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
           </Button>
-          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
             <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
             بنر جدید
           </Button>
@@ -310,7 +310,7 @@ export function HomeBannersTab() {
           ))}
         </div>
       ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconAd className="size-7" stroke={1.75} aria-hidden="true" />}
             title="بنری ثبت نشده است"
@@ -328,7 +328,7 @@ export function HomeBannersTab() {
                 <li
                   key={banner.id}
                   className={cn(
-                    "flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center",
+                    "flex flex-col gap-3 rounded-2xl border border-border/60 bg-card shadow-xs p-4 sm:flex-row sm:items-center",
                     (!banner.isActive || outOfLayout) && "opacity-60",
                   )}
                 >
@@ -344,17 +344,17 @@ export function HomeBannersTab() {
                   {/* متن */}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                         جایگاه {toFa(banner.slot)}
                       </span>
                       <span className="text-xs text-muted-foreground">{slotDescription(layout, banner.slot)}</span>
                       {outOfLayout ? (
-                        <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-bold text-warning">
+                        <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
                           خارج از قالب جاری
                         </span>
                       ) : null}
                     </div>
-                    {banner.title ? <p className="mt-1.5 truncate font-bold">{banner.title}</p> : null}
+                    {banner.title ? <p className="mt-1.5 truncate font-semibold">{banner.title}</p> : null}
                     {banner.subtitle ? (
                       <p className="truncate text-sm text-muted-foreground">{banner.subtitle}</p>
                     ) : null}
@@ -408,7 +408,7 @@ export function HomeBannersTab() {
                         }}
                         aria-label={`فعال بودن بنر جایگاه ${toFa(banner.slot)}`}
                       />
-                      <span className="text-xs font-bold text-muted-foreground">
+                      <span className="text-xs font-semibold text-muted-foreground">
                         {banner.isActive ? "فعال" : "غیرفعال"}
                       </span>
                     </label>
@@ -436,7 +436,7 @@ export function HomeBannersTab() {
 
           <div className="space-y-4 py-1">
             <div className="space-y-1.5">
-              <Label className="text-sm font-bold">جایگاه در گرید *</Label>
+              <Label className="text-xs font-semibold">جایگاه در گرید *</Label>
               <Select value={form.slot} onValueChange={(value) => setForm((f) => ({ ...f, slot: value }))}>
                 <SelectTrigger className="w-full" aria-label="جایگاه بنر">
                   <SelectValue />
@@ -456,7 +456,7 @@ export function HomeBannersTab() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="banner-title" className="text-sm font-bold">
+                <Label htmlFor="banner-title" className="text-xs font-semibold">
                   عنوان *
                 </Label>
                 <Input
@@ -467,7 +467,7 @@ export function HomeBannersTab() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="banner-subtitle" className="text-sm font-bold">
+                <Label htmlFor="banner-subtitle" className="text-xs font-semibold">
                   زیرعنوان
                 </Label>
                 <Input
@@ -479,7 +479,7 @@ export function HomeBannersTab() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="banner-href" className="text-sm font-bold">
+              <Label htmlFor="banner-href" className="text-xs font-semibold">
                 مقصد کلیک *
               </Label>
               <Input
@@ -498,7 +498,7 @@ export function HomeBannersTab() {
               onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
             />
             <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-              <span className="text-sm font-bold">فعال</span>
+              <span className="text-xs font-semibold">فعال</span>
               <Switch
                 checked={form.isActive}
                 onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -511,7 +511,7 @@ export function HomeBannersTab() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "ساخت بنر"}
             </Button>
           </DialogFooter>

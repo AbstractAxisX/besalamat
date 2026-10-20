@@ -69,7 +69,7 @@ export function ImageUploadField({
   return (
     <div className={cn("space-y-2", className)}>
       {label ? (
-        <span className="block text-sm font-bold">{label}</span>
+        <span className="block text-xs font-semibold">{label}</span>
       ) : null}
       <div className="flex items-start gap-3">
         {/* پیش‌نمایش — نسبت تصویر قابل تنظیم */}

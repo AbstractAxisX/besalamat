@@ -138,7 +138,7 @@ export function HomePopularTab() {
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
           </Button>
-          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
             <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
             واژهٔ جدید
           </Button>
@@ -152,7 +152,7 @@ export function HomePopularTab() {
           ))}
         </div>
       ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconSearch className="size-7" stroke={1.75} aria-hidden="true" />}
             title="واژه‌ای ثبت نشده است"
@@ -161,7 +161,7 @@ export function HomePopularTab() {
           />
         </div>
       ) : (
-        <ul className="divide-y overflow-hidden rounded-xl border bg-card">
+        <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
           {rows.map((term) => (
             <li
               key={term.id}
@@ -174,7 +174,7 @@ export function HomePopularTab() {
                 {term.term}
               </span>
               <span
-                className="shrink-0 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary"
+                className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
                 title="وزن — ترتیب نمایش در سایت"
               >
                 وزن {toFa(term.weight)}
@@ -247,7 +247,7 @@ export function HomePopularTab() {
 
           <div className="space-y-4 py-1">
             <div className="space-y-1.5">
-              <Label htmlFor="term-text" className="text-sm font-bold">
+              <Label htmlFor="term-text" className="text-xs font-semibold">
                 واژه *
               </Label>
               <Input
@@ -259,7 +259,7 @@ export function HomePopularTab() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="term-weight" className="text-sm font-bold">
+                <Label htmlFor="term-weight" className="text-xs font-semibold">
                   وزن
                 </Label>
                 <Input
@@ -276,7 +276,7 @@ export function HomePopularTab() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -291,7 +291,7 @@ export function HomePopularTab() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "افزودن واژه"}
             </Button>
           </DialogFooter>

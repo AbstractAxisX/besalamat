@@ -11,14 +11,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ColumnDef } from "@tanstack/react-table";
-import { IconPencil, IconSearch, IconUsers } from "@tabler/icons-react";
+import { IconPencil } from "@tabler/icons-react";
 
-import { cn } from "@/lib/utils";
 import { formatPhoneFa, toFa } from "@/lib/format";
 import { faDateShort } from "@/lib/jalali";
 import { apiFetch, apiSend } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { SearchInput } from "@/components/admin/search-input";
 import type { AdminUserMeResponse, AdminUserRow } from "@/types/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -155,11 +155,11 @@ export function UsersView() {
         header: "نام",
         cell: ({ row }) => (
           <div className="flex items-center gap-2.5">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-black text-accent-foreground">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
               {(row.original.fullName ?? row.original.phone).trim().charAt(0)}
             </span>
             <div className="min-w-0">
-              <p className="max-w-40 truncate font-bold">
+              <p className="max-w-40 truncate font-semibold">
                 {row.original.fullName ?? "— بدون نام —"}
               </p>
               {row.original.email ? (
@@ -175,7 +175,7 @@ export function UsersView() {
         accessorKey: "phone",
         header: "موبایل",
         cell: ({ row }) => (
-          <span dir="ltr" className="text-start font-bold tabular-nums">
+          <span dir="ltr" className="text-start font-semibold tabular-nums">
             {formatPhoneFa(row.original.phone)}
           </span>
         ),
@@ -184,7 +184,7 @@ export function UsersView() {
         accessorKey: "orderCount",
         header: "سفارش‌ها",
         cell: ({ row }) => (
-          <span className="font-black tabular-nums">{toFa(row.original.orderCount)}</span>
+          <span className="font-semibold tabular-nums">{toFa(row.original.orderCount)}</span>
         ),
       },
       {
@@ -192,11 +192,11 @@ export function UsersView() {
         header: "نقش",
         cell: ({ row }) =>
           row.original.role === "ADMIN" ? (
-            <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+            <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
               مدیر
             </span>
           ) : (
-            <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-bold text-muted-foreground">
+            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
               کاربر
             </span>
           ),
@@ -206,11 +206,11 @@ export function UsersView() {
         header: "وضعیت",
         cell: ({ row }) =>
           row.original.isBlocked ? (
-            <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">
+            <span className="rounded-full border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">
               مسدود
             </span>
           ) : (
-            <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-xs font-bold text-success">
+            <span className="rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
               فعال
             </span>
           ),
@@ -257,7 +257,7 @@ export function UsersView() {
                         : `مسدودسازی ${row.original.fullName ?? row.original.phone}`
                     }
                   />
-                  <span className="text-xs font-bold text-muted-foreground">فعال</span>
+                  <span className="text-xs font-semibold text-muted-foreground">فعال</span>
                 </label>
               )}
             </div>
@@ -270,32 +270,25 @@ export function UsersView() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="کاربران"
-        description={
-          loading
-            ? "در حال بارگذاری…"
-            : `${toFa(rows.length)} کاربر${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`
-        }
-      />
+      <PageHeader title="کاربران" description="مدیریت کاربران، نقش‌ها و مسدودسازی" />
 
-      <div className="relative max-w-sm">
-        <IconSearch
-          className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          stroke={1.75}
-          aria-hidden="true"
-        />
-        <Input
+      {/* نوار ابزار: جستجو + شمار */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SearchInput
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="جستجو در نام، موبایل یا رایانامه…"
-          className="pe-9"
-          aria-label="جستجوی کاربر"
+          ariaLabel="جستجوی کاربر"
         />
+        <p className="text-xs text-muted-foreground">
+          {loading
+            ? "در حال بارگذاری…"
+            : `${toFa(rows.length)} کاربر${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
+        </p>
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -306,9 +299,6 @@ export function UsersView() {
         loading={loading}
         emptyTitle="کاربری پیدا نشد"
         emptyDescription="عبارت دیگری را جستجو کنید."
-        emptyAction={
-          <IconUsers className="hidden" stroke={1.75} aria-hidden="true" />
-        }
       />
 
       {/* دیالوگ ویرایش نام/نقش */}
@@ -326,7 +316,7 @@ export function UsersView() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label htmlFor="user-fullname" className="text-sm font-bold">
+              <Label htmlFor="user-fullname" className="text-xs font-semibold">
                 نام و نام خانوادگی
               </Label>
               <Input
@@ -338,7 +328,7 @@ export function UsersView() {
               <p className="text-xs text-muted-foreground">خالی بماند = بدون نام</p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="user-role" className="text-sm font-bold">
+              <Label htmlFor="user-role" className="text-xs font-semibold">
                 نقش
               </Label>
               <Select value={editRole} onValueChange={(value) => setEditRole(value as "USER" | "ADMIN")}>
@@ -365,7 +355,7 @@ export function UsersView() {
             </Button>
             <Button
               type="button"
-              className={cn("font-bold")}
+              className="font-semibold"
               disabled={editBusy}
               onClick={() => void submitEdit()}
             >

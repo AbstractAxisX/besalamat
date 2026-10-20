@@ -206,7 +206,7 @@ export function HomeNeedsTab() {
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
           </Button>
-          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
             <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
             نیاز جدید
           </Button>
@@ -220,7 +220,7 @@ export function HomeNeedsTab() {
           ))}
         </div>
       ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconHeartbeat className="size-7" stroke={1.75} aria-hidden="true" />}
             title="کارت نیازی ثبت نشده است"
@@ -229,7 +229,7 @@ export function HomeNeedsTab() {
           />
         </div>
       ) : (
-        <ul className="divide-y overflow-hidden rounded-xl border bg-card">
+        <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
           {rows.map((need, index) => (
             <li
               key={need.id}
@@ -241,7 +241,7 @@ export function HomeNeedsTab() {
               {/* دایرهٔ شماره + فلش‌ها */}
               <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:gap-1">
                 <span
-                  className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-sm font-black text-primary"
+                  className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary"
                   aria-hidden="true"
                 >
                   {toFa(index + 1)}
@@ -276,7 +276,7 @@ export function HomeNeedsTab() {
 
               {/* متن */}
               <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{need.title}</p>
+                <p className="truncate font-semibold">{need.title}</p>
                 <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">{need.description}</p>
                 <p dir="ltr" className="mt-1 truncate text-start font-mono text-[11px] text-muted-foreground">
                   {need.href}
@@ -331,7 +331,7 @@ export function HomeNeedsTab() {
                     }}
                     aria-label={`فعال بودن ${need.title}`}
                   />
-                  <span className="text-xs font-bold text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     {need.isActive ? "فعال" : "غیرفعال"}
                   </span>
                 </label>
@@ -358,7 +358,7 @@ export function HomeNeedsTab() {
 
           <div className="space-y-4 py-1">
             <div className="space-y-1.5">
-              <Label htmlFor="need-title" className="text-sm font-bold">
+              <Label htmlFor="need-title" className="text-xs font-semibold">
                 عنوان *
               </Label>
               <Input
@@ -369,7 +369,7 @@ export function HomeNeedsTab() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="need-description" className="text-sm font-bold">
+              <Label htmlFor="need-description" className="text-xs font-semibold">
                 توضیح *
               </Label>
               <Textarea
@@ -381,7 +381,7 @@ export function HomeNeedsTab() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="need-href" className="text-sm font-bold">
+              <Label htmlFor="need-href" className="text-xs font-semibold">
                 مقصد کلیک *
               </Label>
               <Input
@@ -398,7 +398,7 @@ export function HomeNeedsTab() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="need-order" className="text-sm font-bold">
+                <Label htmlFor="need-order" className="text-xs font-semibold">
                   ترتیب
                 </Label>
                 <Input
@@ -414,7 +414,7 @@ export function HomeNeedsTab() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -429,7 +429,7 @@ export function HomeNeedsTab() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "ساخت کارت"}
             </Button>
           </DialogFooter>

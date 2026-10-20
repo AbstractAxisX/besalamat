@@ -96,7 +96,7 @@ export function ArticlesView() {
         header: "عنوان",
         cell: ({ row }) => (
           <div className="min-w-0">
-            <p className="max-w-56 truncate font-bold">{row.original.title}</p>
+            <p className="max-w-56 truncate font-semibold">{row.original.title}</p>
             <p dir="ltr" className="truncate text-start font-mono text-[11px] text-muted-foreground">
               {row.original.slug}
             </p>
@@ -108,7 +108,7 @@ export function ArticlesView() {
         header: "دسته",
         cell: ({ row }) =>
           row.original.categoryTitle ? (
-            <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-bold text-muted-foreground">
+            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
               {row.original.categoryTitle}
             </span>
           ) : (
@@ -120,11 +120,11 @@ export function ArticlesView() {
         header: "وضعیت",
         cell: ({ row }) =>
           row.original.isPublished ? (
-            <span className="rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-xs font-bold text-success">
+            <span className="rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
               منتشرشده
             </span>
           ) : (
-            <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-bold text-warning">
+            <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
               پیش‌نویس
             </span>
           ),
@@ -183,7 +183,7 @@ export function ArticlesView() {
               <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
               بازآوری
             </Button>
-            <Button type="button" size="sm" asChild className="gap-1.5 font-bold">
+            <Button type="button" size="sm" asChild className="gap-1.5 font-semibold">
               <Link href="/admin/articles/new">
                 <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
                 مقالهٔ جدید
@@ -209,7 +209,7 @@ export function ArticlesView() {
       </Tabs>
 
       {error ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </p>
       ) : null}

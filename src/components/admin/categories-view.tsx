@@ -296,7 +296,7 @@ export function CategoriesView() {
           <CategoryIcon iconKey={node.iconKey} className="size-4.5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className={cn("truncate", isChild ? "font-bold" : "text-[15px] font-black")}>{node.title}</p>
+          <p className={cn("truncate text-sm", isChild ? "font-semibold" : "font-bold")}>{node.title}</p>
           <p dir="ltr" className="truncate text-start font-mono text-[11px] text-muted-foreground">
             {node.slug}
           </p>
@@ -304,7 +304,7 @@ export function CategoriesView() {
 
         {/* شمار محصول + ترتیب */}
         <span
-          className="shrink-0 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground"
+          className="shrink-0 rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground"
           title="شمار محصولات این دسته"
         >
           {toFa(node.productCount)} کالا
@@ -387,7 +387,7 @@ export function CategoriesView() {
               <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
               بازآوری
             </Button>
-            <Button type="button" size="sm" onClick={() => openCreate()} className="gap-1.5 font-bold">
+            <Button type="button" size="sm" onClick={() => openCreate()} className="gap-1.5 font-semibold">
               <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
               دستهٔ جدید
             </Button>
@@ -398,11 +398,11 @@ export function CategoriesView() {
       {loading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-16 w-full rounded-xl" />
+            <Skeleton key={index} className="h-16 w-full rounded-2xl" />
           ))}
         </div>
       ) : tree === null || tree.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconTag className="size-7" stroke={1.75} aria-hidden="true" />}
             title="دسته‌ای ثبت نشده است"
@@ -411,7 +411,7 @@ export function CategoriesView() {
           />
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-xl border bg-card">{tree.map((node) => renderRow(node, false))}</ul>
+        <ul className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">{tree.map((node) => renderRow(node, false))}</ul>
       )}
 
       {/* نکتهٔ راهنما */}
@@ -439,7 +439,7 @@ export function CategoriesView() {
           <div className="space-y-4 py-1">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="cat-title" className="text-sm font-bold">
+                <Label htmlFor="cat-title" className="text-xs font-semibold">
                   عنوان *
                 </Label>
                 <Input
@@ -450,7 +450,7 @@ export function CategoriesView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="cat-slug" className="text-sm font-bold">
+                <Label htmlFor="cat-slug" className="text-xs font-semibold">
                   نامک *
                 </Label>
                 <Input
@@ -466,7 +466,7 @@ export function CategoriesView() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold">دستهٔ والد</Label>
+                <Label className="text-xs font-semibold">دستهٔ والد</Label>
                 <Select
                   value={form.parentId}
                   onValueChange={(value) => setForm((f) => ({ ...f, parentId: value }))}
@@ -495,7 +495,7 @@ export function CategoriesView() {
                 ) : null}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold">آیکون</Label>
+                <Label className="text-xs font-semibold">آیکون</Label>
                 <Select value={form.iconKey} onValueChange={(value) => setForm((f) => ({ ...f, iconKey: value }))}>
                   <SelectTrigger className="w-full" aria-label="آیکون دسته">
                     <SelectValue />
@@ -514,7 +514,7 @@ export function CategoriesView() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="cat-order" className="text-sm font-bold">
+                <Label htmlFor="cat-order" className="text-xs font-semibold">
                   ترتیب
                 </Label>
                 <Input
@@ -530,7 +530,7 @@ export function CategoriesView() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -541,7 +541,7 @@ export function CategoriesView() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="cat-seo-title" className="text-sm font-bold">
+              <Label htmlFor="cat-seo-title" className="text-xs font-semibold">
                 عنوان سئو (اختیاری)
               </Label>
               <Input
@@ -552,7 +552,7 @@ export function CategoriesView() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="cat-seo-desc" className="text-sm font-bold">
+              <Label htmlFor="cat-seo-desc" className="text-xs font-semibold">
                 توضیح سئو (اختیاری)
               </Label>
               <Textarea
@@ -569,7 +569,7 @@ export function CategoriesView() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "ساخت دسته"}
             </Button>
           </DialogFooter>

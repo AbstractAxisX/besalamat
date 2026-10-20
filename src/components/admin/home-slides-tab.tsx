@@ -215,7 +215,7 @@ export function HomeSlidesTab() {
             <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
             بازآوری
           </Button>
-          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+          <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
             <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
             اسلاید جدید
           </Button>
@@ -230,7 +230,7 @@ export function HomeSlidesTab() {
           ))}
         </div>
       ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconPlayerPlay className="size-7" stroke={1.75} aria-hidden="true" />}
             title="اسلایدی ثبت نشده است"
@@ -244,7 +244,7 @@ export function HomeSlidesTab() {
             <li
               key={slide.id}
               className={cn(
-                "flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center",
+                "flex flex-col gap-3 rounded-2xl border border-border/60 bg-card shadow-xs p-4 sm:flex-row sm:items-center",
                 !slide.isActive && "opacity-60",
               )}
             >
@@ -282,7 +282,7 @@ export function HomeSlidesTab() {
 
               {/* متن */}
               <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{slide.title}</p>
+                <p className="truncate font-semibold">{slide.title}</p>
                 {slide.subtitle ? (
                   <p className="mt-0.5 truncate text-sm text-muted-foreground">{slide.subtitle}</p>
                 ) : null}
@@ -339,7 +339,7 @@ export function HomeSlidesTab() {
                     }}
                     aria-label={`فعال بودن اسلاید ${slide.title}`}
                   />
-                  <span className="text-xs font-bold text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     {slide.isActive ? "فعال" : "غیرفعال"}
                   </span>
                 </label>
@@ -366,7 +366,7 @@ export function HomeSlidesTab() {
 
           <div className="space-y-4 py-1">
             <div className="space-y-1.5">
-              <Label htmlFor="slide-title" className="text-sm font-bold">
+              <Label htmlFor="slide-title" className="text-xs font-semibold">
                 عنوان *
               </Label>
               <Input
@@ -377,7 +377,7 @@ export function HomeSlidesTab() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="slide-subtitle" className="text-sm font-bold">
+              <Label htmlFor="slide-subtitle" className="text-xs font-semibold">
                 زیرعنوان
               </Label>
               <Textarea
@@ -404,7 +404,7 @@ export function HomeSlidesTab() {
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="slide-cta-label" className="text-sm font-bold">
+                <Label htmlFor="slide-cta-label" className="text-xs font-semibold">
                   متن دکمه
                 </Label>
                 <Input
@@ -415,7 +415,7 @@ export function HomeSlidesTab() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="slide-cta-href" className="text-sm font-bold">
+                <Label htmlFor="slide-cta-href" className="text-xs font-semibold">
                   مقصد دکمه
                 </Label>
                 <Input
@@ -428,7 +428,7 @@ export function HomeSlidesTab() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="slide-order" className="text-sm font-bold">
+                <Label htmlFor="slide-order" className="text-xs font-semibold">
                   ترتیب
                 </Label>
                 <Input
@@ -444,7 +444,7 @@ export function HomeSlidesTab() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -459,7 +459,7 @@ export function HomeSlidesTab() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "ساخت اسلاید"}
             </Button>
           </DialogFooter>

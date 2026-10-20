@@ -1,6 +1,7 @@
 /**
  * حالت خالی (بدون داده / بدون نتیجه) — آیکون + متن فارسی
  * قابل استفاده در سرور و کلاینت.
+ * مینیمال: قاب نرم rounded-2xl muted، عنوان text-sm font-bold، توضیح text-xs.
  */
 
 import { cn } from "@/lib/utils";
@@ -24,15 +25,15 @@ export function EmptyState({ icon, title, description, action, className }: Empt
       )}
     >
       <div
-        className="flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground"
+        className="flex size-12 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground"
         aria-hidden="true"
       >
         {icon}
       </div>
       <div className="max-w-sm">
-        <p className="font-bold">{title}</p>
+        <p className="text-sm font-bold">{title}</p>
         {description ? (
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+          <p className="mt-1 text-xs leading-6 text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action}

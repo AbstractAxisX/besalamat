@@ -1,6 +1,7 @@
 /**
  * سربرگ صفحه‌های پنل ادمین — عنوان + توضیح + جای دکمه‌ها
  * (بدون "use client" تا در صفحات سروری هم قابل استفاده باشد)
+ * مینیمال: عنوان text-lg font-bold، توضیح text-xs آرام.
  */
 
 import { cn } from "@/lib/utils";
@@ -22,9 +23,9 @@ export function PageHeader({ title, description, actions, className }: PageHeade
       )}
     >
       <div className="min-w-0">
-        <h1 className="truncate text-xl font-black md:text-2xl">{title}</h1>
+        <h1 className="truncate text-lg font-bold">{title}</h1>
         {description ? (
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}

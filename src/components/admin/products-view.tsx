@@ -18,7 +18,6 @@ import {
   IconPackage,
   IconPencil,
   IconPlus,
-  IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
 
@@ -27,8 +26,8 @@ import { toFa, formatTomanPlain } from "@/lib/format";
 import { apiFetch, apiSend } from "@/components/admin/api";
 import { DataTable } from "@/components/admin/data-table";
 import { PageHeader } from "@/components/admin/page-header";
+import { SearchInput } from "@/components/admin/search-input";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,27 +42,27 @@ import type { AdminProductListResponse, AdminProductRow } from "@/types/admin";
 
 const PAGE_SIZE = 20;
 
-/** بج‌های وضعیت — پیل‌های کوچک */
+/** بج‌های وضعیت — پیل‌های نرم یکدست */
 function StatusPills({ row }: { row: AdminProductRow }) {
   return (
     <span className="flex flex-wrap items-center gap-1">
       <span
         className={cn(
-          "rounded-full border px-2 py-0.5 text-[11px] font-bold",
+          "rounded-full border px-2 py-0.5 text-[11px] font-semibold",
           row.isActive
-            ? "border-success/30 bg-success/10 text-success"
-            : "border-muted-foreground/30 bg-muted text-muted-foreground",
+            ? "border-success/20 bg-success/10 text-success"
+            : "border-border bg-muted text-muted-foreground",
         )}
       >
         {row.isActive ? "فعال" : "غیرفعال"}
       </span>
       {row.isNew ? (
-        <span className="rounded-full border border-teal-600/30 bg-teal-600/10 px-2 py-0.5 text-[11px] font-bold text-teal-700 dark:text-teal-400">
+        <span className="rounded-full border border-fresh/20 bg-fresh/10 px-2 py-0.5 text-[11px] font-semibold text-fresh">
           جدید
         </span>
       ) : null}
       {row.isFeatured ? (
-        <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-bold text-warning">
+        <span className="rounded-full border border-warning/20 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">
           ویژه
         </span>
       ) : null}
@@ -193,7 +192,7 @@ export function ProductsView() {
         accessorKey: "price",
         header: "قیمت (تومان)",
         cell: ({ row }) => (
-          <span className="font-black tabular-nums">{formatTomanPlain(row.original.price)}</span>
+          <span className="font-semibold tabular-nums">{formatTomanPlain(row.original.price)}</span>
         ),
       },
       {
@@ -204,7 +203,7 @@ export function ProductsView() {
           return (
             <span
               className={cn(
-                "font-black tabular-nums",
+                "font-semibold tabular-nums",
                 stock === 0 ? "text-destructive" : stock <= 2 ? "text-warning" : "",
               )}
             >
@@ -259,13 +258,9 @@ export function ProductsView() {
     <div className="space-y-6">
       <PageHeader
         title="محصولات"
-        description={
-          loading
-            ? "در حال بارگذاری…"
-            : `${toFa(total)} محصول در فروشگاه — ${debouncedQuery.length > 0 ? `نتیجهٔ جستجو برای «${debouncedQuery}»` : "نمایش همه"}`
-        }
+        description="مدیریت محصولات فروشگاه — افزودن، ویرایش و حذف"
         actions={
-          <Button type="button" asChild className="gap-1.5 font-bold">
+          <Button type="button" asChild className="gap-1.5 font-semibold">
             <Link href="/admin/products/new">
               <IconPlus className="size-4" stroke={1.75} aria-hidden="true" />
               محصول جدید
@@ -274,20 +269,19 @@ export function ProductsView() {
         }
       />
 
-      {/* جستجو */}
-      <div className="relative max-w-sm">
-        <IconSearch
-          className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          stroke={1.75}
-          aria-hidden="true"
-        />
-        <Input
+      {/* نوار ابزار: جستجو + شمار */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SearchInput
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="جستجو در عنوان یا اسلاگ…"
-          className="pe-9"
-          aria-label="جستجوی محصول"
+          ariaLabel="جستجوی محصول"
         />
+        <p className="text-xs text-muted-foreground">
+          {loading
+            ? "در حال بارگذاری…"
+            : `${toFa(total)} محصول${debouncedQuery.length > 0 ? ` — نتیجهٔ جستجو برای «${debouncedQuery}»` : ""}`}
+        </p>
       </div>
 
       {error ? (
@@ -332,8 +326,8 @@ export function ProductsView() {
             قبلی
           </Button>
           <p className="text-sm text-muted-foreground">
-            صفحهٔ <span className="font-black text-foreground">{toFa(page)}</span> از{" "}
-            <span className="font-black text-foreground">{toFa(pageCount)}</span>
+            صفحهٔ <span className="font-semibold text-foreground">{toFa(page)}</span> از{" "}
+            <span className="font-semibold text-foreground">{toFa(pageCount)}</span>
           </p>
           <Button
             type="button"

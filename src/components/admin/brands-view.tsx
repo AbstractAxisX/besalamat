@@ -198,7 +198,7 @@ export function BrandsView() {
               )}
             </span>
             <div className="min-w-0">
-              <p className="max-w-44 truncate font-bold">{row.original.title}</p>
+              <p className="max-w-44 truncate font-semibold">{row.original.title}</p>
               <p dir="ltr" className="truncate text-start font-mono text-[11px] text-muted-foreground">
                 {row.original.slug}
               </p>
@@ -210,7 +210,7 @@ export function BrandsView() {
         accessorKey: "productCount",
         header: "محصولات",
         cell: ({ row }) => (
-          <span className="font-black tabular-nums">{toFa(row.original.productCount)}</span>
+          <span className="font-semibold tabular-nums">{toFa(row.original.productCount)}</span>
         ),
       },
       {
@@ -231,7 +231,7 @@ export function BrandsView() {
               onCheckedChange={(checked) => void toggleActive(row.original, checked)}
               aria-label={`فعال بودن برند ${row.original.title}`}
             />
-            <span className="text-xs font-bold text-muted-foreground">
+            <span className="text-xs font-semibold text-muted-foreground">
               {row.original.isActive ? "فعال" : "غیرفعال"}
             </span>
           </label>
@@ -284,7 +284,7 @@ export function BrandsView() {
               <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
               بازآوری
             </Button>
-            <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+            <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
               <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
               برند جدید
             </Button>
@@ -293,7 +293,7 @@ export function BrandsView() {
       />
 
       {error ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -326,7 +326,7 @@ export function BrandsView() {
           <div className="space-y-4 py-1">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="brand-title" className="text-sm font-bold">
+                <Label htmlFor="brand-title" className="text-xs font-semibold">
                   عنوان *
                 </Label>
                 <Input
@@ -337,7 +337,7 @@ export function BrandsView() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="brand-slug" className="text-sm font-bold">
+                <Label htmlFor="brand-slug" className="text-xs font-semibold">
                   نامک *
                 </Label>
                 <Input
@@ -359,7 +359,7 @@ export function BrandsView() {
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="brand-order" className="text-sm font-bold">
+                <Label htmlFor="brand-order" className="text-xs font-semibold">
                   ترتیب
                 </Label>
                 <Input
@@ -375,7 +375,7 @@ export function BrandsView() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -390,7 +390,7 @@ export function BrandsView() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "ساخت برند"}
             </Button>
           </DialogFooter>

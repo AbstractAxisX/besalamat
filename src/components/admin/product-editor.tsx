@@ -17,7 +17,9 @@ import { z } from "zod";
 import { toast } from "sonner";
 import {
   IconAlertTriangle,
+  IconArrowDown,
   IconArrowRight,
+  IconArrowUp,
   IconChevronDown,
   IconCirclePlus,
   IconDeviceFloppy,
@@ -208,17 +210,22 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border bg-card">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/50 px-4 py-3 md:px-6">
-        <h2 className="flex items-center gap-2 text-sm font-black">
-          <span className="text-muted-foreground" aria-hidden="true">
-            {icon}
-          </span>
-          {title}
-        </h2>
+    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 bg-muted/40 px-5 py-3.5">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-sm font-bold">
+            <span className="text-muted-foreground" aria-hidden="true">
+              {icon}
+            </span>
+            {title}
+          </h2>
+          {description ? (
+            <p className="mt-0.5 ps-6.5 text-xs text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
         {action}
       </header>
-      <div className="space-y-4 p-4 md:p-6">{children}</div>
+      <div className="space-y-5 p-5">{children}</div>
     </section>
   );
 }
@@ -241,7 +248,7 @@ function Field({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label htmlFor={htmlFor} className="text-sm font-bold">
+      <Label htmlFor={htmlFor} className="text-xs font-semibold">
         {label}
       </Label>
       {children}
@@ -498,7 +505,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
               <IconArrowRight className="size-5" stroke={1.75} aria-hidden="true" />
             </Link>
           </Button>
-          <h1 className="text-xl font-black">ویرایش محصول</h1>
+          <h1 className="text-lg font-bold">ویرایش محصول</h1>
         </div>
         <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {loadError}
@@ -543,7 +550,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
             </Link>
           </Button>
           <div>
-            <h1 className="text-xl font-black md:text-2xl">
+            <h1 className="text-lg font-bold">
               {mode === "create" ? "محصول جدید" : "ویرایش محصول"}
             </h1>
             {mode === "edit" && watchedSlug ? (
@@ -729,18 +736,18 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-2">
             <label className="flex cursor-pointer items-center gap-2">
               <Switch checked={watch("isActive")} onCheckedChange={(checked) => setValue("isActive", checked)} />
-              <span className="text-sm font-bold">فعال در فروشگاه</span>
+              <span className="text-xs font-semibold">فعال در فروشگاه</span>
             </label>
             <label className="flex cursor-pointer items-center gap-2">
               <Switch checked={watch("isNew")} onCheckedChange={(checked) => setValue("isNew", checked)} />
-              <span className="text-sm font-bold">بدج «جدید»</span>
+              <span className="text-xs font-semibold">بدج «جدید»</span>
             </label>
             <label className="flex cursor-pointer items-center gap-2">
               <Switch
                 checked={watch("isFeatured")}
                 onCheckedChange={(checked) => setValue("isFeatured", checked)}
               />
-              <span className="text-sm font-bold">محصول ویژه</span>
+              <span className="text-xs font-semibold">محصول ویژه</span>
             </label>
           </div>
         </div>
@@ -828,7 +835,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
                     </span>
                   )}
                   {index === 0 ? (
-                    <span className="absolute -start-1 -top-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-primary-foreground">
+                    <span className="absolute -start-1 -top-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
                       اصلی
                     </span>
                   ) : null}
@@ -887,7 +894,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
                       aria-label="انتقال به بالا"
                       title="انتقال به بالا (نزدیک‌تر به اصلی)"
                     >
-                      <span aria-hidden="true">↑</span>
+                      <IconArrowUp className="size-4" stroke={1.75} aria-hidden="true" />
                     </Button>
                     <Button
                       type="button"
@@ -899,7 +906,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
                       aria-label="انتقال به پایین"
                       title="انتقال به پایین"
                     >
-                      <span aria-hidden="true">↓</span>
+                      <IconArrowDown className="size-4" stroke={1.75} aria-hidden="true" />
                     </Button>
                     <Button
                       type="button"
@@ -1028,7 +1035,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
                           checked={watch(`variants.${index}.isDefault`)}
                           onCheckedChange={(checked) => setDefaultVariant(index, checked)}
                         />
-                        <span className="text-xs font-bold text-muted-foreground">پیش‌فرض</span>
+                        <span className="text-xs font-semibold text-muted-foreground">پیش‌فرض</span>
                       </label>
                       <Button
                         type="button"
@@ -1119,7 +1126,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
       </Section>
 
       {/* ── نوار ذخیرهٔ چسبان ── */}
-      <div className="sticky bottom-0 z-20 -mx-4 border-t bg-card/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky bottom-0 z-20 -mx-4 border-t border-border/60 bg-card/95 px-4 py-4 backdrop-blur md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {mode === "edit" ? (
             <AlertDialog>
@@ -1166,7 +1173,7 @@ export function ProductEditor({ mode, productId }: ProductEditorProps) {
             <Button type="button" variant="ghost" size="sm" asChild disabled={saving}>
               <Link href="/admin/products">انصراف</Link>
             </Button>
-            <Button type="submit" disabled={saving} className="gap-1.5 font-bold">
+            <Button type="submit" disabled={saving} className="gap-1.5 font-semibold">
               {saving ? (
                 <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               ) : (

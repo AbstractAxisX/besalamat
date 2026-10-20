@@ -1,6 +1,8 @@
 /**
- * کارت آمار داشبورد — آیکون + عدد فارسی درشت + متن ریز
+ * کارت آمار داشبورد — آیکون نرم + عدد فارسی + متن ریز
  * (بدون "use client" تا در صفحهٔ سروری میزکار هم استفاده شود)
+ * مینیمال-پریمیوم: کارت سفید rounded-2xl، بوردر مویی، سایهٔ محو؛
+ * هاور فقط کمی سبز می‌شود (border-primary/25).
  */
 
 import { cn } from "@/lib/utils";
@@ -21,25 +23,27 @@ export function StatCard({ title, value, suffix, icon, hint, className }: StatCa
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-xl border bg-card p-4 md:p-5",
+        "flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-5 shadow-xs transition-colors hover:border-primary/25",
         className,
       )}
     >
       <div
-        className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground md:size-12"
+        className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary"
         aria-hidden="true"
       >
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-muted-foreground md:text-sm">{title}</p>
-        <p className="mt-0.5 flex items-baseline gap-1">
-          <span className="text-xl font-black tabular-nums md:text-2xl">{value}</span>
+        <p className="text-xs font-medium text-muted-foreground">{title}</p>
+        <p className="mt-1 flex items-baseline gap-1">
+          <span className="text-2xl font-bold tabular-nums">{value}</span>
           {suffix ? (
             <span className="text-xs font-medium text-muted-foreground">{suffix}</span>
           ) : null}
         </p>
-        {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
+        {hint ? (
+          <div className="mt-1.5 text-[11px] leading-5 text-muted-foreground">{hint}</div>
+        ) : null}
       </div>
     </div>
   );

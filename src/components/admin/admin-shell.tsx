@@ -5,7 +5,7 @@
  * ─────────────────────────────
  * سایدبار shadcn با collapsible="icon" (دسکتاپ) و Sheet اورلی (موبایل)؛
  * نوار بالا: دکمهٔ باز/بستن + عنوان صفحهٔ جاری + تعویض پوسته + منوی کاربر (خروج).
- * کلاسیک و تمیز: کارت سفید، بوردر مویی، بدون شیشه‌ای/گرادیان.
+ * مینیمال-پریمیوم: آیتم فعال = tint سبز ملایم + فونت نیمه‌ضخیم + نقطهٔ نشانه.
  */
 
 import { useState } from "react";
@@ -156,7 +156,15 @@ export function AdminShell({ user, children }: AdminShellProps) {
   }
 
   return (
-    <SidebarProvider>
+    /* --sidebar روی رنگ کار بازنویسی می‌شود تا سایدبار مثل کارت‌ها سفید و مینیمال باشد */
+    <SidebarProvider
+      style={
+        {
+          "--sidebar": "var(--card)",
+          "--sidebar-border": "var(--border)",
+        } as React.CSSProperties
+      }
+    >
       {/* ── سایدبار (راست — جهت شروع در RTL) ── */}
       <Sidebar side="right" collapsible="icon">
         {/* هدر: نشان برند + نام پنل */}
@@ -169,12 +177,12 @@ export function AdminShell({ user, children }: AdminShellProps) {
                 tooltip={{ children: `${brand.name} — پنل مدیریت`, side: "left" }}
               >
                 <Link href="/admin">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                     <IconHeartbeat className="size-5" stroke={1.75} aria-hidden="true" />
                   </div>
                   <div className="grid flex-1 text-start leading-tight">
-                    <span className="truncate text-base font-black">{brand.name}</span>
-                    <span className="truncate text-xs font-medium text-sidebar-foreground/60">
+                    <span className="truncate text-sm font-bold">{brand.name}</span>
+                    <span className="truncate text-[11px] font-medium text-muted-foreground">
                       پنل مدیریت فروشگاه
                     </span>
                   </div>
@@ -188,43 +196,57 @@ export function AdminShell({ user, children }: AdminShellProps) {
         <SidebarContent>
           {NAV_GROUPS.map((group) => (
             <SidebarGroup key={group.label ?? "root"}>
-              {group.label ? <SidebarGroupLabel>{group.label}</SidebarGroupLabel> : null}
+              {group.label ? (
+                <SidebarGroupLabel className="text-[10px] font-semibold tracking-wide text-muted-foreground/70">
+                  {group.label}
+                </SidebarGroupLabel>
+              ) : null}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive(item.href)}
-                        tooltip={{ children: item.title, side: "left" }}
-                      >
-                        <Link href={item.href}>
-                          <item.icon stroke={1.75} className="size-4.5" aria-hidden="true" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {group.items.map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={active}
+                          tooltip={{ children: item.title, side: "left" }}
+                          className={
+                            active
+                              ? "bg-primary/10 font-semibold text-primary hover:bg-primary/10 hover:text-primary data-[active=true]:bg-primary/10 data-[active=true]:font-semibold data-[active=true]:text-primary"
+                              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                          }
+                        >
+                          <Link href={item.href}>
+                            <item.icon stroke={1.75} className="size-4.5" aria-hidden="true" />
+                            <span>{item.title}</span>
+                            {active ? (
+                              <span
+                                className="ms-auto size-1.5 shrink-0 rounded-full bg-primary group-data-[collapsible=icon]:hidden"
+                                aria-hidden="true"
+                              />
+                            ) : null}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           ))}
         </SidebarContent>
 
-        {/* پاصفحه: کارت فروشگاه + کاربر + خروج */}
+        {/* پاصفحه: کاربر + خروج */}
         <SidebarFooter>
-          <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/60 p-2.5 group-data-[collapsible=icon]:hidden">
-            <p className="text-xs font-medium text-sidebar-foreground/60">
-              فروشگاه <span className="font-black text-sidebar-foreground">{brand.name}</span>
-            </p>
-            <Separator className="my-2 bg-sidebar-border" />
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sm font-black text-sidebar-primary-foreground">
+          <div className="rounded-xl border border-border/60 p-2.5 group-data-[collapsible=icon]:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                 {user.name.trim().charAt(0) || "؟"}
               </div>
               <div className="min-w-0 flex-1 leading-tight">
-                <p className="truncate text-sm font-bold">{user.name}</p>
-                <p dir="ltr" className="truncate text-start text-[11px] text-sidebar-foreground/60">
+                <p className="truncate text-[13px] font-semibold">{user.name}</p>
+                <p dir="ltr" className="truncate text-start text-[11px] text-muted-foreground">
                   {formatPhoneFa(user.phone)}
                 </p>
               </div>
@@ -262,7 +284,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
       {/* ── ناحیهٔ محتوا (چپ) ── */}
       <SidebarInset>
         {/* نوار بالای چسبان */}
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-card/90 px-4 backdrop-blur md:px-6">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-card/80 px-4 backdrop-blur-sm md:px-6">
           <SidebarTrigger className="size-8 shrink-0" />
           <Separator orientation="vertical" className="!h-4 shrink-0" />
           <div className="flex min-w-0 items-baseline gap-2">
@@ -297,7 +319,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
                 className="size-9 gap-2 rounded-full px-0 md:px-2"
                 aria-label="منوی کاربر"
               >
-                <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-black text-primary-foreground">
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                   {user.name.trim().charAt(0) || "؟"}
                 </span>
                 <span className="hidden max-w-32 truncate text-sm font-medium md:inline">
@@ -307,7 +329,7 @@ export function AdminShell({ user, children }: AdminShellProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" align="end" className="w-56">
               <DropdownMenuLabel className="flex flex-col gap-0.5">
-                <span className="font-bold">{user.name}</span>
+                <span className="font-semibold">{user.name}</span>
                 <span
                   dir="ltr"
                   className="text-start text-xs font-normal text-muted-foreground"
@@ -337,10 +359,10 @@ export function AdminShell({ user, children }: AdminShellProps) {
 
         {/* محتوای صفحهٔ جاری — تمام‌عرض سیال با فوتر چسبیده به کف */}
         <div className="flex flex-1 flex-col">
-          <main id="main" className="mx-auto w-full max-w-[1500px] flex-1 p-4 md:p-6">
+          <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8">
             {children}
           </main>
-          <footer className="mt-auto border-t bg-card px-4 py-3 text-center text-xs text-muted-foreground md:px-6">
+          <footer className="mt-auto border-t border-border/60 bg-card px-4 py-3 text-center text-xs text-muted-foreground md:px-6">
             پنل مدیریت {brand.name} — {toFa(new Date().getFullYear())}
           </footer>
         </div>

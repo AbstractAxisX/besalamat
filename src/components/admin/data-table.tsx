@@ -5,6 +5,8 @@
  * ─────────────────────────────
  * ستون‌ها را با ColumnDef می‌گیرد؛ ردیف‌های اسکلت هنگام بارگذاری،
  * EmptyState فارسی وقتی داده‌ای نیست و کلیک‌پذیری ردیف (مثلاً رفتن به جزئیات).
+ * ظاهر: کانتینر rounded-2xl با بوردر مویی، سرجدول آرام bg-muted/40،
+ * ردیف‌ها text-[13px] با هاور ملایم و خطوط جداکنندهٔ کم‌رنگ.
  */
 
 import {
@@ -60,16 +62,22 @@ export function DataTable<TData>({
   return (
     <div
       className={cn(
-        "overflow-x-auto rounded-xl border bg-card shadow-none",
+        "overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-xs",
         className,
       )}
     >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-muted/50 hover:bg-muted/50">
+            <TableRow
+              key={headerGroup.id}
+              className="border-border/50 bg-muted/40 hover:bg-muted/40"
+            >
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="text-start text-xs font-bold">
+                <TableHead
+                  key={header.id}
+                  className="h-9 px-4 text-start text-[11px] font-semibold text-muted-foreground"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -82,16 +90,19 @@ export function DataTable<TData>({
           {loading ? (
             /* ردیف‌های اسکلت هم‌اندازهٔ جدول */
             Array.from({ length: skeletonRows }).map((_, rowIndex) => (
-              <TableRow key={`skeleton-${rowIndex}`}>
+              <TableRow key={`skeleton-${rowIndex}`} className="border-border/50">
                 {Array.from({ length: columnCount }).map((_, cellIndex) => (
-                  <TableCell key={`skeleton-${rowIndex}-${cellIndex}`}>
-                    <Skeleton className="h-6 w-full max-w-28" />
+                  <TableCell
+                    key={`skeleton-${rowIndex}-${cellIndex}`}
+                    className="px-4 py-3"
+                  >
+                    <Skeleton className="h-5 w-full max-w-24" />
                   </TableCell>
                 ))}
               </TableRow>
             ))
           ) : table.getRowModel().rows.length === 0 ? (
-            <TableRow className="hover:bg-transparent">
+            <TableRow className="border-border/50 hover:bg-transparent">
               <TableCell colSpan={columnCount} className="p-0">
                 <EmptyState
                   title={emptyTitle}
@@ -105,11 +116,14 @@ export function DataTable<TData>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className={cn(onRowClick !== undefined && "cursor-pointer")}
+                className={cn(
+                  "border-border/50 text-[13px] hover:bg-muted/40",
+                  onRowClick !== undefined && "cursor-pointer",
+                )}
                 onClick={onRowClick !== undefined ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="px-4 py-2.5">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

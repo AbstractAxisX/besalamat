@@ -216,9 +216,9 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
               <IconArrowRight className="size-5" stroke={1.75} aria-hidden="true" />
             </Link>
           </Button>
-          <h1 className="text-xl font-black">ویرایش مقاله</h1>
+          <h1 className="text-lg font-bold">ویرایش مقاله</h1>
         </div>
-        <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           {loadError}
         </p>
       </div>
@@ -230,8 +230,8 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-40 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-2xl" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             </Link>
           </Button>
           <div>
-            <h1 className="text-xl font-black md:text-2xl">
+            <h1 className="text-lg font-bold">
               {mode === "edit" ? "ویرایش مقاله" : "مقالهٔ جدید"}
             </h1>
             {mode === "edit" && publishedAt !== null ? (
@@ -282,11 +282,11 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </div>
 
       {/* اطلاعات اصلی */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="text-sm font-black">اطلاعات اصلی</h2>
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="text-sm font-bold">اطلاعات اصلی</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="article-title" className="text-sm font-bold">
+            <Label htmlFor="article-title" className="text-xs font-semibold">
               عنوان *
             </Label>
             <Input
@@ -297,7 +297,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="article-slug" className="text-sm font-bold">
+            <Label htmlFor="article-slug" className="text-xs font-semibold">
               نامک *
             </Label>
             <div className="flex gap-2">
@@ -333,7 +333,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="article-excerpt" className="text-sm font-bold">
+          <Label htmlFor="article-excerpt" className="text-xs font-semibold">
             چکیده *
           </Label>
           <Textarea
@@ -347,8 +347,8 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </section>
 
       {/* متن و جلد */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="text-sm font-black">متن و تصویر</h2>
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="text-sm font-bold">متن و تصویر</h2>
         <ImageUploadField
           ratio="landscape"
           label="تصویر جلد *"
@@ -357,7 +357,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
           hint="نسبت افقی ۸:۵ — مثل بندانگشتی مجله"
         />
         <div className="space-y-1.5">
-          <Label htmlFor="article-content" className="text-sm font-bold">
+          <Label htmlFor="article-content" className="text-xs font-semibold">
             متن مقاله * (HTML)
           </Label>
           <Textarea
@@ -378,11 +378,11 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </section>
 
       {/* انتشار و دسته */}
-      <section className="space-y-4 rounded-xl border bg-card p-4 md:p-6">
-        <h2 className="text-sm font-black">انتشار</h2>
+      <section className="space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-xs">
+        <h2 className="text-sm font-bold">انتشار</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-sm font-bold">دستهٔ مقاله</Label>
+            <Label className="text-xs font-semibold">دستهٔ مقاله</Label>
             <Select
               value={form.categoryId}
               onValueChange={(value) => setForm((f) => ({ ...f, categoryId: value }))}
@@ -402,7 +402,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
           </div>
           <div className="space-y-2">
             <label className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-              <span className="text-sm font-bold">انتشار در مجلهٔ سلامت</span>
+              <span className="text-xs font-semibold">انتشار در مجلهٔ سلامت</span>
               <Switch
                 checked={form.isPublished}
                 onCheckedChange={(checked) => setForm((f) => ({ ...f, isPublished: checked }))}
@@ -421,9 +421,9 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </section>
 
       {/* سئو (جمع‌شونده) */}
-      <Collapsible className="rounded-xl border bg-card">
-        <CollapsibleTrigger className="flex w-full items-center justify-between p-4 md:px-6">
-          <span className="flex items-center gap-2 text-sm font-black">
+      <Collapsible className="rounded-2xl border border-border/60 bg-card shadow-xs">
+        <CollapsibleTrigger className="flex w-full items-center justify-between p-5">
+          <span className="flex items-center gap-2 text-sm font-bold">
             <IconSeo className="size-4.5 text-primary" stroke={1.75} aria-hidden="true" />
             سئو (اختیاری)
           </span>
@@ -433,9 +433,9 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             aria-hidden="true"
           />
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 border-t px-4 py-4 md:px-6">
+        <CollapsibleContent className="space-y-4 border-t border-border/50 px-5 py-5">
           <div className="space-y-1.5">
-            <Label htmlFor="article-seo-title" className="text-sm font-bold">
+            <Label htmlFor="article-seo-title" className="text-xs font-semibold">
               عنوان سئو
             </Label>
             <Input
@@ -446,7 +446,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="article-seo-desc" className="text-sm font-bold">
+            <Label htmlFor="article-seo-desc" className="text-xs font-semibold">
               توضیح سئو
             </Label>
             <Textarea
@@ -461,7 +461,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
       </Collapsible>
 
       {/* نوار ذخیرهٔ چسبان */}
-      <div className="sticky bottom-4 z-20 rounded-xl border bg-card/95 p-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-4 z-20 rounded-2xl border border-border/60 bg-card/95 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
             {form.isPublished ? "این مقاله در مجلهٔ سلامت قابل مشاهده است." : "این مقاله پیش‌نویس است."}
@@ -470,7 +470,7 @@ export function ArticleEditor({ mode, articleId }: ArticleEditorProps) {
             <Button type="button" variant="outline" asChild disabled={saving}>
               <Link href="/admin/articles">انصراف</Link>
             </Button>
-            <Button type="button" className="gap-1.5 font-bold" disabled={saving} onClick={() => void submit()}>
+            <Button type="button" className="gap-1.5 font-semibold" disabled={saving} onClick={() => void submit()}>
               <IconDeviceFloppy className="size-4" stroke={1.75} aria-hidden="true" />
               {saving ? "در حال ذخیره…" : mode === "edit" ? "ذخیرهٔ مقاله" : "ساخت مقاله"}
             </Button>

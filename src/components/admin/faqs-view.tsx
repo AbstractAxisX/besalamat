@@ -197,7 +197,7 @@ export function FaqsView() {
               <IconRefresh className="size-4" stroke={1.75} aria-hidden="true" />
               بازآوری
             </Button>
-            <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-bold">
+            <Button type="button" size="sm" onClick={openCreate} className="gap-1.5 font-semibold">
               <IconCirclePlus className="size-4" stroke={1.75} aria-hidden="true" />
               پرسش جدید
             </Button>
@@ -208,11 +208,11 @@ export function FaqsView() {
       {loading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-20 w-full rounded-xl" />
+            <Skeleton key={index} className="h-20 w-full rounded-2xl" />
           ))}
         </div>
       ) : rows === null || rows.length === 0 ? (
-        <div className="rounded-xl border bg-card">
+        <div className="rounded-2xl border border-border/60 bg-card shadow-xs">
           <EmptyState
             icon={<IconMessageQuestion className="size-7" stroke={1.75} aria-hidden="true" />}
             title="پرسشی ثبت نشده است"
@@ -221,7 +221,7 @@ export function FaqsView() {
           />
         </div>
       ) : (
-        <ul className="divide-y overflow-hidden rounded-xl border bg-card">
+        <ul className="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
           {rows.map((faq, index) => (
             <li
               key={faq.id}
@@ -257,7 +257,7 @@ export function FaqsView() {
 
               {/* متن */}
               <div className="min-w-0 flex-1">
-                <p className={cn("font-bold leading-7", !faq.isActive && "text-muted-foreground")}>
+                <p className={cn("font-semibold leading-7", !faq.isActive && "text-muted-foreground")}>
                   {faq.question}
                 </p>
                 <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
@@ -333,7 +333,7 @@ export function FaqsView() {
 
           <div className="space-y-4 py-1">
             <div className="space-y-1.5">
-              <Label htmlFor="faq-question" className="text-sm font-bold">
+              <Label htmlFor="faq-question" className="text-xs font-semibold">
                 پرسش *
               </Label>
               <Textarea
@@ -345,7 +345,7 @@ export function FaqsView() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="faq-answer" className="text-sm font-bold">
+              <Label htmlFor="faq-answer" className="text-xs font-semibold">
                 پاسخ *
               </Label>
               <Textarea
@@ -358,7 +358,7 @@ export function FaqsView() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="faq-order" className="text-sm font-bold">
+                <Label htmlFor="faq-order" className="text-xs font-semibold">
                   ترتیب
                 </Label>
                 <Input
@@ -374,7 +374,7 @@ export function FaqsView() {
               </div>
               <div className="flex items-end">
                 <label className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-sm font-bold">فعال</span>
+                  <span className="text-xs font-semibold">فعال</span>
                   <Switch
                     checked={form.isActive}
                     onCheckedChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
@@ -389,7 +389,7 @@ export function FaqsView() {
             <Button type="button" variant="outline" onClick={closeDialog} disabled={formBusy}>
               انصراف
             </Button>
-            <Button type="button" className="font-bold" disabled={formBusy} onClick={() => void submitForm()}>
+            <Button type="button" className="font-semibold" disabled={formBusy} onClick={() => void submitForm()}>
               {formBusy ? "در حال ذخیره…" : editing !== null ? "ذخیرهٔ تغییرات" : "افزودن پرسش"}
             </Button>
           </DialogFooter>
